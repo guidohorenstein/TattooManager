@@ -1,0 +1,139 @@
+.ayuda {
+  color: #5b5d56;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.foto {
+  position: relative;
+  margin-inline: auto;
+  max-width: calc(100% - 2.5rem);
+}
+
+.foto img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.superficie,
+.mover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  touch-action: none;
+}
+
+.superficie {
+  cursor: crosshair;
+}
+.superficie[aria-disabled='true'] {
+  cursor: default;
+}
+.mover {
+  cursor: move;
+}
+
+.superficie:focus-visible,
+.mover:focus-visible,
+.control:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #24362c;
+}
+
+.recorte,
+.borrador,
+.cursor {
+  position: absolute;
+}
+
+.recorte,
+.borrador {
+  border: 2px solid;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.recorte {
+  --tamano-control: 32px;
+  --distancia-control: min(-4px, calc((100% - var(--tamano-control)) / 2));
+}
+
+.recorte:focus-within,
+.recorte:hover {
+  z-index: 1;
+}
+
+.recorte button {
+  pointer-events: auto;
+}
+
+.control {
+  position: absolute;
+  display: grid;
+  z-index: 1;
+  place-items: center;
+  width: var(--tamano-control);
+  height: var(--tamano-control);
+  padding: 0;
+  border: 1px solid #144050;
+  border-radius: 50%;
+  background: #75e0f2;
+  color: #102d36;
+  font-size: 1.1rem;
+  line-height: 1;
+  touch-action: none;
+}
+
+.rotar {
+  left: var(--distancia-control);
+  top: var(--distancia-control);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+}
+
+.eliminar {
+  right: var(--distancia-control);
+  top: var(--distancia-control);
+  transform: translate(50%, -50%);
+  cursor: pointer;
+}
+
+.redimensionar {
+  right: var(--distancia-control);
+  bottom: var(--distancia-control);
+  transform: translate(50%, 50%);
+  cursor: nwse-resize;
+}
+
+.cursor {
+  display: none;
+  pointer-events: none;
+  width: 13px;
+  height: 13px;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px black;
+  transform: translate(-50%, -50%);
+}
+
+.superficie:focus-visible .cursor {
+  display: block;
+}
+
+.total {
+  display: block;
+  color: #5b5d56;
+  margin-top: 1.1rem;
+}
+
+@media (pointer: coarse) {
+  .recorte {
+    --tamano-control: 36px;
+  }
+}

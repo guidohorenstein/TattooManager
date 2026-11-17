@@ -1,0 +1,903 @@
+import assert from "node:assert/strict";
+import { once } from "node:events";
+import { after, beforeEach, test, type TestContext } from "node:test";
+import { randomUUID } from "node:crypto";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import type { Request, Response } from "express";
+
+// Estas pruebas nunca usan Supabase ni Cloudinary reales.
+// Las URL locales inválidas también impiden una conexión accidental.
+process.env.DATABASE_URL =
+  "postgresql://test:test@127.0.0.1:1/test?connect_timeout=1";
+process.env.DIRECT_URL = process.env.DATABASE_URL;
+process.env.JWT_SECRET = "solo-pruebas-aisladas-inkmanager-32-bytes";
+process.env.FRONTEND_URL = "http://127.0.0.1:3001";
+process.env.NODE_ENV = "test";
+process.env.MAIL_TRANSPORT = "resend";
+process.env.RESEND_API_KEY = "";
+const { app } = await import("../src/app.js");
+const { prisma } = await import("../src/config/prisma.js");
+const { default: cloudinary } = await import("../src/config/cloudinary.js");
+const { limitarLogin } = await import("../src/middlewares/limitar-login.js");
+const { requerirRoles } = await import("../src/middlewares/roles.js");
+const { Rol } = await import("../src/types/roles.js");
+const { crearToken } = await import("../src/auth/auth.tokens.js");
+const { configuracionInicial } = await import("../src/asistente/configuracion.js");
+
+type Row = Record<string, unknown>;
+type Args = { where?: Row; data?: Row; select?: Record<string, boolean> };
+type Query = (args: Args) => Promise<unknown>;
+const users = new Map<string, Row>();
+const sessions = new Map<string, Row>();
+const studios = new Map<string, Row>();
+const restores: (() => void)[] = [];
+let uploads = 0;
+
+function replace(target: object, key: string, method: unknown) {
+  const record = target as Record<string, unknown>;
+  const original = record[key];
+  record[key] = method;
+  restores.push(() => {
+    record[key] = original;
+  });
+}
+function simulate(
+  t: TestContext,
+  target: object,
+  key: string,
+  method: unknown,
+) {
+  const record = target as Record<string, unknown>;
+  const original = record[key];
+  record[key] = method;
+  t.after(() => {
+    record[key] = original;
+  });
+}
+function select(row: Row | undefined, fields?: Record<string, boolean>) {
+  if (!row) return null;
+  return fields
+    ? Object.fromEntries(
+        Object.keys(fields)
+          .filter((key) => fields[key])
+          .map((key) => [key, row[key]]),
+      )
+    : { ...row };
+}
+const findUser: Query = async ({ where, select: fields }) => {
+  const email = where?.email as { equals?: string } | undefined;
+  const user = [...users.values()].find((row) =>
+    email
+      ? String(row.email).toLowerCase() === email.equals
+      : row.tokenVerificacionEmail === where?.tokenVerificacionEmail,
+  );
+  return select(user, fields);
+};
+replace(prisma.usuario, "findFirst", findUser);
+replace(prisma.usuario, "findUnique", async ({ where, select: fields }: Args) =>
+  select(users.get(String(where?.id)), fields),
+);
+replace(prisma.usuario, "findMany", async () => []);
+replace(prisma.usuario, "create", async ({ data, select: fields }: Args) => {
+  const id = randomUUID();
+  const row = {
+    id,
+    estudioId: null,
+    estadoVerificacion: "NO_VERIFICADO",
+    nombreArtistico: null,
+    createdAt: new Date(),
+    ...data,
+  };
+  users.set(id, row);
+  return select(row, fields);
+});
+replace(
+  prisma.usuario,
+  "update",
+  async ({ where, data, select: fields }: Args) => {
+    const row = users.get(String(where?.id));
+    assert.ok(row);
+    Object.assign(row, data);
+    return select(row, fields);
+  },
+);
+replace(prisma.estudio, "create", async ({ data }: Args) => {
+  const row = { id: randomUUID(), ...data };
+  studios.set(row.id, row);
+  return row;
+});
+replace(prisma.sesion, "create", async ({ data }: Args) => {
+  const row = {
+    id: randomUUID(),
+    revocadaAt: null,
+    createdAt: new Date(),
+    ...data,
+  };
+  sessions.set(row.id, row);
+  return row;
+});
+replace(
+  prisma.sesion,
+  "findUnique",
+  async ({ where }: Args) => sessions.get(String(where?.id)) ?? null,
+);
+replace(prisma.sesion, "updateMany", async ({ where, data }: Args) => {
+  let count = 0;
+  for (const row of sessions.values()) {
+    if (
+      row.id === where?.id &&
+      row.usuarioId === where?.usuarioId &&
+      row.revocadaAt === null
+    ) {
+      Object.assign(row, data);
+      count++;
+    }
+  }
+  return { count };
+});
+replace(
+  prisma,
+  "$transaction",
+  async (callback: (tx: typeof prisma) => Promise<unknown>) => {
+    // Simulamos rollback para comprobar que el alta de estudio es atómica.
+    const snapshotUsers = structuredClone(users);
+    const snapshotStudios = structuredClone(studios);
+    try {
+      return await callback(prisma);
+    } catch (error) {
+      users.clear();
+      studios.clear();
+      snapshotUsers.forEach((row, id) => users.set(id, row));
+      snapshotStudios.forEach((row, id) => studios.set(id, row));
+      throw error;
+    }
+  },
+);
+replace(cloudinary.uploader, "upload", async () => {
+  uploads++;
+  return { secure_url: "https://example.com/test.png", public_id: "qa/test" };
+});
+
+const server = app.listen(0, "127.0.0.1");
+await once(server, "listening");
+const address = server.address();
+assert.ok(address && typeof address === "object");
+const baseUrl = `http://127.0.0.1:${address.port}/api`;
+const password = "Una frase segura 1!";
+const base = {
+  nombre: "Ana",
+  email: "ana@example.com",
+  password,
+  rol: "CLIENTE",
+};
+const png = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lN8AAAAASUVORK5CYII=",
+  "base64",
+);
+const request = (path: string, options: RequestInit = {}) =>
+  fetch(baseUrl + path, { ...options, signal: AbortSignal.timeout(10000) });
+
+test("formulario de estudio: admite invitados, protege la ficha y evita duplicar reintentos", async (t) => {
+  const claveEnvio = randomUUID();
+  const estudioId = randomUUID();
+  const contactoId = randomUUID();
+  let guardadas = 0;
+  simulate(t, cloudinary.uploader, "upload", async () => {
+    const archivo = ++uploads === 1 ? "zona-marcada" : "referencia";
+    return { secure_url: `https://example.com/${archivo}.png`, public_id: `qa/${archivo}` };
+  });
+  simulate(t, prisma.estudio, "findFirst", async ({ where }: Args) =>
+    where?.slug === "estudio-qa"
+      ? { id: estudioId, nombre: "Estudio QA", propietarioId: "titular", plazoPropuestasHoras: 48 }
+      : null,
+  );
+  simulate(t, prisma.solicitud, "findFirst", async () => guardadas ? { id: claveEnvio } : null);
+  simulate(t, prisma.contacto, "createMany", async ({ data, skipDuplicates }: Args & { skipDuplicates: boolean }) => {
+    assert.equal(skipDuplicates, true);
+    assert.equal(data?.estudioId, estudioId);
+    assert.equal(data?.email, "persona@example.test");
+    return { count: 0 };
+  });
+  simulate(t, prisma.contacto, "findFirstOrThrow", async () => ({ id: contactoId }));
+  simulate(t, prisma.avisoPanel, "createMany", async () => ({ count: 1 }));
+  simulate(t, prisma.solicitud, "create", async ({ data }: Args) => {
+    assert.equal(data?.id, claveEnvio);
+    assert.equal(data?.estudioId, estudioId);
+    assert.equal(data?.contactoId, contactoId);
+    assert.equal(data?.clienteId, undefined);
+    assert.equal(data?.canal, "WEB");
+    assert.equal(data?.tamano, "12 cm");
+    assert.ok(data?.cierrePropuestasAt instanceof Date);
+    assert.equal(data?.imagenZonaMarcada, "https://example.com/zona-marcada.png");
+    assert.deepEqual(data?.referencias, ["https://example.com/referencia.png"]);
+    guardadas++;
+    return { id: claveEnvio };
+  });
+
+  const ruta = "/consultas/publicas/estudio-qa";
+  const consulta = () => {
+    const form = new FormData();
+    for (const [campo, valor] of Object.entries({
+      claveEnvio, nombre: "Nombre de Prueba", email: "Persona@example.test",
+      telefono: "+54 9 11 1234 5678",
+      tipoColor: "COLOR", generoCuerpo: "FEMENINO", zonaGeneral: "BRAZO",
+      estilo: "Fine Line", subZona: "Antebrazo", tamano: "12 cm", descripcion: "Quiero una rama de olivo en el antebrazo.",
+    })) form.set(campo, valor);
+    form.set("imagenZonaMarcada", new Blob([png], { type: "image/png" }), "zona-marcada.png");
+    form.set("referencias", new Blob([png], { type: "image/png" }), "referencia.png");
+    return form;
+  };
+  const publico = await request(ruta);
+  assert.deepEqual(await publico.json(), { nombre: "Estudio QA" });
+  assert.equal((await request("/consultas/publicas/desconocido")).status, 404);
+  const incompleta = consulta();
+  incompleta.delete("email");
+  assert.equal((await request(ruta, { method: "POST", body: incompleta })).status, 400);
+  const breve = consulta();
+  breve.set("descripcion", "  " + "a".repeat(19) + "  ");
+  assert.equal((await request(ruta, { method: "POST", body: breve })).status, 400);
+  assert.equal((await request(ruta, { method: "POST", body: consulta() })).status, 201);
+  assert.equal((await request(ruta, { method: "POST", body: consulta() })).status, 201);
+  assert.equal(guardadas, 1);
+  assert.equal(uploads, 2);
+});
+
+const post = (path: string, body: unknown, cookie?: string) =>
+  request(path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(cookie ? { Cookie: cookie } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+async function login() {
+  assert.equal((await post("/auth/register", base)).status, 201);
+  const response = await post("/auth/login", { email: base.email, password });
+  assert.equal(response.status, 200);
+  return response.headers.get("set-cookie")!.split(";")[0];
+}
+function upload(
+  cookie?: string,
+  field = "imagen",
+  bytes: Uint8Array = png,
+  type = "image/png",
+) {
+  const form = new FormData();
+  form.set(field, new Blob([bytes], { type }), "prueba.png");
+  return request("/upload", {
+    method: "POST",
+    headers: cookie ? { Cookie: cookie } : {},
+    body: form,
+  });
+}
+beforeEach(async () => {
+  users.clear();
+  studios.clear();
+  sessions.clear();
+  uploads = 0;
+  await limitarLogin.resetKey("127.0.0.1");
+});
+after(async () => {
+  server.closeAllConnections();
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  restores.reverse().forEach((restore) => restore());
+  await prisma.$disconnect();
+});
+
+test("health y reseñas públicas", async () => {
+  assert.equal((await request("/health")).status, 200);
+  assert.deepEqual(await (await request("/resenas")).json(), []);
+});
+
+test("el límite de checkout es por cuenta y devuelve un error JSON", async () => {
+  function cookieArtista() {
+    const id = randomUUID();
+    const sesionId = randomUUID();
+    users.set(id, { id, rol: "ARTISTA", email: id + "@example.test", estudioId: null });
+    sessions.set(sesionId, {
+      id: sesionId,
+      usuarioId: id,
+      revocadaAt: null,
+      expiraAt: new Date(Date.now() + 60000),
+    });
+    return "tattoomanager_session=" + crearToken(id, sesionId);
+  }
+  const datosInvalidos = { plan: "INDIVIDUAL", ciclo: "INVALIDO" };
+  const primera = cookieArtista();
+  for (let intento = 0; intento < 10; intento++) {
+    assert.equal((await post("/pagos/crear-suscripcion", datosInvalidos, primera)).status, 400);
+  }
+  const limitada = await post("/pagos/crear-suscripcion", datosInvalidos, primera);
+  assert.equal(limitada.status, 429);
+  assert.match((await limitada.json()).error, /límite de intentos de pago/);
+  assert.equal((await post("/pagos/crear-suscripcion", datosInvalidos, cookieArtista())).status, 400);
+});
+
+test("la prueba del asistente usa el negocio de la sesión y devuelve su formulario público", async (t) => {
+  const ruta = "/asistente/prueba";
+  const estudio = { id: "estudio-qa", propietarioId: "titular-qa", slug: "estudio-qa" };
+  function cookiePara(id: string, rol: string, perteneceAlEstudio: boolean) {
+    const sesionId = randomUUID();
+    users.set(id, {
+      id,
+      rol,
+      email: id + "@example.test",
+      estudioId: perteneceAlEstudio ? estudio.id : null,
+      estudio: perteneceAlEstudio ? estudio : null,
+    });
+    sessions.set(sesionId, {
+      id: sesionId,
+      usuarioId: id,
+      revocadaAt: null,
+      expiraAt: new Date(Date.now() + 60000),
+    });
+    return "tattoomanager_session=" + crearToken(id, sesionId);
+  }
+  const titular = cookiePara(estudio.propietarioId, "ESTUDIO_ADMIN", true);
+  const residente = cookiePara("integrante-qa", "ARTISTA", true);
+  const independiente = cookiePara("independiente-qa", "ARTISTA", false);
+  const sinPlan = cookiePara("sin-plan-qa", "ARTISTA", false);
+  let estudioActivo = true;
+  simulate(t, prisma.estudio, "findFirst", async ({ where }: Args) => {
+    assert.equal(where?.id, estudio.id);
+    assert.equal(where?.propietario?.suscripciones?.some?.plan, "ESTUDIO");
+    if (where?.usuarios) assert.equal(where.usuarios.some.estadoEnEstudio, "ACTIVO");
+    return estudioActivo ? estudio : null;
+  });
+  const configuraciones = new Map([
+    [estudio.id, { ...configuracionInicial, tono: "Estudio" }],
+    ["independiente-qa", { ...configuracionInicial, tono: "Independiente" }],
+  ]);
+  simulate(t, prisma.configuracionAsistente, "findUnique", async ({ where }: Args) => {
+    return { datos: configuraciones.get(String(where?.estudioId ?? where?.artistaId)) };
+  });
+  simulate(t, prisma.suscripcion, "findFirst", async ({ where }: Args) =>
+    where?.usuarioId === "independiente-qa" ? { id: "plan" } : null,
+  );
+  simulate(t, prisma.estudio, "findUnique", async ({ where }: Args) =>
+    where?.id === estudio.id ? estudio : null,
+  );
+  simulate(t, prisma.usuario, "findFirst", async ({ where }: Args) =>
+    where?.id === "independiente-qa" ? { id: where.id, estudio: null } : null,
+  );
+
+  const claveAnterior = process.env.GROQ_API_KEY;
+  process.env.GROQ_API_KEY = "solo-pruebas";
+  t.after(() => {
+    if (claveAnterior === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = claveAnterior;
+  });
+  const fetchReal = globalThis.fetch;
+  const tonos: string[] = [];
+  simulate(t, globalThis, "fetch", async (url: string, options: RequestInit) => {
+    if (url !== "https://api.groq.com/openai/v1/chat/completions") return fetchReal(url, options);
+    const { messages } = JSON.parse(String(options.body));
+    tonos.push(JSON.parse(messages[1].content).configuracion.tono);
+    return Response.json({
+      choices: [{
+        finish_reason: "stop",
+        message: {
+          content: JSON.stringify({ accion: "FORMULARIO", texto: "Contame tu idea." }),
+        },
+      }],
+    });
+  });
+
+  const datos = { mensaje: "¿Cómo les consulto por una pieza nueva?", estudioId: "otro-estudio" };
+  assert.equal((await post(ruta, datos)).status, 401);
+  assert.equal((await post(ruta, datos, residente)).status, 403);
+  assert.equal((await post(ruta, datos, sinPlan)).status, 403);
+  assert.equal((await post(ruta, { mensaje: "  " }, titular)).status, 400);
+  for (const [cookie, enlaceFormulario] of [
+    [titular, "/cotizacion/estudio-qa"],
+    [independiente, "/cotizacion/artista/independiente-qa"],
+  ] as const) {
+    const respuesta = await post(ruta, datos, cookie);
+    assert.equal(respuesta.status, 200);
+    assert.equal(respuesta.headers.get("cache-control"), "no-store");
+    assert.deepEqual(await respuesta.json(), { accion: "FORMULARIO", texto: "Contame tu idea.", enlaceFormulario });
+  }
+  assert.deepEqual(tonos, ["Estudio", "Independiente"]);
+  estudioActivo = false;
+  assert.equal((await post(ruta, datos, titular)).status, 403);
+});
+test("crear suscripción requiere sesión y un rol profesional", async () => {
+  assert.equal(
+    (
+      await post("/pagos/crear-suscripcion", {
+        plan: "INDIVIDUAL",
+        ciclo: "MENSUAL",
+      })
+    ).status,
+    401,
+  );
+  const cookie = await login();
+  assert.equal(
+    (
+      await post(
+        "/pagos/crear-suscripcion",
+        { plan: "INDIVIDUAL", ciclo: "MENSUAL" },
+        cookie,
+      )
+    ).status,
+    403,
+  );
+});
+test("artistas no pueden crear una suscripción para el plan de estudio", async () => {
+  const artista = {
+    ...base,
+    rol: "ARTISTA",
+    nombreArtistico: "Ana Ink",
+  };
+  await post("/auth/register", artista);
+  const response = await post("/auth/login", {
+    email: artista.email,
+    password,
+  });
+  const cookie = response.headers.get("set-cookie")!.split(";")[0];
+  assert.equal(
+    (
+      await post(
+        "/pagos/crear-suscripcion",
+        { plan: "ESTUDIO", ciclo: "MENSUAL" },
+        cookie,
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await post(
+        "/pagos/crear-suscripcion",
+        { plan: "INDIVIDUAL", ciclo: "SEMESTRAL" },
+        cookie,
+      )
+    ).status,
+    400,
+  );
+});
+test("cancelación de suscripción requiere sesión o token válido", async () => {
+  assert.equal((await post("/pagos/cancelar-suscripcion", {})).status, 401);
+});
+for (const rol of ["CLIENTE", "ARTISTA", "ESTUDIO_ADMIN"]) {
+  test(`registro de ${rol}: datos públicos, hash y relación de estudio`, async () => {
+    const response = await post("/auth/register", {
+      ...base,
+      rol,
+      nombreArtistico: "Ana Ink",
+      nombreEstudio: "Estudio Ana",
+      emailVerificado: true,
+    });
+    assert.equal(response.status, 201);
+    const { user } = await response.json();
+    assert.equal(user.rol, rol);
+    assert.equal(user.password, undefined);
+    assert.equal(user.tokenVerificacionEmail, undefined);
+    assert.equal(user.emailVerificado, false);
+    const saved = users.get(user.id)!;
+    assert.notEqual(saved.password, password);
+    assert.equal(await bcrypt.compare(password, String(saved.password)), true);
+    assert.equal(studios.size, rol === "ESTUDIO_ADMIN" ? 1 : 0);
+    if (rol === "ESTUDIO_ADMIN") assert.ok(saved.estudioId);
+  });
+}
+for (const [name, changes] of [
+  ["nombre numérico", { nombre: 42 }],
+  ["nombre corto", { nombre: "a" }],
+  ["nombre con números", { nombre: "Ana123" }],
+  ["nombre con símbolos", { nombre: "Ana!" }],
+  ["nombre largo", { nombre: "a".repeat(21) }],
+  ["email inválido", { email: "correo" }],
+  ["contraseña corta", { password: "123" }],
+  ["contraseña en blanco", { password: " ".repeat(20) }],
+  ["contraseña >72 bytes", { password: "á".repeat(37) }],
+  ["SUPERADMIN", { rol: "SUPERADMIN" }],
+  ["rol desconocido", { rol: "ARTIST" }],
+  ["artista sin nombre artístico", { rol: "ARTISTA" }],
+  ["estudio sin nombre", { rol: "ESTUDIO_ADMIN" }],
+]) {
+  test(`registro rechaza ${name}`, async () => {
+    assert.equal(
+      (await post("/auth/register", { ...base, ...changes })).status,
+      400,
+    );
+    assert.equal(users.size, 0);
+  });
+}
+test("email normalizado y duplicados", async () => {
+  assert.equal(
+    (await post("/auth/register", { ...base, email: " ANA@EXAMPLE.COM " }))
+      .status,
+    201,
+  );
+  assert.equal([...users.values()][0].email, base.email);
+  assert.equal((await post("/auth/register", base)).status, 409);
+});
+for (const [name, changes] of [
+  ["password corto", { password: "123" }],
+  ["email inválido", { email: "correo" }],
+  ["nombre artístico numérico", { nombreArtistico: 123 }],
+  ["boolean incorrecto", { aceptaCoverUp: "si" }],
+  ["número negativo", { tarifaMinima: -1 }],
+  ["número decimal entero", { anosExperiencia: 1.5 }],
+  ["lista inválida", { estilosPrincipales: [12] }],
+  ["galería inválida", { galeria: [{ url: "javascript:alert(1)" }] }],
+  ["URL inválida", { fotoPerfil: "javascript:alert(1)" }],
+  ["horarios inválidos", { horariosAtencion: true }],
+]) {
+  test(`alta antigua rechaza ${name}`, async () => {
+    assert.equal(
+      (
+        await post("/auth/register-artist", {
+          ...base,
+          nombreArtistico: "Ana Ink",
+          ...changes,
+        })
+      ).status,
+      400,
+    );
+    assert.equal(users.size, 0);
+  });
+}
+test("alta antigua conserva perfiles válidos y el rol artista", async () => {
+  const response = await post("/auth/register-artist", {
+    ...base,
+    nombreArtistico: "Ana Ink",
+    rol: "SUPERADMIN",
+    estilosPrincipales: ["Tradicional"],
+    tarifaMinima: 100,
+  });
+  assert.equal(response.status, 201);
+  const { user } = await response.json();
+  assert.equal(user.rol, "ARTISTA");
+  assert.deepEqual(users.get(user.id)!.estilosPrincipales, ["Tradicional"]);
+  assert.equal(
+    (
+      await post("/auth/register-artist", {
+        ...base,
+        nombreArtistico: "Ana Ink",
+      })
+    ).status,
+    409,
+  );
+});
+test("login, cookie segura, claims y /me sin datos sensibles", async () => {
+  await post("/auth/register", base);
+  const response = await post("/auth/login", {
+    email: " ANA@EXAMPLE.COM ",
+    password,
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  const header = response.headers.get("set-cookie")!;
+  assert.match(header, /HttpOnly/);
+  assert.match(header, /SameSite=Lax/);
+  assert.match(header, /Path=\//);
+  const cookie = header.split(";")[0];
+  const token = cookie.slice("tattoomanager_session=".length);
+  const claims = jwt.verify(token, process.env.JWT_SECRET!, {
+    algorithms: ["HS256"],
+    issuer: "inkmanager-api",
+    audience: "inkmanager-web",
+  }) as jwt.JwtPayload;
+  assert.ok(claims.sub && claims.jti);
+  assert.equal(claims.exp! - claims.iat!, 3600);
+  const me = await request("/auth/me", { headers: { Cookie: cookie } });
+  assert.equal(me.status, 200);
+  assert.deepEqual(Object.keys((await me.json()).user).sort(), [
+    "email",
+    "estudioId",
+    "id",
+    "nombre",
+    "rol",
+  ]);
+});
+
+test("login conserva el acceso a una contraseña anterior a la nueva política", async () => {
+  await post("/auth/register", base);
+  const user = [...users.values()][0];
+  user.password = await bcrypt.hash("clave-anterior", 4);
+  const response = await post("/auth/login", {
+    email: base.email,
+    password: "clave-anterior",
+  });
+  assert.equal(response.status, 200);
+  assert.ok(response.headers.get("set-cookie"));
+});
+test("error uniforme para contraseña y usuario inexistente", async () => {
+  await post("/auth/register", base);
+  const incorrecta = await post("/auth/login", {
+    email: base.email,
+    password: "incorrecta",
+  });
+  const ausente = await post("/auth/login", {
+    email: "otro@example.com",
+    password,
+  });
+  assert.equal(incorrecta.status, 401);
+  assert.equal(ausente.status, 401);
+  assert.deepEqual(await incorrecta.json(), await ausente.json());
+  assert.equal(sessions.size, 0);
+});
+test("limitador bloquea el sexto intento", async () => {
+  for (let i = 0; i < 5; i++)
+    assert.equal(
+      (await post("/auth/login", { email: base.email, password })).status,
+      401,
+    );
+  assert.equal(
+    (await post("/auth/login", { email: base.email, password })).status,
+    429,
+  );
+});
+for (const cookie of ["", "tattoomanager_session=alterado"]) {
+  test(`/me rechaza cookie ${cookie ? "inválida" : "ausente"}`, async () => {
+    assert.equal(
+      (await request("/auth/me", { headers: { Cookie: cookie } })).status,
+      401,
+    );
+  });
+}
+for (const state of [
+  "revocada",
+  "vencida",
+  "otro propietario",
+  "eliminada",
+  "usuario eliminado",
+]) {
+  test(`/me rechaza sesión ${state}`, async () => {
+    const cookie = await login();
+    const session = [...sessions.values()][0];
+    if (state === "revocada") session.revocadaAt = new Date();
+    if (state === "vencida") session.expiraAt = new Date(0);
+    if (state === "otro propietario") session.usuarioId = randomUUID();
+    if (state === "eliminada") sessions.clear();
+    if (state === "usuario eliminado") users.clear();
+    assert.equal(
+      (await request("/auth/me", { headers: { Cookie: cookie } })).status,
+      401,
+    );
+  });
+}
+test("logout revoca, elimina cookie e impide reutilización; otra sesión sigue vigente", async () => {
+  const cookie = await login();
+  const second = await post("/auth/login", { email: base.email, password });
+  const otherCookie = second.headers.get("set-cookie")!.split(";")[0];
+  const response = await post("/auth/logout", {}, cookie);
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("set-cookie")!, /Expires=Thu, 01 Jan 1970/);
+  assert.equal(
+    (await request("/auth/me", { headers: { Cookie: cookie } })).status,
+    401,
+  );
+  assert.equal(
+    (await request("/auth/me", { headers: { Cookie: otherCookie } })).status,
+    200,
+  );
+  assert.equal((await post("/auth/logout", {}, cookie)).status, 200);
+  assert.equal((await post("/auth/logout", {})).status, 200);
+});
+test("rol se consulta en BD, no queda congelado en JWT", async () => {
+  const cookie = await login();
+  [...users.values()][0].rol = "ARTISTA";
+  const response = await request("/auth/me", { headers: { Cookie: cookie } });
+  assert.equal((await response.json()).user.rol, "ARTISTA");
+});
+test("tokens expirados, de otra audiencia, sin jti o firmados con otra clave se rechazan", async () => {
+  const tokens = [
+    jwt.sign({}, process.env.JWT_SECRET!, {
+      subject: "test",
+      jwtid: "test",
+      expiresIn: -1,
+      audience: "inkmanager-web",
+      issuer: "inkmanager-api",
+    }),
+    jwt.sign({}, process.env.JWT_SECRET!, {
+      subject: "test",
+      jwtid: "test",
+      audience: "otro",
+      issuer: "inkmanager-api",
+    }),
+    jwt.sign({}, process.env.JWT_SECRET!, {
+      subject: "test",
+      audience: "inkmanager-web",
+      issuer: "inkmanager-api",
+    }),
+    jwt.sign({}, "otra-clave", {
+      subject: "test",
+      jwtid: "test",
+      audience: "inkmanager-web",
+      issuer: "inkmanager-api",
+    }),
+    crearToken("usuario-inexistente", "sesion-inexistente"),
+  ];
+  for (const token of tokens)
+    assert.equal(
+      (
+        await request("/auth/me", {
+          headers: { Cookie: `tattoomanager_session=${token}` },
+        })
+      ).status,
+      401,
+    );
+});
+test("filtro de roles: matriz completa y rechazo sin usuario", () => {
+  for (const permitido of Object.values(Rol)) {
+    for (const actual of Object.values(Rol)) {
+      let status = 0;
+      let next = false;
+      const res = {
+        status(value: number) {
+          status = value;
+          return this;
+        },
+        json() {},
+      } as unknown as Response;
+      const req = { usuario: { rol: actual } } as Request;
+      requerirRoles(permitido)(req, res, () => {
+        next = true;
+      });
+      assert.equal(next, actual === permitido);
+      assert.equal(status, actual === permitido ? 0 : 403);
+    }
+  }
+  let status = 0;
+  requerirRoles(Rol.CLIENTE)(
+    {} as Request,
+    {
+      status(value: number) {
+        status = value;
+        return this;
+      },
+      json() {},
+    } as unknown as Response,
+    () => assert.fail(),
+  );
+  assert.equal(status, 401);
+});
+test("upload requiere sesión antes de procesar el archivo", async () => {
+  assert.equal((await upload()).status, 401);
+  assert.equal(uploads, 0);
+});
+test("upload válido autenticado devuelve Cloudinary", async () => {
+  const cookie = await login();
+  const response = await upload(cookie);
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).public_id, "qa/test");
+  assert.equal(uploads, 1);
+});
+test("upload sin archivo, campo incorrecto, tipo y firma inválidos: 400 JSON", async () => {
+  const cookie = await login();
+  const responses = [
+    await post("/upload", {}, cookie),
+    await upload(cookie, "otro"),
+    await upload(cookie, "imagen", png, "text/plain"),
+    await upload(cookie, "imagen", Buffer.from("texto"), "image/png"),
+  ];
+  for (const response of responses) {
+    assert.equal(response.status, 400);
+    assert.match(response.headers.get("content-type")!, /json/);
+    assert.equal(typeof (await response.json()).error, "string");
+  }
+  assert.equal(uploads, 0);
+});
+test("upload mayor a 2 MB devuelve 413 JSON", async () => {
+  const cookie = await login();
+  const response = await upload(
+    cookie,
+    "imagen",
+    new Uint8Array(2 * 1024 * 1024 + 1),
+  );
+  assert.equal(response.status, 413);
+  assert.match(response.headers.get("content-type")!, /json/);
+  assert.equal(uploads, 0);
+});
+test("JSON inválido, cuerpo excesivo y ruta inexistente devuelven JSON", async () => {
+  const invalid = await request("/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{",
+  });
+  assert.equal(invalid.status, 400);
+  assert.ok((await invalid.json()).error);
+  const large = await post("/auth/register", { data: "x".repeat(110000) });
+  assert.equal(large.status, 413);
+  assert.ok((await large.json()).error);
+  const missing = await request("/no-existe");
+  assert.equal(missing.status, 404);
+  assert.ok((await missing.json()).error);
+});
+test("origen ajeno bloqueado también para registro y upload", async () => {
+  for (const path of [
+    "/auth/register",
+    "/auth/login",
+    "/auth/logout",
+    "/upload",
+  ]) {
+    const response = await request(path, {
+      method: "POST",
+      headers: {
+        Origin: "https://otro.example",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(base),
+    });
+    assert.equal(response.status, 403);
+  }
+});
+test("CORS permite el frontend con credenciales", async () => {
+  const response = await request("/auth/me", {
+    method: "OPTIONS",
+    headers: {
+      Origin: "http://127.0.0.1:3001",
+      "Access-Control-Request-Method": "GET",
+    },
+  });
+  assert.equal(
+    response.headers.get("access-control-allow-origin"),
+    "http://127.0.0.1:3001",
+  );
+  assert.equal(
+    response.headers.get("access-control-allow-credentials"),
+    "true",
+  );
+});
+test("fallo de almacenamiento no expone datos internos", async (t) => {
+  simulate(t, prisma.usuario, "findFirst", async () => {
+    throw new Error("dato privado");
+  });
+  t.mock.method(console, "error", () => {});
+  const response = await post("/auth/login", { email: base.email, password });
+  assert.equal(response.status, 500);
+  assert.doesNotMatch(
+    await response.text(),
+    /dato privado|password|postgresql/,
+  );
+});
+test("fallo en creación del estudio revierte la cuenta", async (t) => {
+  simulate(t, prisma.estudio, "create", async () => {
+    throw new Error("fallo simulado");
+  });
+  t.mock.method(console, "error", () => {});
+  assert.equal(
+    (
+      await post("/auth/register", {
+        ...base,
+        rol: "ESTUDIO_ADMIN",
+        nombreEstudio: "Ana Ink",
+      })
+    ).status,
+    500,
+  );
+  assert.equal(users.size, 0);
+});
+test("fallo al revocar conserva la cookie y devuelve error", async (t) => {
+  const cookie = await login();
+  simulate(t, prisma.sesion, "updateMany", async () => {
+    throw new Error("fallo simulado");
+  });
+  t.mock.method(console, "error", () => {});
+  const response = await post("/auth/logout", {}, cookie);
+  assert.equal(response.status, 500);
+  assert.equal(response.headers.get("set-cookie"), null);
+});
+test("abrir un enlace de verificación no confirma la cuenta automáticamente", async () => {
+  await post("/auth/register", base);
+  const user = [...users.values()][0];
+  assert.equal((await request("/auth/verify-email")).status, 400);
+  assert.equal(
+    (await request("/auth/verify-email?token=no-existe")).status,
+    400,
+  );
+  const response = await request(`/auth/verify-email?token=${"a".repeat(64)}`, {
+    redirect: "manual",
+  });
+  assert.equal(response.status, 303);
+  assert.equal(
+    response.headers.get("location"),
+    `http://127.0.0.1:3001/verificar-email#${"a".repeat(64)}`,
+  );
+  assert.equal(user.emailVerificado, false);
+});

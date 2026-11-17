@@ -1,0 +1,41 @@
+import type { Metadata } from 'next';
+import { Suspense, type ReactNode } from 'react';
+import localFont from 'next/font/local';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './globals.css';
+import { AuthProvider } from '@/store/AuthProvider';
+import { GoogleAuthNotice } from '@/components/auth/GoogleAuthNotice';
+import { CuentaEliminadaNotice } from '@/components/auth/CuentaEliminadaNotice';
+import { UnsavedChangesProvider } from '@/components/forms/UnsavedChanges';
+
+const plex = localFont({
+  src: [
+    { path: '../../public/fonts/ibm-plex-sans-regular.ttf', weight: '400', style: 'normal' },
+    { path: '../../public/fonts/ibm-plex-sans-medium.ttf', weight: '500', style: 'normal' },
+  ],
+  variable: '--font-plex',
+  display: 'swap',
+  preload: false,
+});
+
+export const metadata: Metadata = {
+  title: 'InkManager',
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="es-AR" className={plex.variable} data-scroll-behavior="smooth">
+      <body>
+        <UnsavedChangesProvider>
+          <AuthProvider>
+            {children}
+            <Suspense fallback={null}>
+              <GoogleAuthNotice />
+              <CuentaEliminadaNotice />
+            </Suspense>
+          </AuthProvider>
+        </UnsavedChangesProvider>
+      </body>
+    </html>
+  );
+}

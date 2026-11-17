@@ -1,0 +1,759 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --- ENUMS ---
+
+enum Rol {
+  CLIENTE
+  ARTISTA
+  ESTUDIO_ADMIN
+  SUPERADMIN
+}
+
+enum GeneroCuerpo {
+  MASCULINO
+  FEMENINO
+}
+
+enum TipoColor {
+  COLOR
+  BLACK_AND_GREY
+}
+
+enum ZonaCuerpoGeneral {
+  BRAZO
+  MANO
+  PIERNA
+  TORSO
+  CABEZA_CUELLO
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  EN_COTIZACION
+  ACEPTADO
+  CANCELADO
+  POR_ASIGNAR
+  ELECCION_CLIENTE
+  ASIGNADA
+  ARCHIVADA
+}
+
+enum CanalConsulta {
+  WEB
+  INSTAGRAM
+  WHATSAPP
+  TIKTOK
+  FACEBOOK
+}
+
+enum EstadoArtistaEstudio {
+  ACTIVO
+  SUSPENDIDO
+}
+
+enum EstadoCita {
+  PENDIENTE
+  CONFIRMADA
+  COMPLETADA
+  CANCELADA
+}
+
+enum EstadoInvitacionEquipo {
+  PENDIENTE
+  ACEPTADA
+  RECHAZADA
+  CANCELADA
+  VENCIDA
+}
+
+enum EstadoEnvioInvitacion {
+  PENDIENTE
+  ENVIADA
+  ERROR
+}
+
+enum EstadoVerificacion {
+  NO_VERIFICADO
+  PENDIENTE
+  VERIFICADO
+  RECHAZADO
+}
+
+enum TipoTrabajo {
+  ESTUDIO_PROPIO
+  RESIDENTE
+  GUEST_SPOT
+  PRIVADO
+}
+
+enum ModalidadCobro {
+  POR_HORA
+  POR_SESION
+  POR_PIEZA
+}
+
+enum PlanSuscripcion {
+  INDIVIDUAL
+  ESTUDIO
+}
+
+enum EstadoSuscripcion {
+  PENDIENTE
+  ACTIVA
+  VENCIDA
+  CANCELADA
+  PAUSADA
+  RECHAZADA
+  ERROR
+}
+
+enum CicloSuscripcion {
+  MENSUAL
+  ANUAL
+}
+
+enum EstadoPagoSuscripcion {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+// --- MODELOS DE DATOS ---
+
+model Usuario {
+  configuracionAsistente ConfiguracionAsistente?
+  suspendidoAt           DateTime?              @db.Timestamptz(3)
+  preferenciasCorreo     PreferenciasCorreo?
+  avisos                 AvisoPanel[]
+  conversacionesWhatsApp ConversacionWhatsApp[] @relation("ArtistaWhatsApp")
+  conexionesCanal        ConexionCanal[]        @relation("CanalArtista")
+  conversacionesCanal    ConversacionCanal[]    @relation("ConversacionArtista")
+  accionesAdmin          AccionAdministrativa[] @relation("AutorAdministracion")
+  accionesRecibidas      AccionAdministrativa[] @relation("CuentaAdministrada")
+  id                     String                 @id @default(uuid())
+  email                  String                 @unique
+  password               String? // Puede no tener contraseña si se registra con Google
+  googleId               String?                @unique // Identificador de su cuenta de Google
+  nombre                 String? // Nombre Completo / Razón Social
+  nombreArtistico        String? // Alias / Apodo para Artistas
+  biografia              String?
+  alias                  String?
+  rol                    Rol                    @default(CLIENTE)
+  telefono               String?
+  telefonoVerificado     Boolean                @default(false)
+  emailVerificado        Boolean                @default(false)
+  tokenVerificacionEmail String?
+
+  // --- CAMPOS DE PERFIL DE ARTISTA (Onboarding) ---
+  fotoPublicId          String?
+  resena                String?
+  fotoPerfil            String?
+  fotoTrabajando        String?
+  dniPasaporte          String?
+  documentoIdentidadUrl String?
+  estadoVerificacion    EstadoVerificacion @default(NO_VERIFICADO)
+
+  // Ubicación y Modalidad
+  tipoTrabajo      TipoTrabajo?
+  direccion        String?
+  ciudad           String?
+  ciudadId         Int?
+  pais             String?
+  radioAlcanceKm   Int?         @default(20)
+  horariosAtencion Json? // Días y rangos horarios
+
+  // Perfil Artístico y Redes
+  estilosPrincipales String[] // Ej: ["Blackwork", "Realismo"]
+  instagram          String?
+  tiktok             String?
+  sitioWeb           String?
+  anosExperiencia    Int?
+  galeria            FotoGaleria[]
+
+  // Cotizaciones y Reglas Económicas
+  tarifaMinima         Float? // Bajada de aguja
+  modalidadCobro       ModalidadCobro?
+  requiereSena         Boolean         @default(true)
+  montoPorcentajeSena  Float?
+  politicaCancelacion  String?
+  metodosPagoAceptados String[] // Ej: ["TRANSFERENCIA", "MERCADO_PAGO"]
+  cbuAliasBancario     String?
+
+  // Higiene y Licencias
+  licenciaSanitariaUrl     String?
+  numeroLicencia           String?
+  aceptaDeclaracionHigiene Boolean @default(false)
+
+  // Preferencias / Filtros de Proyectos
+  aceptaCoverUp        Boolean @default(true)
+  aceptaCicatrices     Boolean @default(true)
+  aceptaRetoques       Boolean @default(true)
+  aceptaCaraManos      Boolean @default(false)
+  copiaDisenosInternet Boolean @default(false)
+  tamanoMinimoCm       Int?    @default(5)
+
+  // --- RELACIONES ---
+  // Relación con el estudio al que pertenece o administra
+  estudioId             String?
+  estadoEnEstudio       EstadoArtistaEstudio @default(ACTIVO)
+  versionEquipo         Int                  @default(0)
+  zonaHoraria           String               @default("America/Argentina/Buenos_Aires")
+  estudio               Estudio?             @relation("EstudioIntegrantes", fields: [estudioId], references: [id])
+  estudiosAdministrados Estudio[]            @relation("EstudioPropietarios")
+
+  solicitudes          Solicitud[]             @relation("ClienteSolicitudes")
+  cotizaciones         Cotizacion[]
+  contactosPropios     Contacto[]              @relation("ArtistaContactos")
+  solicitudesDirectas  Solicitud[]             @relation("ArtistaSolicitudesDirectas")
+  solicitudesAsignadas Solicitud[]             @relation("ArtistaSolicitudesAsignadas")
+  citas                Cita[]                  @relation("ArtistaCitas")
+  citasCreadas         Cita[]                  @relation("AutorCitas")
+  disponibilidades     DisponibilidadArtista[]
+  bloqueosCreados      BloqueoAgenda[]         @relation("AutorBloqueoAgenda")
+
+  sesiones              Sesion[]
+  tokensCuenta          TokenCuenta[]
+  invitacionesCreadas   InvitacionEquipo[] @relation("AutorInvitacionEquipo")
+  invitacionesAceptadas InvitacionEquipo[] @relation("ReceptorInvitacionEquipo")
+  suscripciones          Suscripcion[]
+  planSuscripcionActivo  PlanSuscripcion? // Rastrear plan activo para rápido acceso
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FotoGaleria {
+  id            String            @id @default(uuid())
+  url           String
+  publicId      String?
+  descripcion   String            @default("")
+  estilos       String[]          @default([])
+  estado        EstadoPublicacion @default(BORRADOR)
+  esCicatrizado Boolean           @default(false)
+  usuarioId     String
+  usuario       Usuario           @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @default(now()) @updatedAt
+
+  @@index([usuarioId, estado])
+}
+
+enum EstadoPublicacion {
+  BORRADOR
+  PUBLICADO
+}
+
+model Estudio {
+  configuracionAsistente ConfiguracionAsistente?
+  biografia              String?
+  emailContacto          String?
+  telefono               String?
+  ciudadId               Int?
+  conversacionesWhatsApp ConversacionWhatsApp[]
+  conexionWhatsApp       ConexionWhatsApp?
+  conexionesCanal        ConexionCanal[]
+  conversacionesCanal    ConversacionCanal[]
+  id                     String                 @id @default(uuid())
+  nombre                 String
+  slug                   String                 @unique
+  direccion              String?
+  ciudad                 String?
+  pais                   String?
+  plazoPropuestasHoras   Int                    @default(48)
+  zonaHoraria            String                 @default("America/Argentina/Buenos_Aires")
+
+  // Relaciones
+  propietarioId    String?
+  propietario      Usuario?                @relation("EstudioPropietarios", fields: [propietarioId], references: [id])
+  usuarios         Usuario[]               @relation("EstudioIntegrantes")
+  solicitudes      Solicitud[]
+  contactos        Contacto[]
+  invitaciones     InvitacionEquipo[]
+  disponibilidades DisponibilidadArtista[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConfiguracionAsistente {
+  id         String   @id @default(uuid())
+  estudioId  String?  @unique
+  estudio    Estudio? @relation(fields: [estudioId], references: [id], onDelete: Cascade)
+  artistaId  String?  @unique
+  artista    Usuario? @relation(fields: [artistaId], references: [id], onDelete: Cascade)
+  datos      Json
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model InvitacionEquipo {
+  id              String                 @id @default(uuid())
+  estudioId       String
+  estudio         Estudio                @relation(fields: [estudioId], references: [id], onDelete: Restrict)
+  creadaPorId     String
+  creadaPor       Usuario                @relation("AutorInvitacionEquipo", fields: [creadaPorId], references: [id], onDelete: Restrict)
+  email           String
+  estado          EstadoInvitacionEquipo @default(PENDIENTE)
+  expiraAt        DateTime               @db.Timestamptz(3)
+  aceptadaPorId   String?
+  aceptadaPor     Usuario?               @relation("ReceptorInvitacionEquipo", fields: [aceptadaPorId], references: [id], onDelete: Restrict)
+  respondidaAt    DateTime?              @db.Timestamptz(3)
+  estadoEnvio     EstadoEnvioInvitacion  @default(PENDIENTE)
+  ultimoIntentoAt DateTime               @db.Timestamptz(3)
+  enviadaAt       DateTime?              @db.Timestamptz(3)
+  version         Int                    @default(0)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  @@index([estudioId, createdAt])
+  @@index([email, estado, expiraAt])
+}
+
+model Contacto {
+  recordatorios Json        @default("{}")
+  id            String      @id @default(uuid())
+  nombre        String
+  email         String
+  telefono      String?
+  ciudad        String?
+  notas         String      @default("")
+  estudioId     String?
+  estudio       Estudio?    @relation(fields: [estudioId], references: [id], onDelete: Restrict)
+  artistaId     String?
+  artista       Usuario?    @relation("ArtistaContactos", fields: [artistaId], references: [id], onDelete: Restrict)
+  solicitudes   Solicitud[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([estudioId, email])
+  @@unique([artistaId, email])
+  @@unique([id, estudioId])
+  @@unique([id, artistaId])
+}
+
+model Solicitud {
+  flujoInstagram         FlujoInstagram?
+  promocionesAceptadasAt DateTime?             @db.Timestamptz(3)
+  telefonoContacto       String?
+  conversacionesWhatsApp ConversacionWhatsApp[]
+  conversacionesCanal    ConversacionCanal[]
+  id                     String                 @id @default(uuid())
+  clienteId              String?
+  cliente                Usuario?               @relation("ClienteSolicitudes", fields: [clienteId], references: [id])
+  contactoId             String?
+  contacto               Contacto?              @relation(fields: [contactoId], references: [id], onDelete: Restrict)
+  estudioId              String?
+  estudio                Estudio?               @relation(fields: [estudioId], references: [id])
+  artistaDestinoId       String?
+  artistaDestino         Usuario?               @relation("ArtistaSolicitudesDirectas", fields: [artistaDestinoId], references: [id], onDelete: Restrict)
+  artistaAsignadoId      String?
+  artistaAsignado        Usuario?               @relation("ArtistaSolicitudesAsignadas", fields: [artistaAsignadoId], references: [id], onDelete: Restrict)
+  titulo                 String                 @default("")
+  canal                  CanalConsulta          @default(WEB)
+  tamano                 String?
+  presupuestoMinimo      Decimal?               @db.Decimal(12, 2)
+  presupuestoMaximo      Decimal?               @db.Decimal(12, 2)
+  moneda                 String                 @default("ARS")
+  notas                  String                 @default("")
+  cierrePropuestasAt     DateTime?
+  cerradaAt              DateTime?
+  asignadaPor            String?
+  version                Int                    @default(0)
+  estilo                 String
+  tipoColor              TipoColor              @default(BLACK_AND_GREY)
+  generoCuerpo           GeneroCuerpo           @default(MASCULINO)
+  zonaGeneral            ZonaCuerpoGeneral
+  subZona                String
+  imagenZonaMarcada      String?
+  descripcion            String?
+  referencias            String[]
+  estado                 EstadoSolicitud        @default(PENDIENTE)
+  cotizaciones           Cotizacion[]
+  citas                  Cita[]
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  @@index([estudioId, estado])
+  @@index([artistaDestinoId, estado])
+  @@index([estado, cierrePropuestasAt])
+}
+
+model Cotizacion {
+  id             String    @id @default(uuid())
+  solicitudId    String
+  solicitud      Solicitud @relation(fields: [solicitudId], references: [id])
+  artistaId      String
+  artista        Usuario   @relation(fields: [artistaId], references: [id])
+  monto          Decimal   @db.Decimal(12, 2)
+  montoSena      Decimal   @db.Decimal(12, 2)
+  mensaje        String?
+  validaHasta    DateTime?
+  bocetoUrl      String?
+  bocetoPublicId String?
+  duracionMinutos Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  citas          Cita[]
+
+  @@unique([solicitudId, artistaId])
+}
+
+model Cita {
+  id             String      @id @default(uuid())
+  solicitudId    String
+  solicitud      Solicitud   @relation(fields: [solicitudId], references: [id], onDelete: Restrict)
+  artistaId      String
+  artista        Usuario     @relation("ArtistaCitas", fields: [artistaId], references: [id], onDelete: Restrict)
+  cotizacionId   String?
+  cotizacion     Cotizacion? @relation(fields: [cotizacionId], references: [id], onDelete: Restrict)
+  creadaPorId    String
+  creadaPor      Usuario     @relation("AutorCitas", fields: [creadaPorId], references: [id], onDelete: Restrict)
+  titulo         String
+  inicioAt       DateTime    @db.Timestamptz(3)
+  finAt          DateTime    @db.Timestamptz(3)
+  importe        Decimal     @db.Decimal(12, 2)
+  sena           Decimal     @db.Decimal(12, 2)
+  estado         EstadoCita  @default(PENDIENTE)
+  notas          String      @default("")
+  recordatorios  Json        @default("{}")
+  completadaAt   DateTime?   @db.Timestamptz(3)
+  canceladaAt    DateTime?   @db.Timestamptz(3)
+  claveCreacion  String      @unique
+  avisoInstagramConversacionId String?
+  huellaCreacion String
+  version        Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([artistaId, inicioAt])
+  @@index([solicitudId, inicioAt])
+}
+
+model DisponibilidadArtista {
+  id        String          @id @default(uuid())
+  artistaId String
+  artista   Usuario         @relation(fields: [artistaId], references: [id], onDelete: Restrict)
+  estudioId String?
+  estudio   Estudio?        @relation(fields: [estudioId], references: [id], onDelete: Restrict)
+  ambito    String          @default("INDEPENDIENTE")
+  semana    Json?
+  version   Int             @default(0)
+  bloqueos  BloqueoAgenda[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([artistaId, ambito])
+  @@index([estudioId])
+}
+
+model BloqueoAgenda {
+  id               String                @id @default(uuid())
+  disponibilidadId String
+  disponibilidad   DisponibilidadArtista @relation(fields: [disponibilidadId], references: [id], onDelete: Restrict)
+  creadaPorId      String
+  creadaPor        Usuario               @relation("AutorBloqueoAgenda", fields: [creadaPorId], references: [id], onDelete: Restrict)
+  motivo           String
+  inicioAt         DateTime              @db.Timestamptz(3)
+  finAt            DateTime              @db.Timestamptz(3)
+  diaCompleto      Boolean               @default(false)
+  canceladoAt      DateTime?             @db.Timestamptz(3)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([disponibilidadId, inicioAt])
+}
+
+model Sesion {
+  id         String    @id @default(uuid())
+  usuarioId  String
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiraAt   DateTime
+  revocadaAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([usuarioId])
+  @@index([expiraAt])
+}
+
+enum TipoTokenCuenta {
+  PASSWORD
+  VERIFICAR_EMAIL
+}
+
+model TokenCuenta {
+  id        String          @id @default(uuid())
+  usuarioId String
+  usuario   Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      TipoTokenCuenta
+  tokenHash String          @unique
+  expiraAt  DateTime
+  usadoAt   DateTime?
+  createdAt DateTime        @default(now())
+
+  @@unique([usuarioId, tipo])
+  @@index([expiraAt])
+}
+
+model Suscripcion {
+  id                         String             @id @default(uuid())
+  usuarioId                  String
+  usuario                    Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  plan                       PlanSuscripcion
+  ciclo                      CicloSuscripcion
+  estado                     EstadoSuscripcion  @default(PENDIENTE)
+  monto                      Decimal            @db.Decimal(12, 2)
+  bonificada                 Boolean            @default(false)
+  moneda                     String             @default("ARS")
+  mercadoPagoId              String?            @unique
+  mpPaymentId                String?            @unique
+  referenciaExterna          String             @unique
+  proximoCobroAt             DateTime?
+  periodoHasta               DateTime?
+  canceladaAt                DateTime?
+  correoCancelacionEnviadoAt DateTime?
+  pagos                      PagoSuscripcion[]
+  tokensCancelacion          TokenCancelacion[]
+  avisosVencimiento          AvisoVencimiento[]
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+
+  @@index([usuarioId, estado, createdAt])
+  @@index([estado, proximoCobroAt])
+}
+
+model PagoSuscripcion {
+  id              String                @id @default(uuid())
+  suscripcionId   String
+  suscripcion     Suscripcion           @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+  mercadoPagoId   String                @unique
+  estado          EstadoPagoSuscripcion
+  monto           Decimal?              @db.Decimal(12, 2)
+  moneda          String?
+  aprobadoAt      DateTime?
+  correoEnviadoAt DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([suscripcionId, createdAt])
+}
+
+model TokenCancelacion {
+  id            String      @id @default(uuid())
+  suscripcionId String
+  suscripcion   Suscripcion @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+  tokenHash     String      @unique
+  expiraAt      DateTime
+  usadoAt       DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([suscripcionId, expiraAt])
+}
+
+model AvisoVencimiento {
+  id             String      @id @default(uuid())
+  suscripcionId  String
+  suscripcion    Suscripcion @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+  proximoCobroAt DateTime
+  enviadoAt      DateTime    @default(now())
+
+  @@unique([suscripcionId, proximoCobroAt])
+}
+
+enum CanalMensajes {
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
+}
+
+enum EstadoMensajeCanal {
+  RECIBIDO
+  ENVIANDO
+  ENVIADO
+  ERROR
+  INCIERTO
+}
+
+model ConexionCanal {
+  id           String        @id @default(uuid())
+  canal        CanalMensajes
+  cuentaId     String
+  usuarioCanal String
+  tokenCifrado String?
+  expiraAt     DateTime?     @db.Timestamptz(3)
+  loginUnificado Boolean    @default(false)
+  activa       Boolean       @default(false)
+  estudioId    String?
+  estudio      Estudio?      @relation(fields: [estudioId], references: [id], onDelete: Cascade)
+  artistaId    String?
+  artista      Usuario?      @relation("CanalArtista", fields: [artistaId], references: [id], onDelete: Cascade)
+
+  @@unique([canal, cuentaId])
+  @@unique([canal, estudioId])
+  @@unique([canal, artistaId])
+}
+
+model ConversacionCanal {
+  flujoInstagram  FlujoInstagram?
+  id              String         @id @default(uuid())
+  canal           CanalMensajes
+  cuentaId        String
+  remitente       String
+  nombre          String
+  estudioId       String?
+  estudio         Estudio?       @relation(fields: [estudioId], references: [id], onDelete: Restrict)
+  artistaId       String?
+  artista         Usuario?       @relation("ConversacionArtista", fields: [artistaId], references: [id], onDelete: Restrict)
+  solicitudId     String?
+  solicitud       Solicitud?     @relation(fields: [solicitudId], references: [id], onDelete: SetNull)
+  ultimaEntradaAt DateTime       @db.Timestamptz(3)
+  ultimaActividad DateTime       @db.Timestamptz(3)
+  botResponderAt  DateTime?      @db.Timestamptz(3)
+  botProcesandoHasta DateTime?   @db.Timestamptz(3)
+  mensajes        MensajeCanal[]
+
+  @@unique([canal, cuentaId, remitente])
+  @@index([estudioId, ultimaActividad])
+  @@index([artistaId, ultimaActividad])
+}
+
+model FlujoInstagram {
+  conversacionId String           @id
+  conversacion   ConversacionCanal @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  token          String           @unique
+  enlaceHasta    DateTime         @db.Timestamptz(3)
+  solicitudId    String?          @unique
+  solicitud      Solicitud?       @relation(fields: [solicitudId], references: [id], onDelete: SetNull)
+  pausadoAt      DateTime?        @db.Timestamptz(3)
+  recepcionAt    DateTime?        @db.Timestamptz(3)
+  versionAvisada Int?
+  revisadoAt     DateTime         @default(now()) @db.Timestamptz(3)
+}
+
+model MensajeCanal {
+  id             String             @id @default(uuid())
+  conversacionId String
+  conversacion   ConversacionCanal  @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  proveedorId    String?
+  claveEnvio     String?            @unique
+  texto          String
+  propio         Boolean
+  estado         EstadoMensajeCanal
+  fecha          DateTime           @db.Timestamptz(3)
+  leidoAt        DateTime?          @db.Timestamptz(3)
+  botPendiente   Boolean            @default(false)
+  accionBot      String?
+  ecoInstagram   Boolean            @default(false)
+
+  @@unique([conversacionId, proveedorId])
+  @@index([conversacionId, fecha])
+}
+
+model ConexionWhatsApp {
+  estudioId    String    @id
+  estudio      Estudio   @relation(fields: [estudioId], references: [id], onDelete: Cascade)
+  numeroId     String    @unique
+  wabaId       String    @unique
+  telefono     String
+  tokenCifrado String?
+  expiraAt     DateTime? @db.Timestamptz(3)
+  activadaAt   DateTime? @db.Timestamptz(3)
+  bloqueoHasta DateTime? @db.Timestamptz(3)
+  requierePin  Boolean   @default(false)
+}
+
+model ConversacionWhatsApp {
+  id              String            @id @default(uuid())
+  numeroId        String
+  remitente       String
+  nombre          String
+  estudioId       String?
+  estudio         Estudio?          @relation(fields: [estudioId], references: [id], onDelete: Restrict)
+  artistaId       String?
+  artista         Usuario?          @relation("ArtistaWhatsApp", fields: [artistaId], references: [id], onDelete: Restrict)
+  solicitudId     String?
+  solicitud       Solicitud?        @relation(fields: [solicitudId], references: [id], onDelete: SetNull)
+  ultimaEntradaAt DateTime          @db.Timestamptz(3)
+  ultimaActividad DateTime          @db.Timestamptz(3)
+  mensajes        MensajeWhatsApp[]
+
+  @@unique([numeroId, remitente])
+  @@index([estudioId, ultimaActividad])
+  @@index([artistaId, ultimaActividad])
+  @@index([solicitudId])
+}
+
+enum EstadoMensajeWhatsApp {
+  RECIBIDO
+  ENVIANDO
+  ENVIADO
+  ENTREGADO
+  LEIDO
+  ERROR
+  INCIERTO
+}
+
+model MensajeWhatsApp {
+  id             String                @id @default(uuid())
+  conversacionId String
+  conversacion   ConversacionWhatsApp  @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  proveedorId    String?               @unique
+  claveEnvio     String?               @unique
+  texto          String
+  propio         Boolean
+  estado         EstadoMensajeWhatsApp
+  fecha          DateTime              @db.Timestamptz(3)
+  leidoAt        DateTime?             @db.Timestamptz(3)
+
+  @@index([conversacionId, fecha])
+}
+
+model PreferenciasCorreo {
+  usuarioId String   @id
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  reglas    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EntregaRecordatorio {
+  clave       String    @id
+  reclamadaAt DateTime  @db.Timestamptz(3)
+  enviadaAt   DateTime? @db.Timestamptz(3)
+  intentos    Int       @default(1)
+}
+
+model AvisoPanel {
+  id        String    @id @default(uuid())
+  usuarioId String
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  clave     String
+  titulo    String
+  detalle   String
+  destino   String
+  createdAt DateTime  @default(now())
+  leidaAt   DateTime? @db.Timestamptz(3)
+  urgente   Boolean   @default(false)
+
+  @@unique([usuarioId, clave])
+  @@index([usuarioId, createdAt])
+}
+
+model AccionAdministrativa {
+  id        String   @id @default(uuid())
+  autorId   String
+  autor     Usuario  @relation("AutorAdministracion", fields: [autorId], references: [id], onDelete: Restrict)
+  cuentaId  String
+  cuenta    Usuario  @relation("CuentaAdministrada", fields: [cuentaId], references: [id], onDelete: Restrict)
+  accion    String
+  motivo    String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

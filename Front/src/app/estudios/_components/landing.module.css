@@ -1,0 +1,659 @@
+/* Colores y reglas compartidas de la landing. */
+.landing {
+  --ink: #25251f;
+  --muted: #6a6a61;
+  --line: #deddd5;
+  --landing-bg: #f7f6f2;
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--landing-bg);
+  --bs-border-color: var(--line);
+  width: 100%;
+  color: var(--ink);
+  background: var(--landing-bg);
+}
+
+.landing a {
+  color: inherit;
+  text-decoration: none;
+}
+.landing h1,
+.landing h2,
+.landing h3 {
+  font-weight: 400;
+}
+.landing :is(a, button):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 5px;
+}
+.container {
+  max-width: none;
+  padding-inline: clamp(24px, 4vw, 80px);
+}
+
+/* Cabecera y menú de Bootstrap. */
+.header {
+  position: relative;
+  z-index: 3;
+  color: var(--ink);
+  background: var(--landing-bg);
+  border-bottom: 1px solid var(--line);
+}
+.navbar {
+  min-height: 94px;
+  --bs-navbar-color: var(--ink);
+  --bs-navbar-hover-color: var(--muted);
+}
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  margin: 0;
+  font-size: 29px;
+  font-weight: 500;
+  letter-spacing: -1.5px;
+  transition: opacity 0.25s ease;
+}
+.header :global(.navbar-nav) {
+  gap: 30px;
+  font-size: 14px;
+}
+.header :global(.navbar-brand),
+.header :global(.navbar-brand:hover),
+.header :global(.nav-link) {
+  color: var(--ink);
+}
+.header :global(.nav-link) {
+  transition: color 0.25s ease;
+}
+.brand:hover {
+  opacity: 0.68;
+}
+
+/* Portada editorial. */
+.hero {
+  padding-block: clamp(44px, 6vw, 92px) clamp(72px, 9vw, 136px);
+  color: var(--ink);
+  background: var(--landing-bg);
+}
+.heroLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(40px, 7vw, 112px);
+}
+.heroContent {
+  max-width: 680px;
+  padding-block: 36px;
+}
+.heroImage {
+  object-fit: cover;
+  object-position: 54% 43%;
+  filter: sepia(0.07) saturate(0.72);
+  transition: transform 0.8s cubic-bezier(0.2, 0.65, 0.3, 1);
+}
+.heroVisual {
+  position: relative;
+  min-height: 430px;
+  height: min(57vw, 690px);
+  margin: 0;
+  overflow: hidden;
+  background: #e7e5dd;
+}
+.heroVisual::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgb(244 230 207 / 10%), transparent 58%);
+  content: '';
+  pointer-events: none;
+}
+.heroVisual:hover .heroImage {
+  transform: scale(1.035);
+}
+.heroCaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: calc(100% - 24px);
+  padding: 17px 20px;
+  color: var(--ink);
+  background: var(--landing-bg);
+  font-size: 12px;
+}
+.heroCaption span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.eyebrow {
+  margin-bottom: 30px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.hero h1 {
+  margin: 0 0 28px;
+  font-family: var(--font-serif);
+  font-size: clamp(60px, 7.2vw, 112px);
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+}
+.heroAccent {
+  color: #77766a;
+  font-style: italic;
+}
+.heroDescription {
+  max-width: 430px;
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.75;
+}
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 25px;
+  min-height: 44px;
+  border-bottom: 1px solid currentColor;
+  font-size: 13px;
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.25s ease;
+}
+.textLink:hover {
+  color: var(--muted);
+}
+.textLink span {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+.textLink:hover span {
+  transform: translate(3px, -3px);
+}
+
+/* Franja de palabras. La animación la resuelve React Fast Marquee. */
+.marquee {
+  overflow: hidden;
+  padding-block: clamp(24px, 3vw, 36px);
+  border-bottom: 1px solid var(--line);
+}
+.marqueeWord {
+  margin-right: 4.5vw;
+  color: #77766a;
+  font-family: var(--font-serif);
+  font-size: clamp(30px, 4vw, 72px);
+  font-style: italic;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.staticWords {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 32px;
+  padding-inline: 24px;
+}
+.staticWords .marqueeWord {
+  margin: 0;
+}
+
+/* Espaciado de las secciones y presentación de la plataforma. */
+.section {
+  padding-block: clamp(72px, 8vw, 140px);
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 24px;
+}
+.sectionSoft {
+  background: #f0efe9;
+}
+.sectionCompact {
+  padding-block: clamp(64px, 7vw, 104px);
+}
+.section h2 {
+  max-width: 760px;
+  margin-bottom: 30px;
+  font-size: clamp(34px, 4vw, 68px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+.detailImage {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+}
+.detailImage img,
+.toolsImage img {
+  object-fit: cover;
+  filter: saturate(0.55);
+  transition: transform 0.7s cubic-bezier(0.2, 0.65, 0.3, 1);
+}
+.detailImage:hover img,
+.toolsImage:hover img {
+  transform: scale(1.025);
+}
+.detailImage img {
+  object-position: center 45%;
+}
+.platformCopy {
+  padding-block: 24px;
+  padding-left: 5vw;
+}
+.bodyCopy {
+  max-width: 500px;
+  margin-bottom: 24px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.75;
+}
+.platformCopy .textLink {
+  margin-top: 8px;
+}
+/* Herramientas y acordeón de Bootstrap. */
+.toolsImage {
+  position: relative;
+  height: 100%;
+  min-height: 560px;
+}
+.accordion {
+  --bs-accordion-bg: transparent;
+  --bs-accordion-color: var(--muted);
+  --bs-accordion-border-color: var(--line);
+  --bs-accordion-btn-color: var(--ink);
+  --bs-accordion-active-color: var(--ink);
+  --bs-accordion-active-bg: transparent;
+  --bs-accordion-btn-focus-box-shadow: none;
+  margin-top: 48px;
+}
+.accordion :global(.accordion-button) {
+  padding: 25px 0;
+  box-shadow: none;
+  font-size: 19px;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+}
+.accordion :global(.accordion-button::after) {
+  filter: grayscale(1);
+}
+.accordion :global(.accordion-body) {
+  max-width: 560px;
+  padding: 0 36px 26px 0;
+  font-size: 15px;
+  line-height: 1.75;
+}
+.accordion :global(.accordion-button:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 5px;
+}
+
+/* Reseñas en tarjetas de Bootstrap. El movimiento lo resuelve React Fast Marquee. */
+.reviewCard {
+  --bs-card-border-radius: 4px;
+  width: min(380px, calc(100vw - 48px));
+  min-height: 248px;
+  flex-shrink: 0;
+  margin: 0 12px;
+  border: 1px solid var(--line);
+  background: var(--landing-bg);
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+.reviewCard:hover {
+  transform: translateY(-2px);
+  border-color: #c9c7bc;
+  box-shadow: 0 10px 24px rgb(37 37 31 / 7%);
+}
+.reviewCard blockquote {
+  font-size: 18px;
+  line-height: 1.6;
+}
+.reviewAvatar {
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.reviewsStatic {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px 0;
+  padding-inline: 12px;
+}
+
+/* Tarjetas de los planes. */
+.plans {
+  max-width: 1080px;
+  margin: 40px auto 0;
+}
+.plan {
+  --bs-card-border-color: var(--line);
+  --bs-card-border-radius: 4px;
+  border-width: 1px;
+  background: var(--landing-bg);
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+.plan:hover {
+  transform: translateY(-2px);
+  border-color: #c9c7bc;
+  box-shadow: 0 10px 24px rgb(37 37 31 / 7%);
+}
+.plan :global(.card-body) {
+  padding: clamp(24px, 3vw, 44px);
+}
+.plan h3 {
+  margin-bottom: 20px;
+  font-size: clamp(34px, 3vw, 44px);
+  letter-spacing: -0.045em;
+}
+.plan p {
+  min-height: 3em;
+  margin-bottom: 32px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.plan ul {
+  display: grid;
+  gap: 18px;
+  margin: 0 0 36px;
+  padding: 0;
+  list-style: none;
+  flex-grow: 1;
+}
+.plan li {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 15px;
+}
+.plan li > span {
+  flex-shrink: 0;
+}
+.planButton {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 42px;
+  padding: 15px 22px;
+  border-radius: 0;
+  font-size: 14px;
+  margin-top: 10px;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+.planButton:hover {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.landing .planCheckoutButton {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.landing .planCheckoutButton:hover {
+  color: var(--ink);
+  background: var(--landing-bg);
+  border-color: var(--ink);
+}
+
+.planCheckoutOptions {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.planCheckoutOptions .planButton {
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 0;
+  font-size: 13px;
+}
+
+.planModalDialog {
+  max-width: 960px;
+}
+.planModal {
+  --ink: #202320;
+  --muted: #5f645d;
+  --line: #daddd6;
+  --bs-modal-border-radius: 4px;
+  --bs-modal-header-border-color: var(--line);
+  --bs-modal-footer-border-color: var(--line);
+  color: var(--ink);
+}
+
+.planModalHeader {
+  align-items: flex-start;
+}
+.planModalHeader :global(.modal-title) {
+  font-size: clamp(30px, 4vw, 46px);
+  letter-spacing: -0.045em;
+}
+.planModalEyebrow,
+.planBenefitCount {
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.planModalPrice {
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+.planBenefit {
+  min-height: 280px;
+  padding: 18px 48px 46px;
+}
+.planBenefit h3 {
+  margin-bottom: 18px;
+  font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: -0.04em;
+}
+.planBenefitDescription,
+.planBenefitHighlight {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.planBenefitDescription {
+  color: var(--muted);
+}
+.planBenefitHighlight {
+  margin-top: 24px;
+}
+.planCarousel {
+  --bs-carousel-indicator-active-bg: var(--ink);
+  --bs-carousel-indicator-bg: var(--line);
+}
+.planCarousel :global(.carousel-control-prev),
+.planCarousel :global(.carousel-control-next) {
+  width: 36px;
+}
+.planCarousel :global(.carousel-control-prev-icon),
+.planCarousel :global(.carousel-control-next-icon) {
+  filter: invert(1);
+}
+.planCarousel :global(.carousel-indicators) {
+  margin-bottom: 0;
+}
+.planModalImage {
+  position: relative;
+  min-height: 300px;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #e8e8e2;
+}
+.planModalImage img {
+  object-fit: cover;
+  filter: saturate(0.65);
+}
+.planModalFooter {
+  justify-content: flex-start;
+}
+
+/* Pie de página y enlace para navegar con teclado. */
+.footer {
+  padding-block: 36px;
+  border-top: 1px solid var(--line);
+}
+.footer .textLink {
+  border: 0;
+}
+.skipLink {
+  position: absolute;
+  top: -80px;
+  left: 16px;
+  padding: 14px 20px;
+  color: var(--ink) !important;
+  background: #fff;
+}
+.skipLink:focus {
+  top: 16px;
+  z-index: 4;
+}
+
+/* Ajustes para tablets y celulares. */
+@media (max-width: 991px) {
+  .navbar {
+    min-height: 90px;
+  }
+  .header :global(.navbar-collapse.show),
+  .header :global(.navbar-collapse.collapsing) {
+    margin-top: 16px;
+    padding: 22px;
+    background: var(--landing-bg);
+  }
+  .header :global(.navbar-nav) {
+    gap: 8px;
+  }
+  .heroLayout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .heroContent {
+    max-width: 720px;
+    padding-block: 0;
+  }
+  .hero h1 {
+    font-size: clamp(64px, 10vw, 104px);
+  }
+  .heroImage {
+    object-position: 58% 45%;
+  }
+  .heroVisual {
+    height: min(75vw, 580px);
+    min-height: 340px;
+  }
+  .section h2 {
+    font-size: clamp(34px, 6vw, 50px);
+  }
+  .platformCopy {
+    padding-block: 0;
+    padding-left: calc(var(--bs-gutter-x) * 0.5);
+  }
+  .toolsImage {
+    min-height: 0;
+    aspect-ratio: 5 / 4;
+  }
+  .planModalDialog {
+    margin: 12px;
+  }
+  .planBenefit {
+    min-height: 300px;
+    padding-inline: 38px;
+  }
+  .planModalImage {
+    min-height: 220px;
+    aspect-ratio: 5 / 3;
+  }
+}
+
+@media (max-width: 767px) {
+  .plans {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 575px) {
+  .brand {
+    font-size: 26px;
+  }
+  .hero h1 {
+    margin-bottom: 22px;
+    font-size: clamp(48px, 12vw, 68px);
+    line-height: 1.05;
+  }
+  .heroImage {
+    object-position: 52% center;
+  }
+  .hero {
+    padding-block: 48px 72px;
+  }
+  .heroLayout {
+    gap: 34px;
+  }
+  .heroVisual {
+    height: 112vw;
+    min-height: 320px;
+    max-height: 500px;
+  }
+  .heroCaption {
+    gap: 10px;
+    padding: 14px 16px;
+    font-size: 11px;
+  }
+  .heroDescription {
+    font-size: 15px;
+  }
+  .marqueeWord {
+    font-size: 32px;
+  }
+  .eyebrow {
+    font-size: 10px;
+  }
+  .accordion {
+    margin-top: 30px;
+  }
+  .accordion :global(.accordion-button) {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand,
+  .header :global(.nav-link),
+  .heroImage,
+  .textLink,
+  .textLink span,
+  .detailImage img,
+  .toolsImage img,
+  .reviewCard,
+  .plan,
+  .planButton,
+  .planCheckoutButton {
+    transition: none;
+  }
+
+  .heroVisual:hover .heroImage,
+  .textLink:hover span,
+  .detailImage:hover img,
+  .toolsImage:hover img,
+  .reviewCard:hover,
+  .plan:hover {
+    transform: none;
+  }
+}
