@@ -3,7 +3,7 @@ import { AccountCard } from '@/components/auth/AccountCard';
 import { VerifyEmail } from '@/components/auth/VerifyEmail';
 
 export const metadata: Metadata = {
-  title: 'Verificar email | InkManager',
+  title: 'Verificar email | TattooManager',
   referrer: 'no-referrer',
   robots: { index: false, follow: false },
 };

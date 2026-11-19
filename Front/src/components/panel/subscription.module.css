@@ -5,8 +5,8 @@
 }
 .currentPlan {
   padding: 28px;
-  background: #f6f8f1;
-  border: 1px solid #e1e8d5;
+  background: #f7f7f7;
+  border: 1px solid #e5e5e5;
   border-radius: 7px;
 }
 .planEyebrow {
@@ -17,7 +17,7 @@
   margin-bottom: 28px;
 }
 .planEyebrow > span:first-child {
-  color: #7b8b6a;
+  color: #858585;
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 1px;
@@ -27,12 +27,12 @@
   font-size: 32px;
   font-weight: 500;
   letter-spacing: -1px;
-  color: #3b4f30;
+  color: #494949;
 }
 .currentPlan > p {
   margin: 0;
   font-size: 14px;
-  color: #5f6c54;
+  color: #686868;
 }
 .price {
   display: flex;
@@ -45,11 +45,11 @@
   font-size: 35px;
   font-weight: 500;
   letter-spacing: -1px;
-  color: #3f5533;
+  color: #4e4e4e;
   font-variant-numeric: tabular-nums;
 }
 .price span {
-  color: #7a8c6b;
+  color: #868686;
   font-size: 14px;
 }
 .currentPlan ul {
@@ -64,7 +64,7 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  color: #758567;
+  color: #7f7f7f;
 }
 .billingDetails {
   margin: 0 0 20px;
@@ -75,16 +75,16 @@
   justify-content: space-between;
   gap: 20px;
   padding: 15px 0;
-  border-bottom: 1px solid #e7ecdf;
+  border-bottom: 1px solid #eaeaea;
 }
 .billingDetails dt {
   font-size: 14px;
   font-weight: 400;
-  color: #7a8b69;
+  color: #858585;
 }
 .billingDetails dd {
   margin: 0;
-  color: #566d45;
+  color: #656565;
   font-size: 14px;
   text-align: right;
 }
@@ -99,12 +99,12 @@
 .studioPlan strong {
   font-size: 14px;
   font-weight: 500;
-  color: #5d744d;
+  color: #6c6c6c;
 }
 .studioPlan p {
   margin: 8px 0 0;
   font-size: 14px;
-  color: #839475;
+  color: #8e8e8e;
 }
 .cycleOption {
   display: flex;
@@ -112,7 +112,7 @@
   gap: 12px;
   padding: 20px 17px;
   margin-top: 12px;
-  border: 1px solid #e2e8d9;
+  border: 1px solid #e6e6e6;
   border-radius: 6px;
   cursor: pointer;
 }
@@ -123,27 +123,27 @@
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #5e754d;
+  color: #6d6d6d;
 }
 .cycleOption small {
   display: block;
   margin-top: 7px;
   font-size: 12px;
-  color: #8c9c7b;
+  color: #969696;
 }
 .cycleOption b {
   font-size: 15px;
-  color: #566d43;
+  color: #656565;
   font-weight: 500;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .cycleOption input {
-  accent-color: #738e5d;
+  accent-color: #858585;
 }
 .cycleSelected {
-  border-color: #a5ba8d;
-  background: #f7f9f2;
+  border-color: #b2b2b2;
+  background: #f8f8f8;
 }
 .cancelNowButton {
   display: inline-flex;

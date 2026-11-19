@@ -238,7 +238,7 @@ export async function verificarAltaMeta(
   )
     throw new HttpError(
       403,
-      "Meta no autorizó esta cuenta de WhatsApp para InkManager.",
+      "Meta no autorizó esta cuenta de WhatsApp para TattooManager.",
     );
   let wabaId: string | undefined;
   for (const id of cuentasAutorizadas) {

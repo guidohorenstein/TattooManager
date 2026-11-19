@@ -18,7 +18,7 @@ export function LandingHeader() {
       >
         <div className={`container-fluid ${styles.container}`}>
           <Navbar.Brand href="/" className={styles.brand}>
-            InkManager
+            TattooManager
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="landing-navigation" label="Abrir o cerrar menú" />
           <Navbar.Collapse id="landing-navigation">

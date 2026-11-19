@@ -3,7 +3,7 @@ import { AccountCard } from '@/components/auth/AccountCard';
 import { ResetPasswordForm } from '@/components/forms/ResetPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Nueva contraseña | InkManager',
+  title: 'Nueva contraseña | TattooManager',
   referrer: 'no-referrer',
   robots: { index: false, follow: false },
 };

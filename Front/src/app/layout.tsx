@@ -10,16 +10,27 @@ import { UnsavedChangesProvider } from '@/components/forms/UnsavedChanges';
 
 const plex = localFont({
   src: [
-    { path: '../../public/fonts/ibm-plex-sans-regular.ttf', weight: '400', style: 'normal' },
-    { path: '../../public/fonts/ibm-plex-sans-medium.ttf', weight: '500', style: 'normal' },
+    {
+      path: '../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-500-normal.woff2',
+      weight: '500',
+      style: 'normal',
+    },
   ],
   variable: '--font-plex',
   display: 'swap',
-  preload: false,
+  preload: true,
 });
 
 export const metadata: Metadata = {
-  title: 'InkManager',
+  title: 'TattooManager',
+  description: 'Gestión profesional para artistas y estudios de tatuajes.',
+  applicationName: 'TattooManager',
+  icons: { icon: '/icon.svg' },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -59,7 +59,7 @@ export async function notificarRegistro(
       correoCuenta({
         para: usuario.email,
         nombre: usuario.nombre,
-        asunto: "Bienvenido a InkManager",
+        asunto: "Bienvenido a TattooManager",
         clave: `bienvenida/${usuario.id}`,
         mensaje: google
           ? "Tu cuenta ya está lista y podés ingresar con Google. Si también querés entrar con email y contraseña, creá una contraseña con este enlace. Es opcional y vence en 30 minutos."
@@ -108,7 +108,7 @@ export async function solicitarEnlace(
       nombre: usuario.nombre,
       asunto:
         tipo === "PASSWORD"
-          ? "Tu contraseña de InkManager"
+          ? "Tu contraseña de TattooManager"
           : "Confirmá tu email",
       mensaje:
         tipo === "PASSWORD"
@@ -159,7 +159,7 @@ export async function restablecerPassword(entrada: unknown): Promise<void> {
         nombre: usuario.nombre,
         asunto: "Tu contraseña fue actualizada",
         mensaje:
-          "Tu contraseña se actualizó y cerramos las sesiones abiertas. Ya podés iniciar sesión con tu nueva contraseña. Si no hiciste este cambio, recuperá tu cuenta y contactá al equipo de InkManager.",
+          "Tu contraseña se actualizó y cerramos las sesiones abiertas. Ya podés iniciar sesión con tu nueva contraseña. Si no hiciste este cambio, recuperá tu cuenta y contactá al equipo de TattooManager.",
         clave: `password-actualizada/${hash}`,
       }),
     );

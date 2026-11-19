@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { EnlacePaginaPublica } from '@/components/panel/EnlacePaginaPublica';
 import { useAuth } from '@/store/AuthProvider';
 import { CuentasAsociadas } from '@/components/panel/CuentasAsociadas';
 import { EnlaceFormulario } from '@/components/panel/EnlaceFormulario';
@@ -23,6 +24,14 @@ export function ArtistSettings() {
             Configurar asistente
           </Link>
         </section>
+      )}
+      {datos?.enlace && (
+        <EnlacePaginaPublica
+          enlace={
+            usuario?.estudioId ? datos.enlace.replace('/cotizacion/', '/e/') : `/a/${usuario?.id}`
+          }
+          editable={!usuario?.estudioId}
+        />
       )}
       {datos?.enlace && (
         <EnlaceFormulario enlace={datos.enlace} estudio={Boolean(usuario?.estudioId)} />
@@ -60,7 +69,7 @@ export function ArtistSettings() {
       <section className={styles.settingsSection}>
         <div>
           <h2>Tu cuenta</h2>
-          <p>Datos de acceso a InkManager.</p>
+          <p>Datos de acceso a TattooManager.</p>
         </div>
         <div>
           <p className={styles.description}>{usuario?.email}</p>

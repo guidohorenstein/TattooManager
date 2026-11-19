@@ -216,14 +216,14 @@ export function Checkout({ planInicial }: { planInicial: Plan }) {
   return (
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="checkout-title">
-        <Link href="/estudios#planes" className={styles.back}>
+        <Link href="/#planes" className={styles.back}>
           ← Volver a planes
         </Link>
-        <p className={styles.eyebrow}>Suscripción InkManager</p>
+        <p className={styles.eyebrow}>Suscripción TattooManager</p>
         <h1 id="checkout-title">Elegí tu plan y forma de pago.</h1>
         <p className={styles.intro}>
           Elegí cómo pagar. Si ingresás una tarjeta, sus datos se tokenizan en los campos seguros de
-          Mercado Pago y nunca pasan por los servidores de InkManager.
+          Mercado Pago y nunca pasan por los servidores de TattooManager.
         </p>
 
         <fieldset className={styles.fieldset}>
@@ -336,7 +336,7 @@ export function Checkout({ planInicial }: { planInicial: Plan }) {
           <strong>Pago protegido por Mercado Pago</strong>
           <span>
             {medioPago === 'TARJETA'
-              ? 'La tarjeta se tokeniza de forma segura para configurar los cobros recurrentes. InkManager no recibe el número ni el código de seguridad.'
+              ? 'La tarjeta se tokeniza de forma segura para configurar los cobros recurrentes. TattooManager no recibe el número ni el código de seguridad.'
               : 'Mercado Pago confirma el medio disponible para los cargos recurrentes. La renovación seguirá el ciclo elegido.'}
           </span>
         </div>

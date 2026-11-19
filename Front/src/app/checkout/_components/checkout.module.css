@@ -1,8 +1,8 @@
 .page {
   min-height: 100vh;
   padding: clamp(24px, 5vw, 72px) 20px;
-  color: #242820;
-  background: radial-gradient(ellipse at 86% 0, rgb(220 227 208 / 56%), transparent 34%), #f6f6f1;
+  color: #272727;
+  background: radial-gradient(ellipse at 86% 0, rgb(220 227 208 / 56%), transparent 34%), #f6f6f6;
 }
 
 .shell {
@@ -14,13 +14,13 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #596052;
+  color: #5e5e5e;
   font-size: 14px;
   text-decoration: none;
 }
 
 .backLink:hover {
-  color: #242820;
+  color: #272727;
 }
 
 .heading {
@@ -30,7 +30,7 @@
 
 .eyebrow {
   margin: 0 0 9px;
-  color: #72786a;
+  color: #767676;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -48,7 +48,7 @@
 .heading > p:last-child {
   max-width: 540px;
   margin: 18px 0 0;
-  color: #6a6e63;
+  color: #6c6c6c;
   font-size: 15px;
   line-height: 1.7;
 }
@@ -62,7 +62,7 @@
 
 .formCard,
 .summary {
-  border: 1px solid #e5e6dd;
+  border: 1px solid #e5e5e5;
   border-radius: 22px;
   background: rgb(255 255 255 / 90%);
   box-shadow: 0 20px 60px rgb(34 39 28 / 5%);
@@ -95,8 +95,8 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  color: #435039;
-  background: #e9eee2;
+  color: #4c4c4c;
+  background: #ececec;
   font-size: 12px;
 }
 
@@ -115,8 +115,8 @@
   margin: 0 auto 30px;
   padding: 24px 28px;
   border-radius: 18px;
-  color: #f7f5ee;
-  background: linear-gradient(128deg, #303b33, #667259 58%, #879179);
+  color: #f5f5f5;
+  background: linear-gradient(128deg, #383838, #6e6e6e 58%, #8d8d8d);
   box-shadow: 0 16px 35px rgb(40 49 37 / 22%);
   transition:
     background 250ms ease,
@@ -139,7 +139,7 @@
 }
 
 .brandMASTERCARD {
-  background: linear-gradient(128deg, #382d2e, #755250 58%, #a47864);
+  background: linear-gradient(128deg, #2f2f2f, #755250 58%, #a47864);
 }
 
 .brandAMEX {
@@ -149,7 +149,7 @@
 .brandDISCOVER,
 .brandDINERS,
 .brandMAESTRO {
-  background: linear-gradient(128deg, #35313d, #635d76 58%, #8a8396);
+  background: linear-gradient(128deg, #333333, #606060 58%, #868686);
 }
 
 .cardTop,
@@ -254,7 +254,7 @@
   display: grid;
   min-width: 0;
   gap: 8px;
-  color: #34392f;
+  color: #373737;
   font-size: 13px;
   font-weight: 500;
 }
@@ -263,10 +263,10 @@
   width: 100%;
   min-height: 50px;
   padding: 0 14px;
-  border: 1px solid #dfe1d8;
+  border: 1px solid #e0e0e0;
   border-radius: 11px;
   outline: 0;
-  color: #292d26;
+  color: #2c2c2c;
   background: #fff;
   font: inherit;
   font-size: 14px;
@@ -277,11 +277,11 @@
 }
 
 .field input::placeholder {
-  color: #a1a499;
+  color: #a3a3a3;
 }
 
 .field input:focus {
-  border-color: #68785b;
+  border-color: #737373;
   box-shadow: 0 0 0 3px rgb(104 120 91 / 14%);
 }
 
@@ -309,10 +309,10 @@
   justify-content: center;
   gap: 15px;
   padding: 0 22px;
-  border: 1px solid #292e27;
+  border: 1px solid #2c2c2c;
   border-radius: 999px;
   color: #fff;
-  background: #292e27;
+  background: #2c2c2c;
   font: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -325,7 +325,7 @@
 
 .submitButton:not(:disabled):hover {
   transform: translateY(-1px);
-  color: #292e27;
+  color: #2c2c2c;
   background: #fff;
 }
 
@@ -336,7 +336,7 @@
 
 .submitButton:focus-visible,
 .secondaryButton:focus-visible {
-  outline: 3px solid #77856b;
+  outline: 3px solid #808080;
   outline-offset: 3px;
 }
 
@@ -345,23 +345,23 @@
   align-items: flex-start;
   gap: 8px;
   margin: -4px 0 0;
-  color: #777c70;
+  color: #7a7a7a;
   font-size: 12px;
   line-height: 1.5;
 }
 
 .secureNote span {
-  color: #667858;
+  color: #727272;
 }
 
 .formError,
 .feedbackError {
   margin: 0;
   padding: 12px 14px;
-  border: 1px solid #f0d7d2;
+  border: 1px solid #dcdcdc;
   border-radius: 11px;
   color: #8d3931;
-  background: #fff8f6;
+  background: #f9f9f9;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -380,7 +380,7 @@
 }
 
 .summaryPrice span {
-  color: #777c70;
+  color: #7a7a7a;
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0;
@@ -389,11 +389,11 @@
 .summaryDivider {
   height: 1px;
   margin: 22px 0;
-  background: #e8e9e2;
+  background: #e8e8e8;
 }
 
 .summary > p:not(.eyebrow, .summaryPrice) {
-  color: #696e63;
+  color: #6c6c6c;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -404,14 +404,14 @@
   margin-top: 24px;
   padding: 14px;
   border-radius: 12px;
-  color: #60685a;
-  background: #f2f4ee;
+  color: #656565;
+  background: #f3f3f3;
   font-size: 12px;
   line-height: 1.55;
 }
 
 .summarySecure > span:first-child {
-  color: #667858;
+  color: #727272;
   font-size: 19px;
 }
 
@@ -422,7 +422,7 @@
 
 .authGate p {
   margin: 12px auto 24px;
-  color: #696e63;
+  color: #6c6c6c;
   font-size: 14px;
 }
 
@@ -434,12 +434,12 @@
 }
 
 .secondaryButton {
-  color: #292e27;
+  color: #2c2c2c;
   background: #fff;
 }
 
 .secondaryButton:hover {
-  background: #f1f2ed;
+  background: #f1f1f1;
 }
 
 .cycleOptions {
@@ -461,9 +461,9 @@
   min-height: 74px;
   gap: 6px;
   padding: 14px;
-  border: 1px solid #dfe1d8;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
-  color: #34392f;
+  color: #373737;
   background: #fff;
   font: inherit;
   text-align: left;
@@ -474,8 +474,8 @@
 }
 
 .paymentOption[aria-pressed='true'] {
-  border-color: #68785b;
-  background: #f1f4eb;
+  border-color: #737373;
+  background: #f3f3f3;
 }
 
 .paymentOption strong {
@@ -484,7 +484,7 @@
 
 .paymentOption span,
 .checkoutPro > p:not(.secureNote, .formError) {
-  color: #6a6e63;
+  color: #6c6c6c;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -498,9 +498,9 @@
   display: grid;
   gap: 14px;
   padding: 22px;
-  border: 1px solid #e5e6dd;
+  border: 1px solid #e5e5e5;
   border-radius: 16px;
-  background: #fbfcf9;
+  background: #fcfcfc;
 }
 
 .checkoutPro > p {
@@ -515,9 +515,9 @@
   display: grid;
   gap: 6px;
   padding: 14px;
-  border: 1px solid #dfe1d8;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
-  color: #34392f;
+  color: #373737;
   background: #fff;
   font: inherit;
   text-align: left;
@@ -528,8 +528,8 @@
 }
 
 .cycleOption[aria-pressed='true'] {
-  border-color: #68785b;
-  background: #f1f4eb;
+  border-color: #737373;
+  background: #f3f3f3;
 }
 
 .cycleOption strong {
@@ -537,7 +537,7 @@
 }
 
 .cycleOption span {
-  color: #6a6e63;
+  color: #6c6c6c;
   font-size: 12px;
   line-height: 1.4;
 }
@@ -553,7 +553,7 @@
 }
 
 .feedback {
-  color: #696e63;
+  color: #6c6c6c;
 }
 
 .feedbackError a {
@@ -564,7 +564,7 @@
 
 .footer {
   margin-top: 34px;
-  color: #85897e;
+  color: #878787;
   font-size: 12px;
   text-align: center;
 }

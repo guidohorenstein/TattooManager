@@ -4,7 +4,7 @@ import { HttpError } from "../errors/http-error.js";
 export function configuracionCorreo() {
   const transporte =
     process.env.MAIL_TRANSPORT ??
-    (process.env.NODE_ENV === "production" ? "resend" : "preview");
+    (process.env.NODE_ENV === "production" ? "brevo" : "preview");
   if (transporte === "preview" && process.env.NODE_ENV !== "production") {
     return { transporte } as const;
   }

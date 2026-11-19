@@ -1,9 +1,9 @@
 /* Colores y reglas compartidas de la landing. */
 .landing {
-  --ink: #25251f;
-  --muted: #6a6a61;
-  --line: #deddd5;
-  --landing-bg: #f7f6f2;
+  --ink: #252525;
+  --muted: #696969;
+  --line: #dddddd;
+  --landing-bg: #f6f6f6;
   --bs-body-color: var(--ink);
   --bs-body-bg: var(--landing-bg);
   --bs-border-color: var(--line);
@@ -96,7 +96,7 @@
   height: min(57vw, 690px);
   margin: 0;
   overflow: hidden;
-  background: #e7e5dd;
+  background: #e5e5e5;
 }
 .heroVisual::after {
   position: absolute;
@@ -143,7 +143,7 @@
   line-height: 0.98;
 }
 .heroAccent {
-  color: #77766a;
+  color: #757575;
   font-style: italic;
 }
 .heroDescription {
@@ -184,7 +184,7 @@
 }
 .marqueeWord {
   margin-right: 4.5vw;
-  color: #77766a;
+  color: #757575;
   font-family: var(--font-serif);
   font-size: clamp(30px, 4vw, 72px);
   font-style: italic;
@@ -210,7 +210,7 @@
   scroll-margin-top: 24px;
 }
 .sectionSoft {
-  background: #f0efe9;
+  background: #efefef;
 }
 .sectionCompact {
   padding-block: clamp(64px, 7vw, 104px);
@@ -307,7 +307,7 @@
 }
 .reviewCard:hover {
   transform: translateY(-2px);
-  border-color: #c9c7bc;
+  border-color: #c7c7c7;
   box-shadow: 0 10px 24px rgb(37 37 31 / 7%);
 }
 .reviewCard blockquote {
@@ -343,7 +343,7 @@
 }
 .plan:hover {
   transform: translateY(-2px);
-  border-color: #c9c7bc;
+  border-color: #c7c7c7;
   box-shadow: 0 10px 24px rgb(37 37 31 / 7%);
 }
 .plan :global(.card-body) {
@@ -425,9 +425,9 @@
   max-width: 960px;
 }
 .planModal {
-  --ink: #202320;
-  --muted: #5f645d;
-  --line: #daddd6;
+  --ink: #222222;
+  --muted: #626262;
+  --line: #dcdcdc;
   --bs-modal-border-radius: 4px;
   --bs-modal-header-border-color: var(--line);
   --bs-modal-footer-border-color: var(--line);
@@ -495,7 +495,7 @@
   min-height: 300px;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  background: #e8e8e2;
+  background: #e8e8e8;
 }
 .planModalImage img {
   object-fit: cover;

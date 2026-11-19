@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-  title: 'Elegí tu plan | InkManager',
+  title: 'Elegí tu plan | TattooManager',
 };
 
 export default async function SuscripcionPage({

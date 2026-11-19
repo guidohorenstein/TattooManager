@@ -346,12 +346,19 @@ export async function procesarRecordatorios(
             OR: [
               {
                 solicitud: { estudioId: null },
-                artista: { preferenciasCorreo: reglasActivas, estudioId: null, suscripciones },
+                artista: {
+                  preferenciasCorreo: reglasActivas,
+                  estudioId: null,
+                  suscripciones,
+                },
               },
               {
                 solicitud: {
                   estudio: {
-                    propietario: { ...titular, preferenciasCorreo: reglasActivas },
+                    propietario: {
+                      ...titular,
+                      preferenciasCorreo: reglasActivas,
+                    },
                   },
                 },
               },
@@ -384,7 +391,10 @@ export async function procesarRecordatorios(
               rol: "ARTISTA",
               OR: [
                 { estudioId: null, suscripciones },
-                { estadoEnEstudio: "ACTIVO", estudio: { propietario: titular } },
+                {
+                  estadoEnEstudio: "ACTIVO",
+                  estudio: { propietario: titular },
+                },
               ],
             },
           ],
@@ -410,7 +420,7 @@ export function iniciarRecordatorios() {
       await procesarRecordatorios();
     } catch {
       console.error(
-        "Falló el procesamiento de tareas programadas de InkManager.",
+        "Falló el procesamiento de tareas programadas de TattooManager.",
       );
     } finally {
       ejecutando = false;

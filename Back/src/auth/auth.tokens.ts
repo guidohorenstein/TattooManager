@@ -8,8 +8,8 @@ export function crearToken(usuarioId: string, sesionId: string): string {
     jwtid: sesionId,
     expiresIn: duracionSesionSegundos,
     algorithm: "HS256",
-    issuer: "inkmanager-api",
-    audience: "inkmanager-web",
+    issuer: "tattoomanager-api",
+    audience: "tattoomanager-web",
   });
 }
 
@@ -21,8 +21,8 @@ export function verificarToken(token: string): {
   try {
     const contenido = jwt.verify(token, jwtSecret, {
       algorithms: ["HS256"],
-      issuer: "inkmanager-api",
-      audience: "inkmanager-web",
+      issuer: "tattoomanager-api",
+      audience: "tattoomanager-web",
     });
 
     if (

@@ -1,8 +1,8 @@
 .messenger {
   --chat-blue: #0064e0;
-  --chat-text: #16181c;
-  --chat-muted: #59636e;
-  --chat-border: #e3e7ec;
+  --chat-text: #181818;
+  --chat-muted: #626262;
+  --chat-border: #e7e7e7;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   height: calc(100dvh - 270px);
@@ -34,16 +34,16 @@
   width: 100%;
   padding: 16px 17px;
   border: 0;
-  border-bottom: 1px solid #f0f2f4;
+  border-bottom: 1px solid #f2f2f2;
   background: #fff;
   text-align: left;
 }
 .conversation:hover {
-  background: #f8f9fb;
+  background: #f9f9f9;
 }
 .selected,
 .selected:hover {
-  background: #eef5ff;
+  background: #f4f4f4;
 }
 .conversationInfo {
   flex: 1;
@@ -107,7 +107,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #f7f8fa;
+  background: #f8f8f8;
 }
 .threadHeader {
   display: flex;
@@ -213,8 +213,8 @@
   background: #0054bd;
 }
 .send:disabled {
-  background: #eef0f3;
-  color: #59636e;
+  background: #f0f0f0;
+  color: #626262;
 }
 
 .back {

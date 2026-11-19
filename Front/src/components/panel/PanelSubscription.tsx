@@ -208,7 +208,7 @@ export function PanelSubscription({
                 tu negocio y continuá al checkout seguro para completar el pago con tarjeta.
               </p>
               <Link
-                href="/estudios#planes"
+                href="/#planes"
                 className={styles.button}
                 aria-label="Suscribirme ahora: elegir plan y frecuencia de pago"
               >
@@ -403,7 +403,7 @@ export function PanelSubscription({
                 <strong>¿Vas a trabajar con un equipo?</strong>
                 <p>El plan Estudio permite coordinar artistas y administrar el negocio.</p>
               </div>
-              <Link href="/estudios#planes" className={styles.textButton}>
+              <Link href="/#planes" className={styles.textButton}>
                 Conocer el plan Estudio
                 <PanelIcon nombre="flecha" size={16} />
               </Link>

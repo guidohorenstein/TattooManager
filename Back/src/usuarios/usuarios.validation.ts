@@ -11,7 +11,7 @@ import type { RegistroArtistaDto } from "./dto/registro-artista.dto.js";
 import { validarCiudad } from "../ubicaciones/ubicaciones.service.js";
 
 export function validarRolRegistro(rol: unknown): RegistroUsuarioDto["rol"] {
-  if (rol === Rol.CLIENTE || rol === Rol.ARTISTA || rol === Rol.ESTUDIO_ADMIN) {
+  if (rol === Rol.ARTISTA || rol === Rol.ESTUDIO_ADMIN) {
     return rol;
   }
   throw new HttpError(400, "El rol seleccionado no es válido");

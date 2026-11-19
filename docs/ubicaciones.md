@@ -18,7 +18,7 @@ Las rutas rechazan países desconocidos y provincias que no pertenecen al país 
 
 Los perfiles necesitan una ciudad del catálogo para considerarse completos. Las ubicaciones anteriores se conservan en la base y se muestran como referencia al editar, hasta que el usuario elige una opción válida. El catálogo público presenta ciudad, provincia y país para distinguir localidades con el mismo nombre.
 
-El país elegido se recuerda en `localStorage`, bajo `inkmanager-pais`. Esta preferencia no contiene la ubicación física del usuario ni datos de sesión. Sin preferencia o ubicación guardada se utiliza Argentina. Si el navegador bloquea el almacenamiento, el selector sigue funcionando.
+El país elegido se recuerda en `localStorage`, bajo `tattoomanager-pais`. Esta preferencia no contiene la ubicación física del usuario ni datos de sesión. Sin preferencia o ubicación guardada se utiliza Argentina. Si el navegador bloquea el almacenamiento, el selector sigue funcionando.
 
 ## Organización y fuentes
 

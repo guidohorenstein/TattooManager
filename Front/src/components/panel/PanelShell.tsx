@@ -45,10 +45,13 @@ function Navigation({
   return (
     <>
       <Link href={home} className={styles.brand}>
-        <span className={styles.brandMark}>im</span>
-        <span className={styles.brandName}>InkManager</span>
+        <span className={styles.brandMark}>tm</span>
+        <span className={styles.brandName}>TattooManager</span>
       </Link>
-      <nav aria-label={artista ? 'Panel del artista' : 'Panel del estudio'} className={styles.navigation}>
+      <nav
+        aria-label={artista ? 'Panel del artista' : 'Panel del estudio'}
+        className={styles.navigation}
+      >
         {[...new Set(secciones.map((s) => s.grupo))].map((grupo) => (
           <div className={styles.navGroup} key={grupo}>
             <p className={styles.groupLabel}>{grupo}</p>
@@ -129,7 +132,7 @@ export function PanelShell({ children, secciones, nombre, subtitulo, perfil, art
     confirm = useDiscardChanges();
   const [compact, setCompact] = useState(() => {
     try {
-      return localStorage.getItem('inkmanager:menu-compacto') === 'true';
+      return localStorage.getItem('tattoomanager:menu-compacto') === 'true';
     } catch {
       return false;
     }
@@ -138,7 +141,7 @@ export function PanelShell({ children, secciones, nombre, subtitulo, perfil, art
     [leaving, setLeaving] = useState(false);
   useEffect(() => {
     try {
-      localStorage.setItem('inkmanager:menu-compacto', String(compact));
+      localStorage.setItem('tattoomanager:menu-compacto', String(compact));
     } catch {
       /* Preferencia opcional. */
     }

@@ -42,14 +42,15 @@ export default function SubscriptionResult({ subscriptionId }: { subscriptionId:
       try {
         const ruta = `pagos/suscripcion/${encodeURIComponent(subscriptionId)}`;
         const signal = controller.signal;
-        const response = attempts % 4 === 0
-          ? await apiFetch(ruta + '/verificar', { method: 'POST', signal }).catch((error) => {
-              if (error instanceof ApiError && [429, 502, 503].includes(error.status)) {
-                return apiFetch(ruta, { signal });
-              }
-              throw error;
-            })
-          : await apiFetch(ruta, { signal });
+        const response =
+          attempts % 4 === 0
+            ? await apiFetch(ruta + '/verificar', { method: 'POST', signal }).catch((error) => {
+                if (error instanceof ApiError && [429, 502, 503].includes(error.status)) {
+                  return apiFetch(ruta, { signal });
+                }
+                throw error;
+              })
+            : await apiFetch(ruta, { signal });
         const body: unknown = await response.json();
         if (
           typeof body !== 'object' ||
@@ -64,7 +65,7 @@ export default function SubscriptionResult({ subscriptionId }: { subscriptionId:
 
         const subscription = body.subscription as Record<string, unknown>;
         const estado = subscription.estado;
-        
+
         if (!isSubscriptionStatus(estado)) {
           throw new Error('Estado de suscripción inválido.');
         }
@@ -117,11 +118,7 @@ export default function SubscriptionResult({ subscriptionId }: { subscriptionId:
   const fallo = estadoVisible === 'failed' || estadoVisible === 'error';
 
   const planLabel =
-    plan === 'INDIVIDUAL'
-      ? 'plan Individual'
-      : plan === 'ESTUDIO'
-        ? 'plan Estudio'
-        : 'tu plan';
+    plan === 'INDIVIDUAL' ? 'plan Individual' : plan === 'ESTUDIO' ? 'plan Estudio' : 'tu plan';
 
   return (
     <main className={styles.page}>
@@ -155,7 +152,7 @@ export default function SubscriptionResult({ subscriptionId }: { subscriptionId:
         </h1>
         <p className={styles.description}>
           {estadoVisible === 'active'
-            ? `¡Felicidades! Acabás de contratar ${planLabel}. Ya tenés acceso completo a todas las funcionalidades. Gracias por confiar en InkManager.`
+            ? `¡Felicidades! Acabás de contratar ${planLabel}. Ya tenés acceso completo a todas las funcionalidades. Gracias por confiar en TattooManager.`
             : fallo
               ? mensajeVisible ||
                 'La suscripción no se completó. Podés revisar tus datos e intentarlo nuevamente.'
@@ -176,7 +173,7 @@ export default function SubscriptionResult({ subscriptionId }: { subscriptionId:
             </>
           ) : fallo ? (
             <>
-              <Link className={styles.primaryButton} href="/estudios#planes">
+              <Link className={styles.primaryButton} href="/#planes">
                 Volver a los planes <span aria-hidden="true">→</span>
               </Link>
               <Link className={styles.secondaryButton} href="/">

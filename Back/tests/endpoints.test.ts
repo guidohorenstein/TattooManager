@@ -11,7 +11,7 @@ import type { Request, Response } from "express";
 process.env.DATABASE_URL =
   "postgresql://test:test@127.0.0.1:1/test?connect_timeout=1";
 process.env.DIRECT_URL = process.env.DATABASE_URL;
-process.env.JWT_SECRET = "solo-pruebas-aisladas-inkmanager-32-bytes";
+process.env.JWT_SECRET = "solo-pruebas-aisladas-tattoomanager-32-bytes";
 process.env.FRONTEND_URL = "http://127.0.0.1:3001";
 process.env.NODE_ENV = "test";
 process.env.MAIL_TRANSPORT = "resend";
@@ -23,7 +23,8 @@ const { limitarLogin } = await import("../src/middlewares/limitar-login.js");
 const { requerirRoles } = await import("../src/middlewares/roles.js");
 const { Rol } = await import("../src/types/roles.js");
 const { crearToken } = await import("../src/auth/auth.tokens.js");
-const { configuracionInicial } = await import("../src/asistente/configuracion.js");
+const { configuracionInicial } =
+  await import("../src/asistente/configuracion.js");
 
 type Row = Record<string, unknown>;
 type Args = { where?: Row; data?: Row; select?: Record<string, boolean> };
@@ -79,6 +80,7 @@ replace(prisma.usuario, "findUnique", async ({ where, select: fields }: Args) =>
   select(users.get(String(where?.id)), fields),
 );
 replace(prisma.usuario, "findMany", async () => []);
+replace(prisma.suscripcion, "findFirst", async () => ({ id: "plan-prueba" }));
 replace(prisma.usuario, "create", async ({ data, select: fields }: Args) => {
   const id = randomUUID();
   const row = {
@@ -169,7 +171,8 @@ const base = {
   nombre: "Ana",
   email: "ana@example.com",
   password,
-  rol: "CLIENTE",
+  rol: "ARTISTA",
+  nombreArtistico: "Ana Ink",
 };
 const png = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lN8AAAAASUVORK5CYII=",
@@ -185,21 +188,38 @@ test("formulario de estudio: admite invitados, protege la ficha y evita duplicar
   let guardadas = 0;
   simulate(t, cloudinary.uploader, "upload", async () => {
     const archivo = ++uploads === 1 ? "zona-marcada" : "referencia";
-    return { secure_url: `https://example.com/${archivo}.png`, public_id: `qa/${archivo}` };
+    return {
+      secure_url: `https://example.com/${archivo}.png`,
+      public_id: `qa/${archivo}`,
+    };
   });
   simulate(t, prisma.estudio, "findFirst", async ({ where }: Args) =>
     where?.slug === "estudio-qa"
-      ? { id: estudioId, nombre: "Estudio QA", propietarioId: "titular", plazoPropuestasHoras: 48 }
+      ? {
+          id: estudioId,
+          nombre: "Estudio QA",
+          propietarioId: "titular",
+          plazoPropuestasHoras: 48,
+        }
       : null,
   );
-  simulate(t, prisma.solicitud, "findFirst", async () => guardadas ? { id: claveEnvio } : null);
-  simulate(t, prisma.contacto, "createMany", async ({ data, skipDuplicates }: Args & { skipDuplicates: boolean }) => {
-    assert.equal(skipDuplicates, true);
-    assert.equal(data?.estudioId, estudioId);
-    assert.equal(data?.email, "persona@example.test");
-    return { count: 0 };
-  });
-  simulate(t, prisma.contacto, "findFirstOrThrow", async () => ({ id: contactoId }));
+  simulate(t, prisma.solicitud, "findFirst", async () =>
+    guardadas ? { id: claveEnvio } : null,
+  );
+  simulate(
+    t,
+    prisma.contacto,
+    "createMany",
+    async ({ data, skipDuplicates }: Args & { skipDuplicates: boolean }) => {
+      assert.equal(skipDuplicates, true);
+      assert.equal(data?.estudioId, estudioId);
+      assert.equal(data?.email, "persona@example.test");
+      return { count: 0 };
+    },
+  );
+  simulate(t, prisma.contacto, "findFirstOrThrow", async () => ({
+    id: contactoId,
+  }));
   simulate(t, prisma.avisoPanel, "createMany", async () => ({ count: 1 }));
   simulate(t, prisma.solicitud, "create", async ({ data }: Args) => {
     assert.equal(data?.id, claveEnvio);
@@ -209,7 +229,10 @@ test("formulario de estudio: admite invitados, protege la ficha y evita duplicar
     assert.equal(data?.canal, "WEB");
     assert.equal(data?.tamano, "12 cm");
     assert.ok(data?.cierrePropuestasAt instanceof Date);
-    assert.equal(data?.imagenZonaMarcada, "https://example.com/zona-marcada.png");
+    assert.equal(
+      data?.imagenZonaMarcada,
+      "https://example.com/zona-marcada.png",
+    );
     assert.deepEqual(data?.referencias, ["https://example.com/referencia.png"]);
     guardadas++;
     return { id: claveEnvio };
@@ -219,13 +242,29 @@ test("formulario de estudio: admite invitados, protege la ficha y evita duplicar
   const consulta = () => {
     const form = new FormData();
     for (const [campo, valor] of Object.entries({
-      claveEnvio, nombre: "Nombre de Prueba", email: "Persona@example.test",
+      claveEnvio,
+      nombre: "Nombre de Prueba",
+      email: "Persona@example.test",
       telefono: "+54 9 11 1234 5678",
-      tipoColor: "COLOR", generoCuerpo: "FEMENINO", zonaGeneral: "BRAZO",
-      estilo: "Fine Line", subZona: "Antebrazo", tamano: "12 cm", descripcion: "Quiero una rama de olivo en el antebrazo.",
-    })) form.set(campo, valor);
-    form.set("imagenZonaMarcada", new Blob([png], { type: "image/png" }), "zona-marcada.png");
-    form.set("referencias", new Blob([png], { type: "image/png" }), "referencia.png");
+      tipoColor: "COLOR",
+      generoCuerpo: "FEMENINO",
+      zonaGeneral: "BRAZO",
+      estilo: "Fine Line",
+      subZona: "Antebrazo",
+      tamano: "12 cm",
+      descripcion: "Quiero una rama de olivo en el antebrazo.",
+    }))
+      form.set(campo, valor);
+    form.set(
+      "imagenZonaMarcada",
+      new Blob([png], { type: "image/png" }),
+      "zona-marcada.png",
+    );
+    form.set(
+      "referencias",
+      new Blob([png], { type: "image/png" }),
+      "referencia.png",
+    );
     return form;
   };
   const publico = await request(ruta);
@@ -233,12 +272,24 @@ test("formulario de estudio: admite invitados, protege la ficha y evita duplicar
   assert.equal((await request("/consultas/publicas/desconocido")).status, 404);
   const incompleta = consulta();
   incompleta.delete("email");
-  assert.equal((await request(ruta, { method: "POST", body: incompleta })).status, 400);
+  assert.equal(
+    (await request(ruta, { method: "POST", body: incompleta })).status,
+    400,
+  );
   const breve = consulta();
   breve.set("descripcion", "  " + "a".repeat(19) + "  ");
-  assert.equal((await request(ruta, { method: "POST", body: breve })).status, 400);
-  assert.equal((await request(ruta, { method: "POST", body: consulta() })).status, 201);
-  assert.equal((await request(ruta, { method: "POST", body: consulta() })).status, 201);
+  assert.equal(
+    (await request(ruta, { method: "POST", body: breve })).status,
+    400,
+  );
+  assert.equal(
+    (await request(ruta, { method: "POST", body: consulta() })).status,
+    201,
+  );
+  assert.equal(
+    (await request(ruta, { method: "POST", body: consulta() })).status,
+    201,
+  );
   assert.equal(guardadas, 1);
   assert.equal(uploads, 2);
 });
@@ -295,7 +346,12 @@ test("el límite de checkout es por cuenta y devuelve un error JSON", async () =
   function cookieArtista() {
     const id = randomUUID();
     const sesionId = randomUUID();
-    users.set(id, { id, rol: "ARTISTA", email: id + "@example.test", estudioId: null });
+    users.set(id, {
+      id,
+      rol: "ARTISTA",
+      email: id + "@example.test",
+      estudioId: null,
+    });
     sessions.set(sesionId, {
       id: sesionId,
       usuarioId: id,
@@ -307,17 +363,32 @@ test("el límite de checkout es por cuenta y devuelve un error JSON", async () =
   const datosInvalidos = { plan: "INDIVIDUAL", ciclo: "INVALIDO" };
   const primera = cookieArtista();
   for (let intento = 0; intento < 10; intento++) {
-    assert.equal((await post("/pagos/crear-suscripcion", datosInvalidos, primera)).status, 400);
+    assert.equal(
+      (await post("/pagos/crear-suscripcion", datosInvalidos, primera)).status,
+      400,
+    );
   }
-  const limitada = await post("/pagos/crear-suscripcion", datosInvalidos, primera);
+  const limitada = await post(
+    "/pagos/crear-suscripcion",
+    datosInvalidos,
+    primera,
+  );
   assert.equal(limitada.status, 429);
   assert.match((await limitada.json()).error, /límite de intentos de pago/);
-  assert.equal((await post("/pagos/crear-suscripcion", datosInvalidos, cookieArtista())).status, 400);
+  assert.equal(
+    (await post("/pagos/crear-suscripcion", datosInvalidos, cookieArtista()))
+      .status,
+    400,
+  );
 });
 
 test("la prueba del asistente usa el negocio de la sesión y devuelve su formulario público", async (t) => {
   const ruta = "/asistente/prueba";
-  const estudio = { id: "estudio-qa", propietarioId: "titular-qa", slug: "estudio-qa" };
+  const estudio = {
+    id: "estudio-qa",
+    propietarioId: "titular-qa",
+    slug: "estudio-qa",
+  };
   function cookiePara(id: string, rol: string, perteneceAlEstudio: boolean) {
     const sesionId = randomUUID();
     users.set(id, {
@@ -343,16 +414,26 @@ test("la prueba del asistente usa el negocio de la sesión y devuelve su formula
   simulate(t, prisma.estudio, "findFirst", async ({ where }: Args) => {
     assert.equal(where?.id, estudio.id);
     assert.equal(where?.propietario?.suscripciones?.some?.plan, "ESTUDIO");
-    if (where?.usuarios) assert.equal(where.usuarios.some.estadoEnEstudio, "ACTIVO");
+    if (where?.usuarios)
+      assert.equal(where.usuarios.some.estadoEnEstudio, "ACTIVO");
     return estudioActivo ? estudio : null;
   });
   const configuraciones = new Map([
     [estudio.id, { ...configuracionInicial, tono: "Estudio" }],
     ["independiente-qa", { ...configuracionInicial, tono: "Independiente" }],
   ]);
-  simulate(t, prisma.configuracionAsistente, "findUnique", async ({ where }: Args) => {
-    return { datos: configuraciones.get(String(where?.estudioId ?? where?.artistaId)) };
-  });
+  simulate(
+    t,
+    prisma.configuracionAsistente,
+    "findUnique",
+    async ({ where }: Args) => {
+      return {
+        datos: configuraciones.get(
+          String(where?.estudioId ?? where?.artistaId),
+        ),
+      };
+    },
+  );
   simulate(t, prisma.suscripcion, "findFirst", async ({ where }: Args) =>
     where?.usuarioId === "independiente-qa" ? { id: "plan" } : null,
   );
@@ -371,21 +452,35 @@ test("la prueba del asistente usa el negocio de la sesión y devuelve su formula
   });
   const fetchReal = globalThis.fetch;
   const tonos: string[] = [];
-  simulate(t, globalThis, "fetch", async (url: string, options: RequestInit) => {
-    if (url !== "https://api.groq.com/openai/v1/chat/completions") return fetchReal(url, options);
-    const { messages } = JSON.parse(String(options.body));
-    tonos.push(JSON.parse(messages[1].content).configuracion.tono);
-    return Response.json({
-      choices: [{
-        finish_reason: "stop",
-        message: {
-          content: JSON.stringify({ accion: "FORMULARIO", texto: "Contame tu idea." }),
-        },
-      }],
-    });
-  });
+  simulate(
+    t,
+    globalThis,
+    "fetch",
+    async (url: string, options: RequestInit) => {
+      if (url !== "https://api.groq.com/openai/v1/chat/completions")
+        return fetchReal(url, options);
+      const { messages } = JSON.parse(String(options.body));
+      tonos.push(JSON.parse(messages[1].content).configuracion.tono);
+      return Response.json({
+        choices: [
+          {
+            finish_reason: "stop",
+            message: {
+              content: JSON.stringify({
+                accion: "FORMULARIO",
+                texto: "Contame tu idea.",
+              }),
+            },
+          },
+        ],
+      });
+    },
+  );
 
-  const datos = { mensaje: "¿Cómo les consulto por una pieza nueva?", estudioId: "otro-estudio" };
+  const datos = {
+    mensaje: "¿Cómo les consulto por una pieza nueva?",
+    estudioId: "otro-estudio",
+  };
   assert.equal((await post(ruta, datos)).status, 401);
   assert.equal((await post(ruta, datos, residente)).status, 403);
   assert.equal((await post(ruta, datos, sinPlan)).status, 403);
@@ -397,7 +492,11 @@ test("la prueba del asistente usa el negocio de la sesión y devuelve su formula
     const respuesta = await post(ruta, datos, cookie);
     assert.equal(respuesta.status, 200);
     assert.equal(respuesta.headers.get("cache-control"), "no-store");
-    assert.deepEqual(await respuesta.json(), { accion: "FORMULARIO", texto: "Contame tu idea.", enlaceFormulario });
+    assert.deepEqual(await respuesta.json(), {
+      accion: "FORMULARIO",
+      texto: "Contame tu idea.",
+      enlaceFormulario,
+    });
   }
   assert.deepEqual(tonos, ["Estudio", "Independiente"]);
   estudioActivo = false;
@@ -414,6 +513,7 @@ test("crear suscripción requiere sesión y un rol profesional", async () => {
     401,
   );
   const cookie = await login();
+  [...users.values()][0].rol = "SUPERADMIN";
   assert.equal(
     (
       await post(
@@ -461,7 +561,7 @@ test("artistas no pueden crear una suscripción para el plan de estudio", async 
 test("cancelación de suscripción requiere sesión o token válido", async () => {
   assert.equal((await post("/pagos/cancelar-suscripcion", {})).status, 401);
 });
-for (const rol of ["CLIENTE", "ARTISTA", "ESTUDIO_ADMIN"]) {
+for (const rol of ["ARTISTA", "ESTUDIO_ADMIN"]) {
   test(`registro de ${rol}: datos públicos, hash y relación de estudio`, async () => {
     const response = await post("/auth/register", {
       ...base,
@@ -494,8 +594,9 @@ for (const [name, changes] of [
   ["contraseña en blanco", { password: " ".repeat(20) }],
   ["contraseña >72 bytes", { password: "á".repeat(37) }],
   ["SUPERADMIN", { rol: "SUPERADMIN" }],
+  ["CLIENTE", { rol: "CLIENTE" }],
   ["rol desconocido", { rol: "ARTIST" }],
-  ["artista sin nombre artístico", { rol: "ARTISTA" }],
+  ["artista sin nombre artístico", { rol: "ARTISTA", nombreArtistico: "" }],
   ["estudio sin nombre", { rol: "ESTUDIO_ADMIN" }],
 ]) {
   test(`registro rechaza ${name}`, async () => {
@@ -579,8 +680,8 @@ test("login, cookie segura, claims y /me sin datos sensibles", async () => {
   const token = cookie.slice("tattoomanager_session=".length);
   const claims = jwt.verify(token, process.env.JWT_SECRET!, {
     algorithms: ["HS256"],
-    issuer: "inkmanager-api",
-    audience: "inkmanager-web",
+    issuer: "tattoomanager-api",
+    audience: "tattoomanager-web",
   }) as jwt.JwtPayload;
   assert.ok(claims.sub && claims.jti);
   assert.equal(claims.exp! - claims.iat!, 3600);
@@ -691,25 +792,25 @@ test("tokens expirados, de otra audiencia, sin jti o firmados con otra clave se 
       subject: "test",
       jwtid: "test",
       expiresIn: -1,
-      audience: "inkmanager-web",
-      issuer: "inkmanager-api",
+      audience: "tattoomanager-web",
+      issuer: "tattoomanager-api",
     }),
     jwt.sign({}, process.env.JWT_SECRET!, {
       subject: "test",
       jwtid: "test",
       audience: "otro",
-      issuer: "inkmanager-api",
+      issuer: "tattoomanager-api",
     }),
     jwt.sign({}, process.env.JWT_SECRET!, {
       subject: "test",
-      audience: "inkmanager-web",
-      issuer: "inkmanager-api",
+      audience: "tattoomanager-web",
+      issuer: "tattoomanager-api",
     }),
     jwt.sign({}, "otra-clave", {
       subject: "test",
       jwtid: "test",
-      audience: "inkmanager-web",
-      issuer: "inkmanager-api",
+      audience: "tattoomanager-web",
+      issuer: "tattoomanager-api",
     }),
     crearToken("usuario-inexistente", "sesion-inexistente"),
   ];
@@ -900,4 +1001,17 @@ test("abrir un enlace de verificación no confirma la cuenta automáticamente", 
     `http://127.0.0.1:3001/verificar-email#${"a".repeat(64)}`,
   );
   assert.equal(user.emailVerificado, false);
+});
+
+test("cuentas de cliente existentes no pueden abrir ni reutilizar sesiones", async () => {
+  const cookie = await login();
+  [...users.values()][0].rol = "CLIENTE";
+  assert.equal(
+    (await request("/auth/me", { headers: { Cookie: cookie } })).status,
+    401,
+  );
+  assert.equal(
+    (await post("/auth/login", { email: base.email, password })).status,
+    401,
+  );
 });

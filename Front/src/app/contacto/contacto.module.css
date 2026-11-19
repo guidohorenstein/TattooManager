@@ -2,14 +2,14 @@
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
-  background: #f7f6f2;
+  background: #f6f6f6;
 }
 
 .page {
   flex: 1;
   padding: clamp(56px, 9vw, 112px) 24px;
-  background: #f7f6f2;
-  color: var(--theme-ink, #25251f);
+  background: #f6f6f6;
+  color: var(--theme-ink, #252525);
 }
 
 .container {
@@ -45,7 +45,7 @@
 
 .eyebrow {
   margin: 0 0 14px;
-  color: var(--theme-muted, #6a6a61);
+  color: var(--theme-muted, #696969);
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -59,14 +59,14 @@
 
 .intro > p:last-child {
   margin: 0;
-  color: var(--theme-muted, #6a6a61);
+  color: var(--theme-muted, #696969);
   font-size: 16px;
   line-height: 1.65;
 }
 
 .form {
   padding: clamp(22px, 4vw, 36px);
-  border: 1px solid #deddd5;
+  border: 1px solid #dddddd;
   background: #fff;
 }
 
@@ -97,7 +97,7 @@
   width: 100%;
   min-height: 48px;
   padding: 12px;
-  border: 1px solid #cccec7;
+  border: 1px solid #cdcdcd;
   border-radius: 3px;
   background: #fff;
   color: inherit;
@@ -112,7 +112,7 @@
 
 .field input:focus,
 .field textarea:focus {
-  border-color: #25251f;
+  border-color: #252525;
   outline: 2px solid rgb(37 37 31 / 15%);
   outline-offset: 1px;
 }
@@ -139,16 +139,16 @@
 
 .success {
   margin-top: 16px;
-  color: #30442a;
+  color: #3e3e3e;
 }
 
 .submit {
   justify-self: start;
   min-height: 48px;
   padding: 12px 22px;
-  border: 1px solid #25251f;
+  border: 1px solid #252525;
   border-radius: 3px;
-  background: #25251f;
+  background: #252525;
   color: #fff;
   font: inherit;
   font-size: 14px;
@@ -156,11 +156,11 @@
 }
 
 .submit:hover:not(:disabled) {
-  background: #373c35;
+  background: #3a3a3a;
 }
 
 .submit:focus-visible {
-  outline: 2px solid #25251f;
+  outline: 2px solid #252525;
   outline-offset: 4px;
 }
 

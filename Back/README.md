@@ -1,6 +1,6 @@
-# Backend de InkManager
+# Backend de TattooManager
 
-API con Express, TypeScript y Prisma. PostgreSQL en Supabase almacena datos, Cloudinary almacena imágenes y Resend envía correos. InkManager administra sus propios usuarios, roles y sesiones.
+API con Express, TypeScript y Prisma. PostgreSQL en Supabase almacena datos, Cloudinary almacena imágenes y Resend envía correos. TattooManager administra sus propios usuarios, roles y sesiones.
 
 ## Ejecución
 
@@ -45,7 +45,7 @@ Las credenciales son privadas y los archivos `.env` están excluidos de Git. `pr
 
 ## Suscripciones y pagos
 
-Los planes se cobran mediante Mercado Pago: la opción mensual usa una suscripción recurrente y la anual es un pago único por 12 meses. El checkout alojado o el formulario seguro de Mercado Pago tokeniza la tarjeta en el navegador; InkManager no recibe ni almacena el número, vencimiento ni código de seguridad. El plan Individual cuesta ARS 12.000 por mes o ARS 120.000 por año; el plan Estudio cuesta ARS 35.000 por mes o ARS 350.000 por año.
+Los planes se cobran mediante Mercado Pago: la opción mensual usa una suscripción recurrente y la anual es un pago único por 12 meses. El checkout alojado o el formulario seguro de Mercado Pago tokeniza la tarjeta en el navegador; TattooManager no recibe ni almacena el número, vencimiento ni código de seguridad. El plan Individual cuesta ARS 12.000 por mes o ARS 120.000 por año; el plan Estudio cuesta ARS 35.000 por mes o ARS 350.000 por año.
 
 En una base nueva, aplicá primero el esquema base y después la migración de unificación. En una base que ya tiene las tablas de suscripciones, aplicá solo la migración de unificación. Regenerá Prisma:
 
@@ -61,16 +61,16 @@ Configurá las variables `MERCADOPAGO_ACCESS_TOKEN` y `MERCADOPAGO_WEBHOOK_SECRE
 
 Con un vendedor de prueba podés configurar `MP_PLAN_INDIVIDUAL_MENSUAL_ARS=100` y `MP_PLAN_ESTUDIO_MENSUAL_ARS=100`, y `MP_PLAN_INDIVIDUAL_ANUAL_ARS=500` y `MP_PLAN_ESTUDIO_ANUAL_ARS=500`. Los nuevos intentos toman esos montos. Cancelá los intentos pendientes de un precio anterior antes de crear otros. En el mensual, usá el correo del comprador de prueba generado por Mercado Pago.
 
-| Endpoint                                              | Acceso                           | Función                                                                       |
-| ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------- |
-| `GET /api/pagos/planes`                               | Público                          | Devuelve los planes y precios configurados.                                   |
-| `POST /api/pagos/crear-suscripcion`                   | Sesión ARTISTA o ESTUDIO_ADMIN   | Crea la suscripción mensual o el pago anual y devuelve checkout/token status. |
-| `GET /api/pagos/suscripcion`                          | Sesión                           | Consulta el estado y ciclo de la última suscripción propia.                   |
-| `POST /api/pagos/cancelar-suscripcion`                | Sesión propia o token del correo | Cancela renovaciones en Mercado Pago y conserva la fecha de período abonado.  |
-| `POST /api/pagos/cancelar-suscripcion-inmediatamente` | Sesión ARTISTA o ESTUDIO_ADMIN   | Cancela el acceso inmediatamente para permitir una nueva contratación.        |
-| `GET /api/pagos/suscripcion/:id`                      | Sesión propietaria               | Consulta el resultado individual del checkout.                                |
+| Endpoint                                              | Acceso                           | Función                                                                          |
+| ----------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------- |
+| `GET /api/pagos/planes`                               | Público                          | Devuelve los planes y precios configurados.                                      |
+| `POST /api/pagos/crear-suscripcion`                   | Sesión ARTISTA o ESTUDIO_ADMIN   | Crea la suscripción mensual o el pago anual y devuelve checkout/token status.    |
+| `GET /api/pagos/suscripcion`                          | Sesión                           | Consulta el estado y ciclo de la última suscripción propia.                      |
+| `POST /api/pagos/cancelar-suscripcion`                | Sesión propia o token del correo | Cancela renovaciones en Mercado Pago y conserva la fecha de período abonado.     |
+| `POST /api/pagos/cancelar-suscripcion-inmediatamente` | Sesión ARTISTA o ESTUDIO_ADMIN   | Cancela el acceso inmediatamente para permitir una nueva contratación.           |
+| `GET /api/pagos/suscripcion/:id`                      | Sesión propietaria               | Consulta el resultado individual del checkout.                                   |
 | `POST /api/pagos/suscripcion/:id/verificar`           | Sesión propietaria               | Si el mensual sigue pendiente, verifica su factura directamente en Mercado Pago. |
-| `POST /api/webhooks/mercadopago`                      | Firma HMAC válida                | Actualiza suscripciones, pagos aprobados/rechazados y correos.                |
+| `POST /api/webhooks/mercadopago`                      | Firma HMAC válida                | Actualiza suscripciones, pagos aprobados/rechazados y correos.                   |
 
 El correo de confirmación se envía al confirmarse un cobro y trae un enlace de cancelación de un solo uso, almacenado como hash y válido hasta el fin del período. Los correos de prueba con `MAIL_TRANSPORT=preview` se guardan en `Back/.mail-preview/`; para enviarlos por email real, configurá Resend. El backend revisa cada seis horas si hay renovaciones dentro de los próximos tres días y evita repetir avisos ya enviados.
 

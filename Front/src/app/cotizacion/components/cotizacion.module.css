@@ -1,7 +1,7 @@
 .pagina {
   min-height: 100dvh;
-  background: #f7f6f3;
-  color: #22231f;
+  background: #f6f6f6;
+  color: #222222;
 }
 
 .marco {
@@ -23,7 +23,7 @@
   display: inline-block;
   margin-bottom: 1.35rem;
   font-size: 0.875rem;
-  color: #51554c;
+  color: #535353;
   text-underline-offset: 0.25em;
 }
 
@@ -41,12 +41,12 @@
   gap: 0.2rem;
   margin: 1.5rem 0 0;
   padding-top: 0.75rem;
-  border-top: 1px solid #d8d7d1;
+  border-top: 1px solid #d7d7d7;
 }
 
 .destino span,
 .progreso {
-  color: #5b5d56;
+  color: #5c5c5c;
   font-size: 0.85rem;
 }
 
@@ -78,18 +78,18 @@
   height: 4px;
   border: 0;
   appearance: none;
-  color: #343b30;
-  background: #deded6;
+  color: #393939;
+  background: #dddddd;
 }
 
 .progreso progress::-webkit-progress-bar {
-  background: #deded6;
+  background: #dddddd;
 }
 .progreso progress::-webkit-progress-value {
-  background: #343b30;
+  background: #393939;
 }
 .progreso progress::-moz-progress-bar {
-  background: #343b30;
+  background: #393939;
 }
 
 .pasoTitulo {
@@ -138,7 +138,7 @@
   width: 100%;
   overflow: hidden;
   aspect-ratio: 1;
-  background: #deddd7;
+  background: #dddddd;
   border: 2px solid transparent;
 }
 
@@ -146,7 +146,7 @@
   object-fit: cover;
 }
 .muestra[data-cuerpo='true'] {
-  background: #e5e3dd;
+  background: #e3e3e3;
   aspect-ratio: 5 / 6;
   max-height: 15rem;
 }
@@ -163,25 +163,25 @@
 .etiqueta {
   min-width: 0;
   padding: 0.55rem 0.15rem;
-  border-bottom: 1px solid #d8d7d1;
+  border-bottom: 1px solid #d7d7d7;
   font-weight: 500;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
 
 .opcion:hover .muestra {
-  border-color: #888b80;
+  border-color: #8a8a8a;
 }
 .opcion input:checked ~ .muestra {
-  border-color: #2d432f;
+  border-color: #3d3d3d;
 }
 .opcion input:checked ~ .etiqueta {
   font-weight: 700;
-  border-color: #2d432f;
-  color: #28402c;
+  border-color: #3d3d3d;
+  color: #393939;
 }
 .opcion input:focus-visible ~ .muestra {
-  outline: 2px solid #2d432f;
+  outline: 2px solid #3d3d3d;
   outline-offset: 3px;
 }
 
@@ -202,12 +202,12 @@
   display: flex;
   gap: 0.6rem;
   align-items: center;
-  border: 1px solid #d8d7d1;
+  border: 1px solid #d7d7d7;
   padding: 0.7rem;
   cursor: pointer;
 }
 .textoOpciones input {
-  accent-color: #2d432f;
+  accent-color: #3d3d3d;
 }
 
 .respuestas {
@@ -222,7 +222,7 @@
   align-items: center;
   min-height: 6rem;
   padding: 1rem;
-  border: 1px solid #bbbcb2;
+  border: 1px solid #bbbbbb;
   border-radius: 0.2rem;
   background: #fff;
   font-weight: 600;
@@ -237,18 +237,18 @@
 }
 
 .respuesta:hover {
-  border-color: #2d432f;
+  border-color: #3d3d3d;
 }
 
 .respuesta:has(input:checked) {
-  border-color: #2d432f;
-  background: #e8eee4;
-  color: #28402c;
-  box-shadow: inset 0 0 0 1px #2d432f;
+  border-color: #3d3d3d;
+  background: #ececec;
+  color: #393939;
+  box-shadow: inset 0 0 0 1px #3d3d3d;
 }
 
 .respuesta:has(input:focus-visible) {
-  outline: 2px solid #2d432f;
+  outline: 2px solid #3d3d3d;
   outline-offset: 3px;
 }
 
@@ -263,22 +263,22 @@
   font-weight: 600;
 }
 .campos label span {
-  color: #5b5d56;
+  color: #5c5c5c;
   font-weight: 400;
 }
 .campo {
   display: block;
   width: 100%;
   padding: 0.72rem 0.8rem;
-  border: 1px solid #bbbcb2;
+  border: 1px solid #bbbbbb;
   border-radius: 0.2rem;
   background: #fff;
   color: inherit;
   font: inherit;
 }
 .campo:focus {
-  border-color: #2d432f;
-  outline: 2px solid #2d432f;
+  border-color: #3d3d3d;
+  outline: 2px solid #3d3d3d;
   outline-offset: 1px;
 }
 .campos .permiso {
@@ -315,30 +315,30 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  border-top: 1px solid #d8d7d1;
+  border-top: 1px solid #d7d7d7;
   padding-top: 1rem;
   margin-top: 1.8rem;
 }
 .primario,
 .secundario {
   padding: 0.65rem 1.15rem;
-  border: 1px solid #343b30;
+  border: 1px solid #393939;
   border-radius: 0.2rem;
   font-weight: 600;
 }
 .primario {
   color: #fff;
-  background: #343b30;
+  background: #393939;
 }
 .secundario {
-  color: #343b30;
+  color: #393939;
   background: transparent;
 }
 .primario:hover {
-  background: #242b22;
+  background: #292929;
 }
 .secundario:hover {
-  background: #e8e8df;
+  background: #e7e7e7;
 }
 .primario:disabled {
   opacity: 0.65;

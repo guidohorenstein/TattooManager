@@ -43,7 +43,7 @@ export function LocationFields({
         setErrorPaises('');
         if (!paisActual) {
           try {
-            const preferido = localStorage.getItem('inkmanager-pais');
+            const preferido = localStorage.getItem('tattoomanager-pais');
             if (preferido && lista.some((item) => item.codigo === preferido)) setPais(preferido);
           } catch {
             /* La elección funciona aunque el navegador bloquee el almacenamiento. */
@@ -111,7 +111,7 @@ export function LocationFields({
               setErrorProvincias('');
               setErrorCiudades('');
               try {
-                localStorage.setItem('inkmanager-pais', codigo);
+                localStorage.setItem('tattoomanager-pais', codigo);
               } catch {
                 /* Preferencia opcional. */
               }

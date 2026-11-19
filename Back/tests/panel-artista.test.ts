@@ -6,7 +6,7 @@ import { after, beforeEach, test, type TestContext } from "node:test";
 process.env.DATABASE_URL =
   "postgresql://test:test@127.0.0.1:1/test?connect_timeout=1";
 process.env.DIRECT_URL = process.env.DATABASE_URL;
-process.env.JWT_SECRET = "solo-pruebas-panel-artista-32-bytes-inkmanager";
+process.env.JWT_SECRET = "solo-pruebas-panel-artista-32-bytes-tattoomanager";
 process.env.FRONTEND_URL = "http://127.0.0.1:3001";
 process.env.MAIL_TRANSPORT = "resend";
 process.env.RESEND_API_KEY = "";
@@ -109,7 +109,9 @@ beforeEach((t) => {
   fallaEscritura = false;
   t.mock.method(console, "error", () => {});
   reemplazar(t, prisma.suscripcion, "findFirst", async ({ where }: Row) =>
-    where.plan === "INDIVIDUAL" && cuentasConPlan.has(where.usuarioId) ? { id: "plan" } : null,
+    where.plan === "INDIVIDUAL" && cuentasConPlan.has(where.usuarioId)
+      ? { id: "plan" }
+      : null,
   );
   reemplazar(t, prisma.usuario, "findUnique", async ({ where, select }: Row) =>
     seleccionar(usuarios.get(where.id), select),
@@ -257,7 +259,9 @@ test("sin un plan vigente el artista puede consultar su acceso pero no su perfil
   assert.equal((await form("/trabajos", "POST", {}, cookie, true)).status, 403);
   assert.equal(subidas, 0);
   cuentasConPlan.add(usuario.id);
-  assert.deepEqual(await (await request("/pagos/acceso", cookie)).json(), { habilitado: true });
+  assert.deepEqual(await (await request("/pagos/acceso", cookie)).json(), {
+    habilitado: true,
+  });
   assert.equal((await request("/trabajos", cookie)).status, 200);
 });
 function trabajo(usuarioId: string, estado = "BORRADOR") {
@@ -329,10 +333,13 @@ test("panel exige sesión y rechaza clientes, administradores y superadmin", asy
   );
   for (const rol of ["CLIENTE", "ESTUDIO_ADMIN", "SUPERADMIN"]) {
     const { cookie } = cuenta(rol);
-    assert.equal((await request("/trabajos", cookie)).status, 403);
+    assert.equal(
+      (await request("/trabajos", cookie)).status,
+      rol === "CLIENTE" ? 401 : 403,
+    );
     assert.equal(
       (await form("/artistas/perfil", "PUT", {}, cookie, true)).status,
-      403,
+      rol === "CLIENTE" ? 401 : 403,
     );
   }
   assert.equal(subidas, 0);

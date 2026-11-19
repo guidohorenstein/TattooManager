@@ -7,11 +7,11 @@
 .listDay {
   margin: 0;
   padding: 17px 20px;
-  background: #f5f8ef;
-  color: #415b32;
+  background: #f7f7f7;
+  color: #535353;
   font-size: 15px;
   font-weight: 500;
-  border-bottom: 1px solid #e1e7d8;
+  border-bottom: 1px solid #e5e5e5;
 }
 .listDay::first-letter {
   text-transform: uppercase;
@@ -22,15 +22,15 @@
   flex-wrap: wrap;
   gap: 12px;
   font-size: 14px;
-  color: #526647;
+  color: #606060;
 }
 .statusFilter select {
   padding: 10px 12px;
   min-height: 44px;
-  border: 1px solid #dce3d3;
+  border: 1px solid #e0e0e0;
   border-radius: 5px;
   background: #fff;
-  color: #35472c;
+  color: #414141;
 }
 .dateNavigation strong {
   margin: 0 14px;
@@ -53,7 +53,7 @@
 .day {
   min-width: 0;
   min-height: 440px;
-  border-right: 1px solid #e7ecdf;
+  border-right: 1px solid #eaeaea;
 }
 .day:last-child {
   border-right: 0;
@@ -64,13 +64,13 @@
   align-items: center;
   gap: 8px;
   padding: 18px 8px;
-  border-bottom: 1px solid #e7ecdf;
-  background: #fcfdf9;
+  border-bottom: 1px solid #eaeaea;
+  background: #fcfcfc;
 }
 .dayHeading span {
   text-transform: uppercase;
   font-size: 12px;
-  color: #5f6c54;
+  color: #686868;
   letter-spacing: 0.6px;
 }
 .dayHeading strong {
@@ -80,10 +80,10 @@
   height: 30px;
   font-size: 19px;
   font-weight: 500;
-  color: #667459;
+  color: #6f6f6f;
 }
 .currentDay strong {
-  background: #30432b;
+  background: #3d3d3d;
   color: #fff;
   border-radius: 50%;
 }
@@ -99,15 +99,15 @@
   min-width: 0;
   padding: 13px 10px;
   text-align: left;
-  background: #edf3e5;
-  border: 1px solid #e0ead4;
-  border-left: 2px solid #9fb687;
+  background: #f1f1f1;
+  border: 1px solid #e6e6e6;
+  border-left: 2px solid #aeaeae;
   border-radius: 4px;
-  color: #465b37;
+  color: #545454;
   transition: background 0.15s;
 }
 .event:hover {
-  background: #e4eed9;
+  background: #eaeaea;
 }
 .event time {
   display: block;
@@ -127,31 +127,31 @@
   display: block;
   font-size: 12px;
   margin-top: 7px;
-  color: #5f6c54;
+  color: #686868;
 }
 .event small {
   display: block;
   font-size: 11px;
   margin-top: 16px;
-  color: #5f6c54;
+  color: #686868;
 }
 .pending {
-  background: #f8f3e8;
-  border-color: #eee4d0;
-  border-left-color: #5f6c54;
+  background: #f3f3f3;
+  border-color: #e5e5e5;
+  border-left-color: #686868;
   color: #8c744c;
 }
 .pending:hover {
-  background: #f4ecdb;
+  background: #ececec;
 }
 .pending span,
 .pending small {
-  color: #5f6c54;
+  color: #686868;
 }
 .cancelled {
-  background: #f0f1ed;
-  border-color: #e1e4d9;
-  color: #5f6c54;
+  background: #f0f0f0;
+  border-color: #e3e3e3;
+  color: #686868;
 }
 .cancelled strong {
   text-decoration: line-through;
@@ -161,16 +161,16 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  border: 1px dashed #e2e8d8;
+  border: 1px dashed #e6e6e6;
   border-radius: 4px;
   background: none;
   padding: 9px;
-  color: #5f6c54;
+  color: #686868;
   font-size: 12px;
 }
 .addEvent:hover {
-  background: #f7f9f2;
-  color: #5f6c54;
+  background: #f8f8f8;
+  color: #686868;
 }
 @media (max-width: 650px) {
   .dateNavigation strong {
@@ -187,9 +187,9 @@
 .dateField input {
   min-height: 44px;
   padding: 8px;
-  border: 1px solid #dce3d3;
+  border: 1px solid #e0e0e0;
   border-radius: 5px;
-  color: #35472c;
+  color: #414141;
   max-width: 100%;
 }
 .zone {
@@ -197,7 +197,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  color: #5f6c54;
+  color: #686868;
   font-size: 13px;
 }
 .block {
@@ -205,17 +205,17 @@
   gap: 6px;
   margin: 8px;
   padding: 14px;
-  border: 1px dashed #a4ab9d;
+  border: 1px dashed #a9a9a9;
   border-radius: 4px;
-  background: #f5f5f1;
-  color: #4e5847;
+  background: #f5f5f5;
+  color: #555555;
   text-decoration: none;
   overflow-wrap: anywhere;
   font-size: 13px;
 }
 .block:hover {
-  background: #eceee7;
-  color: #283e24;
+  background: #ededed;
+  color: #373737;
 }
 .block small {
   text-transform: uppercase;

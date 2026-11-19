@@ -22,7 +22,7 @@ export async function validarCredenciales(entrada: unknown) {
     usuario?.password ?? hashAlternativo,
   );
 
-  if (!usuario || !passwordCorrecta) {
+  if (!usuario || usuario.rol === "CLIENTE" || !passwordCorrecta) {
     throw new HttpError(401, "Email o contraseña incorrectos.");
   }
 
@@ -54,7 +54,7 @@ export async function obtenerUsuarioSesion(token: unknown) {
     buscarUsuarioPorId(usuarioId),
   ]);
 
-  if (!usuario) {
+  if (!usuario || usuario.rol === "CLIENTE") {
     throw new HttpError(401, "Sesión inválida.");
   }
 
@@ -102,7 +102,7 @@ export async function eliminarCuenta(usuarioId: string): Promise<void> {
     await tx.usuario.update({
       where: { id: usuarioId },
       data: {
-        email: `eliminado_${sufijoAnonimo}@anonimo.inkmanager.com`,
+        email: `eliminado_${sufijoAnonimo}@anonimo.tattoomanager.com`,
         nombre: "Usuario eliminado",
         nombreArtistico: null,
         telefono: null,

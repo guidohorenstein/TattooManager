@@ -1,7 +1,7 @@
 .label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--color-text-muted, #a09da3);
+  color: var(--color-text-muted, #9e9e9e);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1rem;
@@ -15,8 +15,8 @@
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--color-border, rgb(255 255 255 / 9%));
   border-radius: 0.375rem;
-  background-color: var(--color-surface-raised, #19191d);
-  color: var(--color-text-primary, #f2f0ed);
+  background-color: var(--color-surface-raised, #191919);
+  color: var(--color-text-primary, #f0f0f0);
   color-scheme: dark;
   box-shadow: none;
   transition:
@@ -33,7 +33,7 @@
 }
 
 .control:global(.form-control)::placeholder {
-  color: var(--color-text-muted, #a09da3);
+  color: var(--color-text-muted, #9e9e9e);
   opacity: 0.8;
 }
 
@@ -41,16 +41,16 @@
 .control:global(.form-select):focus {
   border-color: var(--color-accent, #c58a68);
   outline: 0;
-  background-color: var(--color-surface, #121214);
-  color: var(--color-text-primary, #f2f0ed);
+  background-color: var(--color-surface, #121212);
+  color: var(--color-text-primary, #f0f0f0);
   box-shadow: 0 0 0 0.2rem rgb(197 138 104 / 18%);
 }
 
 .control:global(.form-control):disabled,
 .control:global(.form-select):disabled {
   border-color: var(--color-border, rgb(255 255 255 / 9%));
-  background-color: var(--color-surface-raised, #19191d);
-  color: var(--color-text-muted, #a09da3);
+  background-color: var(--color-surface-raised, #191919);
+  color: var(--color-text-muted, #9e9e9e);
   opacity: 0.65;
 }
 

@@ -1,0 +1,31 @@
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.9px;
+  white-space: nowrap;
+}
+.mark {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: currentColor;
+  border-radius: 4px;
+  font-size: 0;
+  flex-shrink: 0;
+}
+.mark::after {
+  content: 'tm';
+  color: var(--brand-mark-ink, #fff);
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -2px;
+  padding-right: 2px;
+}
+.light {
+  font-weight: 400;
+}

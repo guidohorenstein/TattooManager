@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { ResultadoSuscripcion } from '../_components/ResultadoSuscripcion';
 
 export const metadata: Metadata = {
-  title: 'Estado de suscripción | InkManager',
+  title: 'Estado de suscripción | TattooManager',
 };
 
 export default async function ResultadoSuscripcionPage({

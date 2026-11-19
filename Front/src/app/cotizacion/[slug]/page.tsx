@@ -24,7 +24,7 @@ export default async function CotizacionEstudioPage({
   const estudio: { nombre: string } = await respuesta.json();
 
   return (
-    <MarcoCotizacion destinatario={estudio.nombre}>
+    <MarcoCotizacion destinatario={estudio.nombre} volver={'/e/' + encodeURIComponent(slug)}>
       <SolicitudPublica key={ig ?? slug} destino={{ estudio: slug }} enlaceInstagram={ig} />
     </MarcoCotizacion>
   );

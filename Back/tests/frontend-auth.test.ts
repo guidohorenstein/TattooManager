@@ -12,17 +12,13 @@ const registro = {
   email: "ana@example.com",
   password: "Una frase segura 1!",
   confirmPassword: "Una frase segura 1!",
-  rol: "CLIENTE" as const,
-  nombreArtistico: "",
+  rol: "ARTISTA" as const,
+  nombreArtistico: "Ana Ink",
   nombreEstudio: "",
 };
-test("frontend: clientes empiezan como CLIENTE y profesionales como ARTISTA", () => {
-  assert.equal(crearValoresRegistro("cliente").rol, "CLIENTE");
-  assert.equal(crearValoresRegistro("profesional").rol, "ARTISTA");
-  assert.notEqual(
-    crearValoresRegistro("cliente"),
-    crearValoresRegistro("cliente"),
-  );
+test("frontend: el registro comienza como artista y conserva formularios independientes", () => {
+  assert.equal(crearValoresRegistro().rol, "ARTISTA");
+  assert.notEqual(crearValoresRegistro(), crearValoresRegistro());
 });
 test("frontend: login requiere email válido y contraseña", () => {
   assert.deepEqual(validarLogin({ email: "", password: "" }), {
@@ -34,7 +30,7 @@ test("frontend: login requiere email válido y contraseña", () => {
     {},
   );
 });
-test("frontend: alta válida de cliente, artista y estudio", () => {
+test("frontend: alta válida de artista y estudio", () => {
   assert.deepEqual(validarRegistro(registro), {});
   assert.deepEqual(
     validarRegistro({
@@ -68,7 +64,10 @@ test("frontend: campos vacíos, contraseña débil y confirmación", () => {
   );
 });
 test("frontend: solo exige el nombre adicional del rol elegido", () => {
-  assert.ok(validarRegistro({ ...registro, rol: "ARTISTA" }).nombreArtistico);
+  assert.ok(
+    validarRegistro({ ...registro, rol: "ARTISTA", nombreArtistico: "" })
+      .nombreArtistico,
+  );
   assert.ok(
     validarRegistro({ ...registro, rol: "ESTUDIO_ADMIN" }).nombreEstudio,
   );
