@@ -32,7 +32,7 @@ export async function registroGoogle(
 }
 
 function guardarFlujoGoogle(res: Response, flujoToken: string): void {
-  res.cookie("inkmanager_google_oauth", flujoToken, {
+  res.cookie("tattoomanager_google_oauth", flujoToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -48,9 +48,9 @@ export async function callbackGoogle(
   res.set("Cache-Control", "no-store");
   res.set("Referrer-Policy", "no-referrer");
 
-  const flujoToken = req.cookies?.inkmanager_google_oauth;
+  const flujoToken = req.cookies?.tattoomanager_google_oauth;
 
-  res.clearCookie("inkmanager_google_oauth", {
+  res.clearCookie("tattoomanager_google_oauth", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

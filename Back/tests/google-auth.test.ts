@@ -450,7 +450,7 @@ function callbackGoogle(
   });
   return fetch(`${baseUrl}/callback?${query}`, {
     redirect: "manual",
-    headers: token ? { Cookie: `inkmanager_google_oauth=${token}` } : {},
+    headers: token ? { Cookie: `tattoomanager_google_oauth=${token}` } : {},
     signal: AbortSignal.timeout(10000),
   });
 }
@@ -464,7 +464,7 @@ function comprobarFallo(response: Response, codigo = "fallido") {
   assert.ok(
     cookies.some(
       (cookie) =>
-        cookie.startsWith("inkmanager_google_oauth=;") &&
+        cookie.startsWith("tattoomanager_google_oauth=;") &&
         cookie.includes("Path=/api/auth/google"),
     ),
   );
@@ -501,7 +501,7 @@ for (const perfil of perfiles) {
     assert.equal(sesiones.size, 1);
     const cookies = response.headers.getSetCookie();
     assert.ok(
-      cookies.some((cookie) => cookie.startsWith("inkmanager_google_oauth=;")),
+      cookies.some((cookie) => cookie.startsWith("tattoomanager_google_oauth=;")),
     );
     const cookieSesion = cookies.find((cookie) =>
       cookie.startsWith("tattoomanager_session="),
