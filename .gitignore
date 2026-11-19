@@ -162,3 +162,4 @@ front/.env.local
 
 # Informes, capturas de pruebas y notas de trabajo locales.
 /docs-local/
+.vercel
