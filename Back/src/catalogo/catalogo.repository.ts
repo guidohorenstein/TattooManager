@@ -9,6 +9,10 @@ export const trabajoPublicado = {
   estilos: { isEmpty: false },
 } satisfies Prisma.FotoGaleriaWhereInput;
 export const artistaVisible = {
+  OR: [
+    { estudioId: null, paginaPublicada: true },
+    { estudio: { propietario: { paginaPublicada: true } } },
+  ],
   rol: "ARTISTA",
   suspendidoAt: null,
   nombreArtistico: { not: null, notIn: [""] },

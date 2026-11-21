@@ -18,13 +18,13 @@ export function PlatformSection() {
             </div>
           </div>
           <div className={`col-lg-6 ${styles.platformCopy}`}>
-            <h2 id="platform-title">Enfocate en tu arte, InkManager se encarga del resto.</h2>
+            <h2 id="platform-title">Enfocate en tu arte, TattooManager se encarga del resto.</h2>
             <p className={styles.bodyCopy}>
               Nosotros te respondemos mensajes, recordamos turnos, organizamos tu agenda y ayudamos
               a cotizar. Todo en un solo lugar.
             </p>
             <p className={styles.bodyCopy}>
-              InkManager conecta cada consulta con su presupuesto y su turno. Para que puedas
+              TattooManager conecta cada consulta con su presupuesto y su turno. Para que puedas
               retomar una conversación sin volver a preguntar todo.
             </p>
             <a href="#herramientas" className={styles.textLink}>

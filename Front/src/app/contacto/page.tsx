@@ -52,9 +52,9 @@ export default function ContactPage() {
             <Link className={styles.backLink} href="/">
               <span aria-hidden="true">←</span> Volver al inicio
             </Link>
-            <p className={styles.eyebrow}>InkManager</p>
+            <p className={styles.eyebrow}>TattooManager</p>
             <h1>Contacto</h1>
-            <p>Dejanos tu consulta y el equipo de InkManager se pondrá en contacto.</p>
+            <p>Dejanos tu consulta y el equipo de TattooManager se pondrá en contacto.</p>
           </header>
 
           <Formik<ContactValues>

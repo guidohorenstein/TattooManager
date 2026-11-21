@@ -2,7 +2,7 @@
 export const reviewArtists = [
   {
     slug: "lucas-realismo",
-    email: "lucas.realism@inkmanager.com",
+    email: "lucas.realism@tattoomanager.com",
     nombre: 'Lucas "Realismo" Gómez',
     alias: "lucas_realism",
     resena:
@@ -10,7 +10,7 @@ export const reviewArtists = [
   },
   {
     slug: "sofia-martinez",
-    email: "sofi.fineline@inkmanager.com",
+    email: "sofi.fineline@tattoomanager.com",
     nombre: "Sofía Martínez",
     alias: "sofi_fineline",
     resena:

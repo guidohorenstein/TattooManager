@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { limitarRegistro } from "../middlewares/limitar-registro.js";
 import { login, logout, me, eliminarCuenta } from "./auth.controller.js";
 import { requerirSesion } from "../middlewares/autenticacion.js";
 import { limitarLogin } from "../middlewares/limitar-login.js";
@@ -14,7 +15,7 @@ router.get("/me", requerirSesion, me);
 router.delete("/cuenta", requerirSesion, eliminarCuenta);
 router.post("/logout", logout);
 router.get("/google", loginGoogle);
-router.post("/google/registro", registroGoogle);
+router.post("/google/registro", limitarRegistro, registroGoogle);
 router.get("/google/callback", callbackGoogle);
 
 export default router;

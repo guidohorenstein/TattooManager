@@ -33,7 +33,7 @@ async function notificar(invitacion: InvitacionCompleta) {
         nombre: null,
         asunto: `Invitación a ${invitacion.estudio.nombre}`,
         clave: `equipo/${invitacion.id}/${invitacion.version}`,
-        mensaje: `${invitacion.estudio.nombre} te invitó a formar parte de su equipo en InkManager. Ingresá con una cuenta de artista registrada con este email y revisá la invitación en Mi estudio. Si todavía no tenés cuenta, registrate como artista y verificá tu email. La invitación vence en 7 días. Incorporarte requiere tu aceptación y tener resuelto el trabajo independiente pendiente.`,
+        mensaje: `${invitacion.estudio.nombre} te invitó a formar parte de su equipo en TattooManager. Ingresá con una cuenta de artista registrada con este email y revisá la invitación en Mi estudio. Si todavía no tenés cuenta, registrate como artista y verificá tu email. La invitación vence en 7 días. Incorporarte requiere tu aceptación y tener resuelto el trabajo independiente pendiente.`,
         accion: {
           texto: "Revisar invitación",
           url: new URL("/invitacion-equipo", origenesPermitidos[0]).toString(),
@@ -224,7 +224,11 @@ export async function responderInvitacion(
       },
       select: { id: true, nombre: true, zonaHoraria: true },
     });
-    if (!estudio) throw new HttpError(409, "El estudio necesita un plan vigente para incorporar artistas.");
+    if (!estudio)
+      throw new HttpError(
+        409,
+        "El estudio necesita un plan vigente para incorporar artistas.",
+      );
     await tx.usuario.update({
       where: { id: usuarioId },
       data: {

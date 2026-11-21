@@ -459,7 +459,7 @@ function ReminderFields({ tipo, onCancel }: { tipo: TipoRecordatorio; onCancel: 
         </summary>
         <article className={mail.email}>
           <header>
-            <span>InkManager</span>
+            <span>TattooManager</span>
             <strong>{reemplazarVariables(regla.asunto, valores)}</strong>
             <small>
               Para:{' '}

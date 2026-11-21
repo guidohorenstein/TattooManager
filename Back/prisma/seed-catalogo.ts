@@ -12,7 +12,7 @@ import {
 } from "./catalogo-demo.js";
 
 const fotosTrabajos = ["tattoo-detail", "artist-hands", "studio-session"];
-const carpetaCloudinary = "inkmanager/catalogo-demo";
+const carpetaCloudinary = "tattoomanager/catalogo-demo";
 
 async function cargarFoto(archivo: URL, nombre: string) {
   const imagen = await cloudinary.uploader.upload(fileURLToPath(archivo), {

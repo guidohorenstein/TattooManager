@@ -1,5 +1,13 @@
 'use client';
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import * as auth from '@/services/auth.service';
 import type { UsuarioSesion } from '@/types/auth';
@@ -16,6 +24,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const paginaPublica = /^\/(e|a|cotizacion|ejemplo)(\/|$)/.test(pathname);
   const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -26,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIntento((value) => value + 1);
   }, []);
   useEffect(() => {
+    if (paginaPublica) return;
     const controller = new AbortController();
     consulta.current = controller;
     auth
@@ -44,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!controller.signal.aborted) setCargando(false);
       });
     return () => controller.abort();
-  }, [intento]);
+  }, [intento, paginaPublica]);
   async function login(email: string, password: string) {
     consulta.current?.abort();
     const { user } = await auth.iniciarSesion(email, password);
@@ -68,7 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await auth.eliminarMiCuenta();
     setUsuario(null);
     setError('');
-    window.location.assign('/?cuenta_eliminada=true');
+    router.replace('/?cuenta_eliminada=true');
+    router.refresh();
   }
   return (
     <AuthContext.Provider

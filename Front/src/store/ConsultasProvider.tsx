@@ -51,13 +51,13 @@ function useConsultasState() {
     document.addEventListener('visibilitychange', refrescar);
     const timer = setInterval(refrescar, 30000);
     if ('BroadcastChannel' in window) {
-      canal.current = new BroadcastChannel('inkmanager-consultas');
+      canal.current = new BroadcastChannel('tattoomanager-consultas');
       canal.current.onmessage = () => {
         void recargar();
       };
     }
     const agenda =
-      'BroadcastChannel' in window ? new BroadcastChannel('inkmanager-disponibilidad') : null;
+      'BroadcastChannel' in window ? new BroadcastChannel('tattoomanager-disponibilidad') : null;
     if (agenda)
       agenda.onmessage = () => {
         void recargar();

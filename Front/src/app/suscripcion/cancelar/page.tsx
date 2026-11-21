@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { CancelarSuscripcion } from '../_components/CancelarSuscripcion';
 
 export const metadata: Metadata = {
-  title: 'Cancelar suscripción | InkManager',
+  title: 'Cancelar suscripción | TattooManager',
   referrer: 'no-referrer',
   robots: { index: false, follow: false },
 };

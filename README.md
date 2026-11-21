@@ -22,7 +22,7 @@ El formulario de cotización usa las referencias públicas del proyecto del que 
 | `Back/`  | API Express con TypeScript y Prisma.                  |
 | `docs/`  | Documentación del funcionamiento y la arquitectura.   |
 
-PostgreSQL en Supabase almacena los datos. Cloudinary almacena las imágenes y Resend envía correos. InkManager administra la autenticación y los roles de la aplicación.
+PostgreSQL en Supabase almacena los datos. Cloudinary almacena las imágenes y Brevo envía correos. TattooManager administra la autenticación y los roles de la aplicación.
 
 ## Documentación
 

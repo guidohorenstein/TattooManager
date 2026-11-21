@@ -30,7 +30,7 @@ export function CancelarSuscripcion({ token }: { token: string }) {
   return (
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="cancelar-title">
-        <p className={styles.eyebrow}>Suscripción InkManager</p>
+        <p className={styles.eyebrow}>Suscripción TattooManager</p>
         <h1 id="cancelar-title">{cancelada ? 'Renovación cancelada' : 'Cancelar renovación'}</h1>
         {cancelada ? (
           <p>
@@ -59,8 +59,8 @@ export function CancelarSuscripcion({ token }: { token: string }) {
             {error}
           </p>
         )}
-        <Link className={styles.back} href="/estudios">
-          Volver a InkManager
+        <Link className={styles.back} href="/">
+          Volver a TattooManager
         </Link>
       </section>
     </main>

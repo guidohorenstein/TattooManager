@@ -15,7 +15,7 @@
   min-height: 40px;
   margin-top: 16px;
   padding: 9px 12px;
-  border: 1px solid #747775;
+  border: 1px solid #767676;
   border-radius: 20px;
   background: #fff;
   color: #1f1f1f;
@@ -28,13 +28,13 @@
 }
 
 .button:hover:not(:disabled) {
-  background: #f8faff;
+  background: #fafafa;
   border-color: #1f1f1f;
   box-shadow: 0 1px 2px #3c40434d;
 }
 
 .button:active:not(:disabled) {
-  background: #e8eef8;
+  background: #ededed;
   box-shadow: none;
 }
 

@@ -15,7 +15,7 @@ import {
   type ConfiguracionMeta,
 } from "./whatsapp.proveedor.js";
 
-const audiencia = "inkmanager-whatsapp";
+const audiencia = "tattoomanager-whatsapp";
 type Identidad = Pick<ConexionWhatsApp, "estudioId" | "numeroId" | "wabaId">;
 const libre = (ahora: Date) => ({
   OR: [{ bloqueoHasta: null }, { bloqueoHasta: { lte: ahora } }],

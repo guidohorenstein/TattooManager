@@ -40,7 +40,7 @@ export function useDisponibilidad(artistaId: string) {
     const timer = setInterval(actualizar, 30000);
     document.addEventListener('visibilitychange', actualizar);
     if ('BroadcastChannel' in window) {
-      canal.current = new BroadcastChannel('inkmanager-disponibilidad');
+      canal.current = new BroadcastChannel('tattoomanager-disponibilidad');
       canal.current.onmessage = () => {
         void recargar();
       };

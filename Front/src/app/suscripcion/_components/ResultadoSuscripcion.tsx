@@ -66,7 +66,7 @@ export function ResultadoSuscripcion() {
   return (
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="resultado-title">
-        <p className={styles.eyebrow}>Suscripción InkManager</p>
+        <p className={styles.eyebrow}>Suscripción TattooManager</p>
         <h1 id="resultado-title">Estado del pago</h1>
         {estado ? (
           <p role="status">{estados[estado]}</p>
@@ -90,8 +90,8 @@ export function ResultadoSuscripcion() {
             <AuthControls contextoRegistro="profesional" />
           </div>
         )}
-        <Link className={styles.back} href="/estudios#planes">
-          Volver a InkManager
+        <Link className={styles.back} href="/#planes">
+          Volver a TattooManager
         </Link>
       </section>
     </main>

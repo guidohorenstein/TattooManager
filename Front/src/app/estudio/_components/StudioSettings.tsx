@@ -1,4 +1,6 @@
 'use client';
+import { EnlacePaginaPublica } from '@/components/panel/EnlacePaginaPublica';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useFormikContext } from 'formik';
@@ -184,6 +186,7 @@ export function StudioSettings() {
           Configurar asistente
         </Link>
       </section>
+      <EnlacePaginaPublica enlace={`/e/${encodeURIComponent(perfil.slug)}`} />
       <EnlaceFormulario enlace={`/cotizacion/${encodeURIComponent(perfil.slug)}`} estudio />
       <section className={styles.settingsSection}>
         <div>

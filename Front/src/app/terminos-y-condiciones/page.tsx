@@ -5,8 +5,8 @@ import { LandingFooter } from '@/app/estudios/_components/LandingFooter';
 import styles from './Terms.module.css';
 
 export const metadata: Metadata = {
-  title: 'Términos y Condiciones | InkManager',
-  description: 'Términos y condiciones de uso del servicio de InkManager.',
+  title: 'Términos y Condiciones | TattooManager',
+  description: 'Términos y condiciones de uso del servicio de TattooManager.',
 };
 
 export default function TermsPage() {
@@ -20,7 +20,7 @@ export default function TermsPage() {
           </Link>
 
           <header className={styles.intro}>
-            <p className={styles.eyebrow}>InkManager</p>
+            <p className={styles.eyebrow}>TattooManager</p>
             <h1>TÉRMINOS Y CONDICIONES DE USO</h1>
             <p className={styles.updated}>Última actualización: 11 de noviembre de 2026</p>
           </header>

@@ -50,10 +50,10 @@ export function Administracion() {
     <PanelShell
       secciones={secciones}
       nombre={usuario.nombre || 'Administración'}
-      subtitulo="InkManager"
+      subtitulo="TattooManager"
       perfil="/admin"
     >
-      <PageHeader titulo="Administración" descripcion="Actividad y gestión de InkManager." />
+      <PageHeader titulo="Administración" descripcion="Actividad y gestión de TattooManager." />
       <div className={styles.toolbar}>
         <div className={styles.tabs} role="group" aria-label="Vistas de administración">
           {vistas.map((v) => (

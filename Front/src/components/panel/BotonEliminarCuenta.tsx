@@ -5,11 +5,7 @@ import Modal from 'react-bootstrap/Modal';
 import { useAuth } from '@/store/AuthProvider';
 import styles from '@/components/panel/workspace.module.css';
 
-export function BotonEliminarCuenta({
-  rol,
-}: {
-  rol: 'ARTISTA' | 'ESTUDIO_ADMIN' | 'CLIENTE';
-}) {
+export function BotonEliminarCuenta({ rol }: { rol: 'ARTISTA' | 'ESTUDIO_ADMIN' | 'CLIENTE' }) {
   const { eliminarCuenta } = useAuth();
   const [mostrarModal, setMostrarModal] = useState(false);
   const [procesando, setProcesando] = useState(false);
@@ -42,8 +38,8 @@ export function BotonEliminarCuenta({
             {esEstudio
               ? 'Dar de baja el estudio y desactivar el acceso administrativo.'
               : esCliente
-                ? 'Dar de baja tu cuenta de cliente en InkManager.'
-                : 'Dar de baja tu cuenta de artista en InkManager.'}
+                ? 'Dar de baja tu cuenta de cliente en TattooManager.'
+                : 'Dar de baja tu cuenta de artista en TattooManager.'}
           </p>
         </div>
         <div>

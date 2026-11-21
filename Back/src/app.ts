@@ -1,4 +1,8 @@
+import { contactoRouter } from "./contacto/contacto.routes.js";
+import { paginasPublicasRouter } from "./paginas-publicas/paginas-publicas.routes.js";
 import express from "express";
+import { identificarCliente } from "./middlewares/limitar-solicitudes.js";
+import { configurarProxy } from "./config/proxy.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./auth/auth.routes.js";
@@ -30,9 +34,11 @@ import { operacionRouter } from "./operacion/operacion.routes.js";
 import { asistenteRouter } from "./asistente/asistente.routes.js";
 
 export const app = express();
+configurarProxy(app);
 
 app.use(cors({ origin: origenesPermitidos, credentials: true }));
 app.use(validarOrigen);
+app.use(identificarCliente);
 app.use("/api/webhooks/whatsapp", webhookWhatsApp);
 app.use("/api/webhooks/instagram", webhookInstagram);
 app.use(express.json());
@@ -42,12 +48,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth", tokensCuentaRouter);
 app.use("/api/auth", usuariosRoutes);
 app.use("/api/health", healthRouter);
+app.use("/api/contacto", contactoRouter);
 app.use("/api/upload", imagenRouter);
 app.use("/api/resenas", resenasRouter);
 app.use("/api/artistas", artistasRouter);
 app.use("/api/trabajos", trabajosRouter);
 app.use("/api/estilos", estilosRouter);
 app.use("/api/catalogo", catalogoRouter);
+app.use("/api/paginas", paginasPublicasRouter);
 app.use("/api/ubicaciones", ubicacionesRouter);
 app.use("/api/consultas", solicitudesRouter);
 app.use("/api/citas", citasRouter);

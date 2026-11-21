@@ -23,7 +23,7 @@ interface NavbarProps {
 export default function Navbar({
   actions,
   brandHref = '/',
-  brandLabel = 'InkManager',
+  brandLabel = 'TattooManager',
   headerId,
   links = [],
   navigationId = 'site-navigation',

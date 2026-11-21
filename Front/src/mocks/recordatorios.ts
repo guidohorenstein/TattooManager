@@ -47,7 +47,7 @@ export function crearRecordatorios(): RecordatoriosPanel {
         activo: false,
         hora: '20:00',
         diaSemana: 0,
-        asunto: 'Tu semana en InkManager',
+        asunto: 'Tu semana en TattooManager',
         mensaje:
           'Hola {{artista}}, este es el resumen de tu semana:\n\n{{resumen}}\n\nPodés consultar el detalle en tu panel.',
       },
@@ -55,7 +55,7 @@ export function crearRecordatorios(): RecordatoriosPanel {
         ...reglaBase,
         activo: false,
         hora: '09:00',
-        asunto: 'Tu resumen mensual de InkManager',
+        asunto: 'Tu resumen mensual de TattooManager',
         mensaje:
           'Hola {{artista}}, así cerraste el mes:\n\n{{resumen}}\n\nEncontrá tus consultas, sesiones y clientes en el panel.',
       },

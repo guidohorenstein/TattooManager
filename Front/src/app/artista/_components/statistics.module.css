@@ -14,14 +14,14 @@
   max-width: 185px;
   width: 100%;
   padding: 8px 11px;
-  border: 1px solid #dce0d8;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
-  background: #fff;
-  color: #35432d;
+  background: var(--theme-surface);
+  color: var(--theme-ink);
   font-size: 14px;
 }
 .month input:focus-visible {
-  outline: 2px solid #718b65;
+  outline: 2px solid var(--theme-border);
   outline-offset: 3px;
 }
 .periodHeading {
@@ -36,7 +36,7 @@
   font-weight: 500;
 }
 .periodHeading > span {
-  color: #62695e;
+  color: var(--theme-ink);
   font-size: 14px;
 }
 .columns {
@@ -55,10 +55,10 @@
   align-items: center;
   gap: 14px;
   font-size: 14px;
-  color: #5f6c54;
+  color: var(--theme-ink);
 }
 .revenueRow strong {
-  color: #46533c;
+  color: var(--theme-ink);
   text-align: right;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -72,27 +72,27 @@
   height: 12px;
   border: 0;
   border-radius: 3px;
-  background: #f0f2ec;
+  background: var(--theme-background);
 }
 .revenueRow meter::-webkit-meter-bar {
   height: 12px;
-  background: #f0f2ec;
+  background: var(--theme-background);
   border: 0;
   border-radius: 3px;
 }
 .revenueRow meter::-webkit-meter-optimum-value {
-  background: #b7c4a8;
+  background: var(--theme-soft);
   border-radius: 3px;
 }
 .revenueRow meter::-moz-meter-bar {
-  background: #b7c4a8;
+  background: var(--theme-soft);
   border-radius: 3px;
 }
 .selected meter::-webkit-meter-optimum-value {
-  background: #6d845b;
+  background: var(--theme-soft);
 }
 .selected meter::-moz-meter-bar {
-  background: #6d845b;
+  background: var(--theme-soft);
 }
 .details {
   display: grid;
@@ -100,10 +100,10 @@
   gap: 23px;
   margin: 28px 0;
   padding: 24px 0;
-  border-block: 1px solid #e2e6dc;
+  border-block: 1px solid var(--theme-border);
 }
 .details dt {
-  color: #5f6c54;
+  color: var(--theme-ink);
   font-weight: 400;
   font-size: 14px;
   line-height: 1.6;
@@ -112,7 +112,7 @@
   margin: 12px 0 0;
   font-size: 25px;
   font-weight: 500;
-  color: #34432b;
+  color: var(--theme-ink);
   letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
 }
@@ -125,7 +125,7 @@
   align-items: center;
   gap: 15px;
   padding: 17px 0;
-  border-bottom: 1px solid #ecefe7;
+  border-bottom: 1px solid var(--theme-border);
 }
 .appointments > div:last-child {
   border: 0;
@@ -141,13 +141,13 @@
 }
 .appointments > div > span:last-child {
   text-align: right;
-  color: #5f6c54;
+  color: var(--theme-ink);
   font-size: 14px;
 }
 .note {
   margin: 22px 0 0;
   max-width: 850px;
-  color: #62695e;
+  color: var(--theme-ink);
   font-size: 12px;
   line-height: 1.8;
 }

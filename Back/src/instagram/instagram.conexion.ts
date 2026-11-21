@@ -19,7 +19,7 @@ import {
 } from "./instagram.proveedor.js";
 
 export const canalInstagram = "INSTAGRAM" as const;
-const audiencia = "inkmanager-instagram";
+const audiencia = "tattoomanager-instagram";
 export const duracionInstagram = 10 * 60;
 
 export function ambitoInstagram(a: AmbitoConsultas) {
@@ -41,7 +41,8 @@ export function activaInstagram(c: ConexionCanal | null) {
 
 export function credencialVigenteInstagram(c: ConexionCanal) {
   return Boolean(
-    c.tokenCifrado && (c.expiraAt === null ? c.loginUnificado : c.expiraAt > new Date()),
+    c.tokenCifrado &&
+    (c.expiraAt === null ? c.loginUnificado : c.expiraAt > new Date()),
   );
 }
 
@@ -73,7 +74,10 @@ function permiso(a: AmbitoConsultas) {
 async function permisoConexion(a: AmbitoConsultas) {
   permiso(a);
   if (!a.estudioId && !(await tienePlanIndividual(a.usuarioId)))
-    throw new HttpError(403, "Necesitás un Plan Individual vigente para conectar Instagram.");
+    throw new HttpError(
+      403,
+      "Necesitás un Plan Individual vigente para conectar Instagram.",
+    );
 }
 
 export async function iniciarInstagram(a: AmbitoConsultas, sesionId: string) {
@@ -81,13 +85,17 @@ export async function iniciarInstagram(a: AmbitoConsultas, sesionId: string) {
   const config = configuracionInstagram();
   if (!config)
     throw new HttpError(503, "Instagram todavía no está habilitado.");
-  const state = jwt.sign({ ...ambitoInstagram(a), configId: config.configId }, jwtSecret, {
-    subject: sesionId,
-    audience: audiencia,
-    algorithm: "HS256",
-    jwtid: randomUUID(),
-    expiresIn: duracionInstagram,
-  });
+  const state = jwt.sign(
+    { ...ambitoInstagram(a), configId: config.configId },
+    jwtSecret,
+    {
+      subject: sesionId,
+      audience: audiencia,
+      algorithm: "HS256",
+      jwtid: randomUUID(),
+      expiresIn: duracionInstagram,
+    },
+  );
   return { state, url: urlInstagram(config, state) };
 }
 

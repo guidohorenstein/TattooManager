@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ipKeyGenerator, rateLimit } from "express-rate-limit";
+import { claveIP, rateLimit } from "../middlewares/limitar-solicitudes.js";
 import { requerirSesion } from "../middlewares/autenticacion.js";
 import { requerirRoles } from "../middlewares/roles.js";
 import { tieneAccesoAlPanel } from "./acceso-plan.js";
@@ -16,10 +16,10 @@ const router = Router();
 const limitarOperacionesPago = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
-  keyGenerator: (req) =>
+  keyGenerator: (req, res) =>
     req.usuario
       ? "cuenta:" + req.usuario.id
-      : "ip:" + ipKeyGenerator(req.ip ?? req.socket.remoteAddress ?? ""),
+      : "ip:" + claveIP(req, res),
   standardHeaders: true,
   legacyHeaders: false,
   message: {

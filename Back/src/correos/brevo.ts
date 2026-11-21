@@ -23,7 +23,7 @@ export async function enviarPorBrevo(
   correo: Correo,
   config: { apiKey: string; remitente: string },
 ) {
-  const remitente = { email: config.remitente, name: "InkManager" };
+  const remitente = { email: config.remitente, name: "TattooManager" };
   let respuesta: Response;
   try {
     respuesta = await fetch("https://api.brevo.com/v3/smtp/email", {

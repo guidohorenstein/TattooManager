@@ -67,7 +67,7 @@ webhookInstagram.post(
   },
 );
 
-const cookie = "inkmanager_instagram_oauth";
+const cookie = "tattoomanager_instagram_oauth";
 const opcionesCookie = {
   httpOnly: true,
   sameSite: "lax" as const,
@@ -78,7 +78,11 @@ const sesionDe = (req: Request) =>
   verificarToken(req.cookies.tattoomanager_session).sesionId;
 
 export const instagramRouter = Router();
-instagramRouter.use(requerirSesion, requerirRoles("ARTISTA", "ESTUDIO_ADMIN"), requerirPlanVigente);
+instagramRouter.use(
+  requerirSesion,
+  requerirRoles("ARTISTA", "ESTUDIO_ADMIN"),
+  requerirPlanVigente,
+);
 instagramRouter.get("/conexion", async (req, res) => {
   res.json(await estadoInstagram(await resolverAmbito(req.usuario!.id)));
 });
@@ -123,8 +127,10 @@ instagramRouter.get("/callback", async (req, res) => {
     if (!(error instanceof HttpError))
       console.error("No pudimos completar la conexión con Instagram.");
     let resultado = "error";
-    if (error instanceof CuentaInstagramNoSeleccionada) resultado = error.resultado;
-    else if (error instanceof HttpError && error.status === 409) resultado = "conflicto";
+    if (error instanceof CuentaInstagramNoSeleccionada)
+      resultado = error.resultado;
+    else if (error instanceof HttpError && error.status === 409)
+      resultado = "conflicto";
     destino.searchParams.set("instagram", resultado);
   }
   res.redirect(303, destino.href);

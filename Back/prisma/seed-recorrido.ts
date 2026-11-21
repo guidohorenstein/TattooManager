@@ -17,7 +17,7 @@ const identidades = [
   {
     id: uid(1),
     nombre: "Titular Taller Sur",
-    email: "estudio.tallersur@inkmanager.example.test",
+    email: "estudio.tallersur@tattoomanager.example.test",
     rol: "ESTUDIO_ADMIN" as const,
     estilos: [],
     estudioId,
@@ -25,7 +25,7 @@ const identidades = [
   {
     id: uid(2),
     nombre: "Inés Romero",
-    email: "ines.romero@inkmanager.example.test",
+    email: "ines.romero@tattoomanager.example.test",
     rol: "ARTISTA" as const,
     estilos: ["Fine Line", "Botánico"],
     estudioId,
@@ -33,7 +33,7 @@ const identidades = [
   {
     id: uid(3),
     nombre: "Bautista Torres",
-    email: "bautista.torres@inkmanager.example.test",
+    email: "bautista.torres@tattoomanager.example.test",
     rol: "ARTISTA" as const,
     estilos: ["Blackwork", "Geométrico"],
     estudioId,
@@ -41,7 +41,7 @@ const identidades = [
   {
     id: uid(4),
     nombre: "Leonor Sánchez",
-    email: "leonor.independiente@inkmanager.example.test",
+    email: "leonor.independiente@tattoomanager.example.test",
     rol: "ARTISTA" as const,
     estilos: ["Fine Line", "Ornamental"],
     estudioId: null,
@@ -49,7 +49,7 @@ const identidades = [
   {
     id: uid(5),
     nombre: "Manuel Rojas",
-    email: "manuel.independiente@inkmanager.example.test",
+    email: "manuel.independiente@tattoomanager.example.test",
     rol: "ARTISTA" as const,
     estilos: ["Tradicional", "Full Color"],
     estudioId: null,
@@ -57,7 +57,7 @@ const identidades = [
   {
     id: uid(6),
     nombre: "Delfina Acosta",
-    email: "delfina.artista@inkmanager.example.test",
+    email: "delfina.artista@tattoomanager.example.test",
     rol: "ARTISTA" as const,
     estilos: ["Blackwork"],
     estudioId: null,

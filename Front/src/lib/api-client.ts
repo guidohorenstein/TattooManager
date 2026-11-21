@@ -25,7 +25,7 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     });
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw error;
-    throw new Error('No pudimos conectar con InkManager. Intentá nuevamente.');
+    throw new Error('No pudimos conectar con TattooManager. Intentá nuevamente.');
   }
   if (!response.ok) {
     const body: unknown = await response.json().catch(() => null);

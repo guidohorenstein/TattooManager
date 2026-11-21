@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { usePanelFilters } from '@/hooks/usePanelFilters';
 import type {
   ClientePanel,
@@ -116,10 +116,9 @@ export function PanelMessages(props: PanelMessagesProps) {
     ) || (params.has('conversacion') || soloSinLeer ? undefined : conversaciones[0]);
   const historial = seleccionada && historiales[seleccionada.id];
   const recientes = seleccionada?.mensajes;
-  const mensajes = useMemo(
-    () => (historial ? reunirMensajes(historial.mensajes, recientes ?? []) : recientes ?? []),
-    [historial, recientes],
-  );
+  const mensajes = historial
+    ? reunirMensajes(historial.mensajes, recientes ?? [])
+    : (recientes ?? []);
   const anterior = historial ? historial.anterior : seleccionada?.anterior;
   const texto = seleccionada ? borradores[seleccionada.id] || '' : '';
   const ultimoRecibido = seleccionada?.mensajes.findLast((m) => !m.propio)?.fecha;
@@ -355,7 +354,9 @@ export function PanelMessages(props: PanelMessagesProps) {
                   className={`btn btn-sm ms-auto flex-shrink-0 ${seleccionada.botActivo ? 'btn-outline-secondary' : 'btn-outline-primary'}`}
                   type="button"
                   disabled={guardando}
-                  onClick={() => void ejecutar(() => cambiarBot(seleccionada.id, !seleccionada.botActivo))}
+                  onClick={() =>
+                    void ejecutar(() => cambiarBot(seleccionada.id, !seleccionada.botActivo))
+                  }
                 >
                   {seleccionada.botActivo ? 'Pausar bot' : 'Activar bot'}
                 </button>

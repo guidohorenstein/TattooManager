@@ -3,7 +3,7 @@ import { AccountCard } from '@/components/auth/AccountCard';
 import { RequestEmailForm } from '@/components/forms/RequestEmailForm';
 
 export const metadata: Metadata = {
-  title: 'Recuperar contraseña | InkManager',
+  title: 'Recuperar contraseña | TattooManager',
   robots: { index: false, follow: false },
 };
 

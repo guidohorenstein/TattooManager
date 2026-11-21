@@ -1,8 +1,8 @@
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 
 export function health(_req: Request, res: Response): void {
   res.json({
-    status: 'ok',
-    message: 'Backend InkManager corriendo correctamente',
+    status: "ok",
+    message: "Backend TattooManager corriendo correctamente",
   });
 }

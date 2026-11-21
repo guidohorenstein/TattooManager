@@ -37,14 +37,14 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #fff;
+  background: var(--theme-surface);
 }
 .workImage {
   position: relative;
   display: grid;
   place-items: center;
   aspect-ratio: 4/5;
-  background: #f0f1ec;
+  background: var(--theme-background);
   color: var(--muted);
   font-size: 14px;
 }
@@ -58,7 +58,7 @@
   padding: 5px 9px;
   border-radius: 3px;
   background: #ffffffed;
-  color: #43493f;
+  color: var(--theme-ink);
   font-size: 12px;
 }
 .published {
@@ -86,7 +86,7 @@
 }
 .tags span {
   padding: 3px 7px;
-  background: #f3f4f0;
+  background: var(--theme-background);
   border-radius: 3px;
   color: var(--muted);
   font-size: 12px;
@@ -111,7 +111,7 @@
 }
 .empty {
   padding: clamp(36px, 6vw, 80px) 24px;
-  border: 1px dashed #c7ccc0;
+  border: 1px dashed var(--theme-border);
   border-radius: 7px;
   text-align: center;
 }
@@ -123,7 +123,7 @@
   margin: 0 auto 20px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  color: #747b6e;
+  color: var(--theme-muted);
   font-size: 26px;
 }
 .empty h2 {
@@ -134,7 +134,7 @@
 
 .feedback {
   margin: 20px 0;
-  color: #34442c;
+  color: var(--theme-ink);
   font-size: 14px;
 }
 .photoField {
@@ -146,7 +146,7 @@
   justify-content: center;
   max-height: 300px;
   margin-bottom: 14px;
-  background: #f5f6f2;
+  background: var(--theme-background);
   border-radius: 5px;
   overflow: hidden;
 }
@@ -176,18 +176,18 @@
   min-height: 44px;
   display: block;
   padding: 7px 10px;
-  border: 1px solid #d4d8cf;
+  border: 1px solid var(--theme-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--theme-surface);
   font-size: 14px;
 }
 .choice input:checked + span {
-  border-color: #202320;
-  background: #202320;
-  color: #fff;
+  border-color: var(--theme-border);
+  background: var(--theme-accent);
+  color: var(--theme-on-accent);
 }
 .choice input:focus-visible + span {
-  outline: 2px solid #56734d;
+  outline: 2px solid var(--theme-border);
   outline-offset: 3px;
 }
 .formFooter {

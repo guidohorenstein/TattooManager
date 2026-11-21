@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit } from "../middlewares/limitar-solicitudes.js";
 import { prisma } from "../config/prisma.js";
 import { HttpError } from "../errors/http-error.js";
 import { requerirSesion } from "../middlewares/autenticacion.js";

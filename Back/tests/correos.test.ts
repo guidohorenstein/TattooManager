@@ -7,12 +7,12 @@ import bcrypt from "bcryptjs";
 process.env.DATABASE_URL =
   "postgresql://test:test@127.0.0.1:1/test?connect_timeout=1";
 process.env.DIRECT_URL = process.env.DATABASE_URL;
-process.env.JWT_SECRET = "solo-pruebas-correos-inkmanager-32-bytes";
+process.env.JWT_SECRET = "solo-pruebas-correos-tattoomanager-32-bytes";
 process.env.FRONTEND_URL = "http://127.0.0.1:3001";
 process.env.NODE_ENV = "test";
 process.env.MAIL_TRANSPORT = "resend";
 process.env.RESEND_API_KEY = "re_clave_ficticia";
-process.env.MAIL_FROM = "InkManager <cuentas@example.com>";
+process.env.MAIL_FROM = "TattooManager <cuentas@example.com>";
 
 const { app } = await import("../src/app.js");
 const { prisma } = await import("../src/config/prisma.js");
@@ -72,7 +72,7 @@ beforeEach((t) => {
   escrituraFalla = false;
   process.env.MAIL_TRANSPORT = "resend";
   process.env.RESEND_API_KEY = "re_clave_ficticia";
-  process.env.MAIL_FROM = "InkManager <cuentas@example.com>";
+  process.env.MAIL_FROM = "TattooManager <cuentas@example.com>";
   t.mock.method(console, "error", () => {});
   t.mock.method(
     globalThis,
@@ -243,10 +243,11 @@ test("registro envía bienvenida con verificación, sin contraseña ni token cru
     nombre: "Ana",
     email: "ana@example.com",
     password,
-    rol: "CLIENTE",
+    rol: "ARTISTA",
+    nombreArtistico: "Ana Ink",
   });
   assert.equal(enviados.length, 1);
-  assert.equal(enviados[0].subject, "Bienvenido a InkManager");
+  assert.equal(enviados[0].subject, "Bienvenido a TattooManager");
   assert.ok(enviados[0].html.includes("Ana"));
   assert.equal(enviados[0].text.includes(password), false);
   const token = tokenDelCorreo();
@@ -260,7 +261,7 @@ test("Google nuevo recibe bienvenida y enlace opcional; accesos posteriores no r
     googleId: "google-ana",
     email: "ana@example.com",
     nombre: "Ana",
-    registro: { rol: "CLIENTE" as const },
+    registro: { rol: "ARTISTA" as const, nombreArtistico: "Ana Ink" },
   };
   await resolverUsuarioGoogle(identidad);
   assert.equal([...usuarios.values()][0].password, null);
@@ -276,7 +277,8 @@ test("fallo del proveedor no borra la cuenta ni convierte el registro en error",
     nombre: "Ana",
     email: "ana@example.com",
     password,
-    rol: "CLIENTE",
+    rol: "ARTISTA",
+    nombreArtistico: "Ana Ink",
   });
   assert.ok(usuarios.has(creado.id));
   assert.equal(enviados.length, 0);
@@ -456,7 +458,7 @@ test("producción impide usar previews", () => {
 test("Brevo entrega el enlace de verificación a un destinatario distinto del remitente", async (t) => {
   process.env.MAIL_TRANSPORT = "brevo";
   process.env.BREVO_API_KEY = "clave-brevo-de-prueba";
-  process.env.BREVO_SENDER_EMAIL = "inkmanager@example.com";
+  process.env.BREVO_SENDER_EMAIL = "tattoomanager@example.com";
   const cuenta = usuario();
   const mensajes: Row[] = [];
   t.mock.method(
@@ -481,8 +483,8 @@ test("Brevo entrega el enlace de verificación a un destinatario distinto del re
   assert.equal(mensajes.length, 1);
   const [correo] = mensajes;
   assert.deepEqual(correo.sender, {
-    name: "InkManager",
-    email: "inkmanager@example.com",
+    name: "TattooManager",
+    email: "tattoomanager@example.com",
   });
   assert.deepEqual(correo.replyTo, correo.sender);
   assert.deepEqual(correo.to, [{ email: cuenta.email }]);
@@ -496,7 +498,7 @@ test("Brevo entrega el enlace de verificación a un destinatario distinto del re
 test("Brevo conserva la clave en reintentos y avisa cuando se agota la cuota", async (t) => {
   process.env.MAIL_TRANSPORT = "brevo";
   process.env.BREVO_API_KEY = "clave-brevo-de-prueba";
-  process.env.BREVO_SENDER_EMAIL = "inkmanager@example.com";
+  process.env.BREVO_SENDER_EMAIL = "tattoomanager@example.com";
   const correo = {
     para: "ana@example.com",
     asunto: "Prueba",

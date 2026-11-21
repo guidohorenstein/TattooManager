@@ -1,12 +1,11 @@
-import type { PublicoRegistro, RegisterValues } from '@/types/forms';
-
-export function crearValoresRegistro(contexto: PublicoRegistro): RegisterValues {
+import type { RegisterValues } from '@/types/forms';
+export function crearValoresRegistro(): RegisterValues {
   return {
     nombre: '',
     email: '',
     password: '',
     confirmPassword: '',
-    rol: contexto === 'cliente' ? 'CLIENTE' : 'ARTISTA',
+    rol: 'ARTISTA',
     nombreArtistico: '',
     nombreEstudio: '',
   };

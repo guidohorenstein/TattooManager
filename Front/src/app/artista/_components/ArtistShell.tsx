@@ -1,5 +1,6 @@
 'use client';
 
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavigationGuardLink as Link } from 'nextjs-nav-guard';
 import NextLink from 'next/link';
@@ -87,19 +88,27 @@ export function ArtistShell({ children }: { children: ReactNode }) {
       key={usuario.id + (usuario.estudioId ?? '')}
       ruta="/artista"
       vinculado={Boolean(usuario.estudioId)}
-      mostrarPanel={(contenido, habilitado) => habilitado ? (
-        <ConsultasProvider>
-          <ArtistProfileProvider>
-            <ArtistPanelProvider>
-              <ArtistPanel>{contenido}</ArtistPanel>
-            </ArtistPanelProvider>
-          </ArtistProfileProvider>
-        </ConsultasProvider>
-      ) : (
-        <PanelShell artista secciones={navegacion} nombre={usuario.nombre || usuario.email} subtitulo="Mi cuenta" perfil="/artista/perfil">
-          {contenido}
-        </PanelShell>
-      )}
+      mostrarPanel={(contenido, habilitado) =>
+        habilitado ? (
+          <ConsultasProvider>
+            <ArtistProfileProvider>
+              <ArtistPanelProvider>
+                <ArtistPanel>{contenido}</ArtistPanel>
+              </ArtistPanelProvider>
+            </ArtistProfileProvider>
+          </ConsultasProvider>
+        ) : (
+          <PanelShell
+            artista
+            secciones={navegacion}
+            nombre={usuario.nombre || usuario.email}
+            subtitulo="Mi cuenta"
+            perfil="/artista/perfil"
+          >
+            {contenido}
+          </PanelShell>
+        )
+      }
     >
       {children}
     </AccesoPanel>
@@ -126,7 +135,7 @@ function ArtistNavigation({ cerrar }: { cerrar?: () => void }) {
         }}
       >
         <span className={styles.brandMark}>im</span>
-        <span className={styles.brandName}>InkManager</span>
+        <span className={styles.brandName}>TattooManager</span>
       </Link>
       <nav aria-label="Panel del artista" className={styles.navigation}>
         {['Trabajo diario', 'Gestión', 'Perfil y cuenta'].map((grupo) => (
@@ -237,14 +246,14 @@ function ArtistPanel({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [compacto, setCompacto] = useState(() => {
     try {
-      return localStorage.getItem('inkmanager:menu-compacto') === 'true';
+      return localStorage.getItem('tattoomanager:menu-compacto') === 'true';
     } catch {
       return false;
     }
   });
   useEffect(() => {
     try {
-      localStorage.setItem('inkmanager:menu-compacto', String(compacto));
+      localStorage.setItem('tattoomanager:menu-compacto', String(compacto));
     } catch {
       /* Preferencia opcional. */
     }
@@ -267,7 +276,7 @@ function ArtistPanel({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <div className={`${styles.panel} ${compacto ? styles.compact : ''}`} data-bs-theme="light">
+    <div className={`${styles.panel} ${compacto ? styles.compact : ''}`}>
       <a className={styles.skipLink} href="#artist-content">
         Ir al contenido
       </a>
@@ -294,6 +303,7 @@ function ArtistPanel({ children }: { children: ReactNode }) {
             <strong>{titulo}</strong>
           </div>
           <div className={styles.topbarActions}>
+            <ThemeToggle />
             <Link
               className={styles.notificationButton}
               href="/artista/notificaciones"

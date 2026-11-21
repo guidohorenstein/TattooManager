@@ -91,7 +91,7 @@ export default function CheckoutForm({ planId, cycleId }: { planId: string; cycl
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
-        <Link className={styles.backLink} href="/estudios#planes">
+        <Link className={styles.backLink} href="/#planes">
           ← Volver a los planes
         </Link>
         <header className={styles.heading}>

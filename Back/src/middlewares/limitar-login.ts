@@ -1,4 +1,4 @@
-import { rateLimit } from "express-rate-limit";
+import { rateLimit } from "./limitar-solicitudes.js";
 
 export const limitarLogin = rateLimit({
   windowMs: 15 * 60 * 1000,

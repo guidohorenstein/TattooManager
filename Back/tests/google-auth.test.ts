@@ -10,7 +10,7 @@ import { Prisma } from "@prisma/client";
 process.env.DATABASE_URL =
   "postgresql://test:test@127.0.0.1:1/test?connect_timeout=1";
 process.env.DIRECT_URL = process.env.DATABASE_URL;
-process.env.JWT_SECRET = "solo-pruebas-google-inkmanager-32-bytes";
+process.env.JWT_SECRET = "solo-pruebas-google-tattoomanager-32-bytes";
 process.env.FRONTEND_URL = "http://127.0.0.1:3001";
 process.env.GOOGLE_CLIENT_ID = "prueba.apps.googleusercontent.com";
 process.env.GOOGLE_CLIENT_SECRET = "secreto-ficticio";
@@ -21,6 +21,7 @@ process.env.MAIL_TRANSPORT = "resend";
 process.env.RESEND_API_KEY = "";
 
 const { app } = await import("../src/app.js");
+const { limitarRegistro } = await import("../src/middlewares/limitar-registro.js");
 const { prisma } = await import("../src/config/prisma.js");
 const {
   prepararAccesoGoogle,
@@ -59,7 +60,8 @@ function reemplazar(
     record[key] = anterior;
   });
 }
-beforeEach((t) => {
+beforeEach(async (t) => {
+  await limitarRegistro.resetKey("127.0.0.1");
   usuarios.clear();
   estudios.clear();
   sesiones.clear();
@@ -176,14 +178,14 @@ function post(body: unknown, origin = "http://127.0.0.1:3001") {
 function leerFlujo(token: string) {
   const flujo = jwt.verify(token, process.env.JWT_SECRET!, {
     algorithms: ["HS256"],
-    issuer: "inkmanager-api",
-    audience: "inkmanager-google-oauth",
+    issuer: "tattoomanager-api",
+    audience: "tattoomanager-google-oauth",
   });
   assert.notEqual(typeof flujo, "string");
   return flujo as jwt.JwtPayload;
 }
 const perfiles = [
-  { rol: "CLIENTE" },
+  { rol: "ARTISTA", nombreArtistico: "Ana Ink" },
   { rol: "ARTISTA", nombreArtistico: "Ana Ink" },
   { rol: "ESTUDIO_ADMIN", nombreEstudio: "Estudio Ana" },
 ] as const;
@@ -220,6 +222,7 @@ for (const entrada of [
   [],
   {},
   { rol: "SUPERADMIN" },
+  { rol: "CLIENTE" },
   { rol: "ARTISTA" },
   { rol: "ESTUDIO_ADMIN", nombreEstudio: "a" },
 ]) {
@@ -255,11 +258,12 @@ test("Google: login no incorpora roles desde query y registro rechaza otro orige
 test("Google: descarta campos ajenos y exige state, firma y vigencia", async () => {
   assert.deepEqual(
     validarPerfilRegistro({
-      rol: "CLIENTE",
+      rol: "ARTISTA",
+      nombreArtistico: "Ana Ink",
       estudioId: "ajeno",
       nombreEstudio: "Ignorar",
     }),
-    { rol: "CLIENTE" },
+    { rol: "ARTISTA", nombreArtistico: "Ana Ink" },
   );
   const { flujoToken } = await prepararAccesoGoogle(perfiles[1]);
   const flujo = leerFlujo(flujoToken);
@@ -501,7 +505,9 @@ for (const perfil of perfiles) {
     assert.equal(sesiones.size, 1);
     const cookies = response.headers.getSetCookie();
     assert.ok(
-      cookies.some((cookie) => cookie.startsWith("tattoomanager_google_oauth=;")),
+      cookies.some((cookie) =>
+        cookie.startsWith("tattoomanager_google_oauth=;"),
+      ),
     );
     const cookieSesion = cookies.find((cookie) =>
       cookie.startsWith("tattoomanager_session="),
@@ -513,8 +519,8 @@ for (const perfil of perfiles) {
     const cookie = cookieSesion.split(";")[0];
     const payload = jwt.verify(cookie.split("=")[1], process.env.JWT_SECRET!, {
       algorithms: ["HS256"],
-      issuer: "inkmanager-api",
-      audience: "inkmanager-web",
+      issuer: "tattoomanager-api",
+      audience: "tattoomanager-web",
     }) as jwt.JwtPayload;
     assert.equal(payload.rol, undefined);
     assert.equal(payload.jti, [...sesiones.keys()][0]);
@@ -634,4 +640,13 @@ test("Google callback: cookie Secure en producción", async (t) => {
       .getSetCookie()
       .every((cookie) => cookie.includes("Secure")),
   );
+});
+
+test("Google rechaza una cuenta de cliente anterior", async () => {
+  const creado = await resolverUsuarioGoogle({
+    ...identidad,
+    registro: perfiles[1],
+  });
+  usuarios.get(creado.id)!.rol = "CLIENTE";
+  await assert.rejects(resolverUsuarioGoogle(identidad), { status: 403 });
 });

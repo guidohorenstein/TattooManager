@@ -32,7 +32,7 @@ export function LoginModal({ show, onHide, onSwitch }: AuthModalProps) {
     >
       <Modal.Header closeButton closeLabel="Cerrar" className={styles.modalHeader}>
         <div>
-          <p className={styles.eyebrow}>Tu espacio en InkManager</p>
+          <p className={styles.eyebrow}>Tu espacio en TattooManager</p>
           <Modal.Title id="login-title" as="h2">
             Qué bueno verte.
           </Modal.Title>

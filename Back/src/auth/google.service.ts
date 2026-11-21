@@ -51,8 +51,8 @@ export async function prepararAccesoGoogle(registro?: unknown) {
     {
       algorithm: "HS256",
       expiresIn: duracionFlujoGoogleSegundos,
-      issuer: "inkmanager-api",
-      audience: "inkmanager-google-oauth",
+      issuer: "tattoomanager-api",
+      audience: "tattoomanager-google-oauth",
     },
   );
 
@@ -75,8 +75,8 @@ export function validarFlujoGoogle(flujoToken: unknown, state: unknown) {
   try {
     const flujo = jwt.verify(flujoToken, jwtSecret, {
       algorithms: ["HS256"],
-      issuer: "inkmanager-api",
-      audience: "inkmanager-google-oauth",
+      issuer: "tattoomanager-api",
+      audience: "tattoomanager-google-oauth",
     });
 
     if (
@@ -173,6 +173,11 @@ export async function resolverUsuarioGoogle(
   identidad: IdentidadGoogle,
 ): Promise<UsuarioSesion> {
   const usuario = await buscarUsuarioPorGoogleId(identidad.googleId);
+  if (usuario?.rol === "CLIENTE")
+    throw new HttpError(
+      403,
+      "Las consultas de clientes se realizan sin cuenta.",
+    );
   if (usuario) return usuario;
 
   if (await buscarUsuarioPorEmail(identidad.email)) {

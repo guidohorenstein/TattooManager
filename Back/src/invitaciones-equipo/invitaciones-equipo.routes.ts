@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit } from "../middlewares/limitar-solicitudes.js";
 import { requerirSesion } from "../middlewares/autenticacion.js";
 import { requerirRoles } from "../middlewares/roles.js";
 import { requerirPlanVigente } from "../middlewares/plan-vigente.js";

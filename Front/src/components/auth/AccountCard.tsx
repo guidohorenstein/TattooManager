@@ -7,7 +7,7 @@ export function AccountCard({ title, children }: { title: string; children: Reac
     <main className={styles.accountPage}>
       <section className={styles.accountCard} aria-labelledby="account-title">
         <Link href="/" className={styles.brand}>
-          InkManager
+          TattooManager
         </Link>
         <h1 id="account-title">{title}</h1>
         {children}

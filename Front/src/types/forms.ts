@@ -1,6 +1,4 @@
-import type { RolUsuario } from './auth';
-export type ContextoRegistro = 'cliente' | 'profesional' | 'general';
-export type PublicoRegistro = Exclude<ContextoRegistro, 'general'>;
+export type ContextoRegistro = 'profesional' | 'general';
 export interface AuthModalProps {
   show: boolean;
   onHide: () => void;
@@ -16,12 +14,9 @@ export interface LoginValues {
 export interface RegisterValues extends LoginValues {
   nombre: string;
   confirmPassword: string;
-  rol: Exclude<RolUsuario, 'SUPERADMIN'>;
+  rol: 'ARTISTA' | 'ESTUDIO_ADMIN';
   nombreArtistico: string;
   nombreEstudio: string;
 }
-
 export type PerfilRegistroGoogle =
-  | { rol: 'CLIENTE' }
-  | { rol: 'ARTISTA'; nombreArtistico: string }
-  | { rol: 'ESTUDIO_ADMIN'; nombreEstudio: string };
+  { rol: 'ARTISTA'; nombreArtistico: string } | { rol: 'ESTUDIO_ADMIN'; nombreEstudio: string };

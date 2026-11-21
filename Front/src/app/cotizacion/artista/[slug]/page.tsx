@@ -19,7 +19,7 @@ export default async function CotizacionArtistaPage({
   if (artista.estudioSlug) redirect(`/cotizacion/${encodeURIComponent(artista.estudioSlug)}`);
 
   return (
-    <MarcoCotizacion destinatario={artista.nombre}>
+    <MarcoCotizacion destinatario={artista.nombre} volver={'/a/' + encodeURIComponent(id)}>
       <SolicitudPublica key={id} destino={{ artista: id }} />
     </MarcoCotizacion>
   );

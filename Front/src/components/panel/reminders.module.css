@@ -3,7 +3,7 @@
   align-items: center;
   gap: 10px;
   margin: 0 0 25px;
-  color: #5f6c54;
+  color: var(--theme-ink);
 }
 .timezone label {
   font-size: 14px;
@@ -14,23 +14,23 @@
   max-width: 370px;
   margin-left: auto;
   padding: 9px 12px;
-  border: 1px solid #e0e5d8;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
-  background: #fff;
+  background: var(--theme-surface);
   font-size: 14px;
-  color: #637354;
+  color: var(--theme-muted);
 }
 .groupDescription {
   margin: 8px 0 0;
   font-size: 14px;
-  color: #5f6c54;
+  color: var(--theme-ink);
   line-height: 1.6;
 }
 .groupSwitch {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #68795a;
+  color: var(--theme-muted);
   font-size: 12px;
 }
 .ruleRow {
@@ -38,7 +38,7 @@
   align-items: center;
   gap: 18px;
   padding: 25px 24px;
-  border-bottom: 1px solid #e9eddf;
+  border-bottom: 1px solid var(--theme-border);
 }
 .ruleRow:last-child {
   border-bottom: 0;
@@ -49,10 +49,10 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  border: 1px solid #e1e7d8;
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
-  background: #f7f9f2;
-  color: #839670;
+  background: var(--theme-background);
+  color: var(--theme-muted);
 }
 .ruleContent {
   flex: 1;
@@ -62,12 +62,12 @@
   margin: 0 0 7px;
   font-size: 14px;
   font-weight: 500;
-  color: #435639;
+  color: var(--theme-ink);
 }
 .ruleContent p {
   margin: 0 0 10px;
   font-size: 14px;
-  color: #5f6c54;
+  color: var(--theme-ink);
   line-height: 1.5;
 }
 .schedule {
@@ -75,7 +75,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #5f6c54;
+  color: var(--theme-ink);
 }
 .ruleActions {
   display: flex;
@@ -103,23 +103,23 @@
   min-height: 44px;
 }
 .ruleDisabled .ruleIcon {
-  color: #a1ac96;
-  background: #fbfcf8;
+  color: var(--theme-muted);
+  background: var(--theme-surface);
 }
 .ruleDisabled .schedule {
-  color: #5f6c54;
+  color: var(--theme-ink);
 }
 .ruleRow :global(.form-check-input:checked),
 .groupSwitch :global(.form-check-input:checked) {
-  background-color: #617d4f;
-  border-color: #617d4f;
+  background-color: var(--theme-soft);
+  border-color: var(--theme-border);
 }
 .variables {
   margin: -3px 0 24px;
 }
 .variables > span {
   font-size: 12px;
-  color: #5f6c54;
+  color: var(--theme-ink);
 }
 .variables > div {
   display: flex;
@@ -129,16 +129,16 @@
 }
 .variables button {
   padding: 5px 8px;
-  border: 1px solid #e1e8d5;
+  border: 1px solid var(--theme-border);
   border-radius: 4px;
-  background: #f7f9f2;
-  color: #5f6c54;
+  background: var(--theme-background);
+  color: var(--theme-ink);
   font-family: monospace;
   font-size: 12px;
 }
 .emailDetails {
   margin: 20px 0;
-  border: 1px solid #e1e8d7;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
 }
 .emailDetails summary {
@@ -148,39 +148,39 @@
   cursor: pointer;
   padding: 14px 16px;
   font-size: 14px;
-  color: #637954;
+  color: var(--theme-muted);
 }
 .email {
-  border-top: 1px solid #e1e8d7;
-  background: #fcfdf9;
+  border-top: 1px solid var(--theme-border);
+  background: var(--theme-surface);
 }
 .email header {
   display: grid;
   gap: 9px;
   padding: 22px;
-  border-bottom: 1px solid #e8eddf;
+  border-bottom: 1px solid var(--theme-border);
 }
 .email header > span {
   font-size: 16px;
   letter-spacing: -0.5px;
   font-weight: 500;
-  color: #435c35;
+  color: var(--theme-ink);
 }
 .email strong {
   font-size: 14px;
   font-weight: 500;
-  color: #667c54;
+  color: var(--theme-muted);
   line-height: 1.5;
 }
 .email small {
-  color: #88987a;
+  color: var(--theme-muted);
   font-size: 12px;
 }
 .email > div {
   padding: 22px;
   font-size: 14px;
   line-height: 1.9;
-  color: #708360;
+  color: var(--theme-muted);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

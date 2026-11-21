@@ -2,23 +2,25 @@
   color-scheme: light;
 
   --font-sans: var(--font-plex), Arial, sans-serif;
-  --font-serif:
-    'Iowan Old Style', 'Baskerville', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-serif: var(--font-sans);
 
   --theme-background: #fafafa;
   --theme-surface: #ffffff;
-  --theme-ink: #18181b;
-  --theme-muted: #71717a;
-  --theme-border: rgb(0 0 0 / 6%);
-  --theme-accent: #18181b;
-  --theme-accent-hover: #3f3f46;
+  --theme-ink: #181818;
+  --theme-muted: #727272;
+  --theme-border: #dedede;
+  --theme-soft: #f0f0f0;
+  --theme-on-accent: #fff;
+  --brand-mark-ink: var(--theme-on-accent);
+  --theme-accent: #181818;
+  --theme-accent-hover: #404040;
   --theme-shadow-card: 0 10px 30px -10px rgb(0 0 0 / 5%);
   --theme-shadow-raised: 0 16px 36px -12px rgb(0 0 0 / 12%);
 
-  --bs-primary: #18181b;
+  --bs-primary: #181818;
   --bs-primary-rgb: 24, 24, 27;
-  --bs-link-color: #18181b;
-  --bs-link-hover-color: #3f3f46;
+  --bs-link-color: #181818;
+  --bs-link-hover-color: #404040;
 }
 
 *,
@@ -113,4 +115,37 @@ svg {
   .lift-on-hover:focus-within {
     transform: none;
   }
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+::selection {
+  background: #222;
+  color: #fff;
+}
+.public-loading {
+  min-height: 65dvh;
+  padding: clamp(40px, 8vw, 100px);
+  color: #171717;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --theme-background: #111;
+  --theme-surface: #1b1b1b;
+  --theme-soft: #252525;
+  --theme-ink: #f3f3f3;
+  --theme-muted: #b0b0b0;
+  --theme-border: #3b3b3b;
+  --theme-accent: #f3f3f3;
+  --theme-accent-hover: #d8d8d8;
+  --theme-on-accent: #151515;
+  --bs-body-bg: #1b1b1b;
+  --bs-body-color: #f3f3f3;
+  --bs-border-color: #3b3b3b;
+  --bs-secondary-color: #b0b0b0;
+  --bs-link-color: #f3f3f3;
+  --bs-link-hover-color: #d8d8d8;
 }

@@ -128,7 +128,7 @@ test("invitaciones: muestra vencimientos y espera un minuto antes de reenviar", 
 });
 
 test("aceptar una invitación actualiza la membresía sin pedir columnas del perfil completo", async (t) => {
-  process.env.JWT_SECRET ??= "solo-pruebas-equipo-inkmanager-32-bytes";
+  process.env.JWT_SECRET ??= "solo-pruebas-equipo-tattoomanager-32-bytes";
   const { prisma } = await import("../src/config/prisma.js");
   const { responderInvitacion } =
     await import("../src/invitaciones-equipo/invitaciones-equipo.service.js");

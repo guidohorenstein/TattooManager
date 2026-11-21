@@ -16,23 +16,23 @@ El login no envía correos. Una cuenta de Google conserva ese método de acceso 
 
 El backend envía los correos mediante la [API de Resend](https://resend.com/docs/api-reference/emails/send-email) o la [API de Brevo](https://developers.brevo.com/reference/send-transac-email). Cada envío utiliza una clave de idempotencia y un tiempo de espera máximo de ocho segundos.
 
-| Variable de `Back/.env` | Uso                                                                   |
-| ----------------------- | --------------------------------------------------------------------- |
+| Variable de `Back/.env` | Uso                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------- |
 | `MAIL_TRANSPORT`        | `resend` y `brevo` envían por Internet. `preview` guarda una vista previa local. |
-| `RESEND_API_KEY`        | Credencial privada del proveedor, requerida para `resend`.            |
-| `MAIL_FROM`             | Nombre y dirección del remitente para Resend.                          |
-| `BREVO_API_KEY`         | Credencial privada de la API, requerida para `brevo`.                  |
-| `BREVO_SENDER_EMAIL`    | Dirección verificada en Brevo. Se usa también para recibir respuestas. |
-| `FRONTEND_URL`          | Origen de las páginas incluidas en los enlaces.                       |
+| `RESEND_API_KEY`        | Credencial privada del proveedor, requerida para `resend`.                       |
+| `MAIL_FROM`             | Nombre y dirección del remitente para Resend.                                    |
+| `BREVO_API_KEY`         | Credencial privada de la API, requerida para `brevo`.                            |
+| `BREVO_SENDER_EMAIL`    | Dirección verificada en Brevo. Se usa también para recibir respuestas.           |
+| `FRONTEND_URL`          | Origen de las páginas incluidas en los enlaces.                                  |
 
 Ejemplo de remitente con dominio verificado:
 
 ```dotenv
 MAIL_TRANSPORT=resend
-MAIL_FROM="InkManager <cuentas@tu-dominio-verificado.com>"
+MAIL_FROM="TattooManager <cuentas@tu-dominio-verificado.com>"
 ```
 
-El remitente de prueba `InkManager <onboarding@resend.dev>` solo admite envíos a la dirección asociada a la cuenta de Resend. En Resend, los envíos a otras personas requieren un dominio verificado. Las credenciales quedan en el backend y los archivos `.env` están excluidos de Git.
+El remitente de prueba `TattooManager <onboarding@resend.dev>` solo admite envíos a la dirección asociada a la cuenta de Resend. En Resend, los envíos a otras personas requieren un dominio verificado. Las credenciales quedan en el backend y los archivos `.env` están excluidos de Git.
 
 Para usar Brevo, verificá el [remitente](https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email), habilitá los envíos transaccionales y generá una [clave de API](https://help.brevo.com/hc/en-us/articles/40159485019794-Create-and-manage-your-API-keys) con permiso de envío transaccional. En Render, cargá estas variables en el servicio del backend.
 
