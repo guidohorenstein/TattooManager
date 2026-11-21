@@ -26,7 +26,7 @@ export function EnlaceFormulario({ enlace, estudio }: { enlace: string; estudio?
             : 'Compartí el enlace para recibir consultas sin registro.'}
         </p>
       </div>
-      <div>
+      <div className={styles.settingsActions}>
         <Link href={enlace} target="_blank" rel="noopener" className={styles.textButton}>
           Abrir formulario
         </Link>{' '}

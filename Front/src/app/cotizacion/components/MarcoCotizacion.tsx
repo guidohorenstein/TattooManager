@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import styles from './cotizacion.module.css';
@@ -18,6 +19,7 @@ export function MarcoCotizacion({
           <Link href={volver} className={styles.volver}>
             ← Volver
           </Link>
+          <ThemeToggle />
           <h1>Solicitar presupuesto</h1>
           <p className={styles.destino}>
             <span>Consulta para</span>

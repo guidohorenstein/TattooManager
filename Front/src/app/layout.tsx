@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense, type ReactNode } from 'react';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { AuthProvider } from '@/store/AuthProvider';
@@ -35,8 +36,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es-AR" className={plex.variable} data-scroll-behavior="smooth">
+    <html
+      lang="es-AR"
+      className={plex.variable}
+      data-scroll-behavior="smooth"
+      data-theme="dark"
+      data-bs-theme="dark"
+      suppressHydrationWarning
+    >
       <body>
+        <Script
+          id="theme-preference"
+          strategy="beforeInteractive"
+        >{`(()=>{const m=document.cookie.match(/(?:^|; )tattoomanager_theme=(light|dark)(?:;|$)/);const t=m?m[1]:'dark';document.documentElement.dataset.theme=t;document.documentElement.dataset.bsTheme=t})()`}</Script>
         <UnsavedChangesProvider>
           <AuthProvider>
             {children}

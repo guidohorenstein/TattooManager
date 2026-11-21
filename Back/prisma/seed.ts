@@ -1,167 +1,53 @@
-import {
-  PrismaClient,
-  Rol,
-  GeneroCuerpo,
-  TipoColor,
-  ZonaCuerpoGeneral,
-  EstadoSolicitud,
-} from "@prisma/client";
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
+import fs from "node:fs/promises";
+import { autorizarSeed, destinoSeed } from "./seed-seguridad.js";
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DIRECT_URL || process.env.DATABASE_URL,
-    },
-  },
-});
-
-async function main() {
-  console.log("🌱 Limpiando tablas...");
-  await prisma.cotizacion.deleteMany();
-  await prisma.solicitud.deleteMany();
-  await prisma.usuario.deleteMany();
-  await prisma.estudio.deleteMany();
-
-  console.log("🏛️ Creando estudios...");
-  const estudio1 = await prisma.estudio.create({
-    data: {
-      nombre: "Black Ink Society",
-      slug: "black-ink-society",
-      direccion: "Av. Corrientes 1234",
-      ciudad: "Buenos Aires",
-      pais: "Argentina",
-    },
-  });
-
-  const estudio2 = await prisma.estudio.create({
-    data: {
-      nombre: "Sacred Art Tattoo Studio",
-      slug: "sacred-art-tattoo",
-      direccion: "Calle 50 #789",
-      ciudad: "La Plata",
-      pais: "Argentina",
-    },
-  });
-
-  console.log("🎨 Creando artistas...");
-  const artista1 = await prisma.usuario.create({
-    data: {
-      email: "lucas.realism@tattoomanager.com",
-      password: "password123", // 👈 Campo obligatorio agregado
-      nombre: 'Lucas "Realismo" Gómez',
-      alias: "lucas_realism",
-      rol: "ARTISTA",
-      telefono: "+5491122334455",
-      estudioId: estudio1.id,
-    },
-  });
-
-  const artista2 = await prisma.usuario.create({
-    data: {
-      email: "sofi.fineline@tattoomanager.com",
-      password: "password123",
-      nombre: "Sofía Martínez",
-      alias: "sofi_fineline",
-      rol: Rol.ARTISTA,
-      telefono: "+5491133445566",
-      estudioId: estudio2.id,
-    },
-  });
-
-  console.log("👤 Creando clientes...");
-  const cliente1 = await prisma.usuario.create({
-    data: {
-      email: "juan.perez@gmail.com",
-      password: "password123",
-      nombre: "Juan Pérez",
-      alias: "juanp",
-      rol: Rol.CLIENTE,
-      telefono: "+5491199887766",
-    },
-  });
-
-  const cliente2 = await prisma.usuario.create({
-    data: {
-      email: "maria.lopez@gmail.com",
-      password: "password123",
-      nombre: "María López",
-      alias: "marilopez",
-      rol: Rol.CLIENTE,
-      telefono: "+5491188776655",
-    },
-  });
-
-  console.log("📋 Creando proyectos/solicitudes con zonas marcadas...");
-  const solicitud1 = await prisma.solicitud.create({
-    data: {
-      clienteId: cliente1.id,
-      estudioId: estudio1.id,
-      estilo: "realism",
-      tipoColor: TipoColor.BLACK_AND_GREY,
-      generoCuerpo: GeneroCuerpo.MASCULINO,
-      zonaGeneral: ZonaCuerpoGeneral.BRAZO,
-      subZona: "inner_arm",
-      imagenZonaMarcada:
-        "https://res.cloudinary.com/demo/image/upload/sample.jpg",
-      descripcion: "Retrato de león realista en antebrazo interno.",
-      referencias: ["https://res.cloudinary.com/demo/image/upload/sample.jpg"],
-      estado: EstadoSolicitud.EN_COTIZACION,
-    },
-  });
-
-  const solicitud2 = await prisma.solicitud.create({
-    data: {
-      clienteId: cliente2.id,
-      estudioId: estudio2.id,
-      estilo: "fineline",
-      tipoColor: TipoColor.COLOR,
-      generoCuerpo: GeneroCuerpo.FEMENINO,
-      zonaGeneral: ZonaCuerpoGeneral.TORSO,
-      subZona: "ribs",
-      imagenZonaMarcada:
-        "https://res.cloudinary.com/demo/image/upload/sample.jpg",
-      descripcion: "Ramo de flores en línea fina sobre las costillas.",
-      referencias: [],
-      estado: EstadoSolicitud.PENDIENTE,
-    },
-  });
-
-  const solicitud3 = await prisma.solicitud.create({
-    data: {
-      clienteId: cliente1.id,
-      estudioId: estudio1.id,
-      estilo: "black work",
-      tipoColor: TipoColor.BLACK_AND_GREY,
-      generoCuerpo: GeneroCuerpo.MASCULINO,
-      zonaGeneral: ZonaCuerpoGeneral.PIERNA,
-      subZona: "outer_leg",
-      imagenZonaMarcada:
-        "https://res.cloudinary.com/demo/image/upload/sample.jpg",
-      descripcion: "Geometría ornamental en la parte externa de la pierna.",
-      referencias: [],
-      estado: EstadoSolicitud.PENDIENTE,
-    },
-  });
-
-  console.log("💰 Creando cotización...");
-  await prisma.cotizacion.create({
-    data: {
-      solicitudId: solicitud1.id,
-      artistaId: artista1.id,
-      monto: 150000,
-      montoSena: 30000,
-      mensaje: "Hola Juan, requiere 2 sesiones de 4 horas.",
-    },
-  });
-
-  console.log("✅ Base de datos poblada con éxito.");
-}
-
-main()
-  .catch((e) => {
-    console.error("❌ Error en el seed:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
+if (process.argv.includes("--describe")) {
+  if (!process.env.DATABASE_URL) throw new Error("Falta DATABASE_URL.");
+  console.log(JSON.stringify(destinoSeed(process.env.DATABASE_URL), null, 2));
+} else {
+  autorizarSeed();
+  const prisma = new PrismaClient();
+  const carpeta = new URL("../../docs-local/accesos-seed/", import.meta.url);
+  const archivo = new URL("cuentas.json", carpeta);
+  const id = (n: number) => "bd202026-1120-4000-8000-" + String(n).padStart(12, "0");
+  const estudioId = id(100);
+  const cuentas = [
+    { id: id(1), email: "estudio@tattoomanager.example.test", nombre: "Trazo Estudio", rol: "ESTUDIO_ADMIN" as const, estudioId },
+    { id: id(2), email: "artista@tattoomanager.example.test", nombre: "Lucía Torres", rol: "ARTISTA" as const, estudioId },
+    { id: id(3), email: "independiente@tattoomanager.example.test", nombre: "Nicolás Vera", rol: "ARTISTA" as const, estudioId: null },
+  ];
+  try {
+    // Persistimos accesos antes de crear usuarios. Los reintentos conservan las mismas claves.
+    await fs.mkdir(carpeta, { recursive: true });
+    try {
+      await fs.writeFile(archivo, JSON.stringify(cuentas.map(c => ({ ...c, password: "Tattoo!" + randomBytes(18).toString("base64url") + "7a" })), null, 2), { flag: "wx", mode: 0o600 });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+    const accesos: { id: string; email: string; password: string }[] = JSON.parse(await fs.readFile(archivo, "utf8"));
+    const hashes = await Promise.all(cuentas.map(async c => {
+      const acceso = accesos.find(a => a.id === c.id && a.email === c.email);
+      if (!acceso || typeof acceso.password !== "string" || acceso.password.length < 20) throw new Error("El archivo privado de accesos no coincide con el seed.");
+      return bcrypt.hash(acceso.password, 12);
+    }));
+    await prisma.$transaction(async tx => {
+      // Un conflicto con una cuenta ajena aborta el conjunto; no reasignamos usuarios existentes.
+      for (const c of cuentas) {
+        const existente = await tx.usuario.findUnique({ where: { email: c.email }, select: { id: true, rol: true, estudioId: true } });
+        if (existente && (existente.id !== c.id || existente.rol !== c.rol || existente.estudioId !== c.estudioId)) throw new Error("Hay una cuenta existente que no pertenece a este seed.");
+      }
+      await tx.estudio.upsert({ where: { id: estudioId }, update: {}, create: { id: estudioId, nombre: "Trazo Estudio", slug: "trazo-seed", ciudad: "Buenos Aires", pais: "Argentina" } });
+      for (const [i,c] of cuentas.entries()) {
+        await tx.usuario.upsert({ where: { id: c.id }, update: {}, create: { ...c, password: hashes[i]!, nombreArtistico: c.rol === "ARTISTA" ? c.nombre : null, estilosPrincipales: [], metodosPagoAceptados: [] } });
+      }
+      await tx.estudio.updateMany({ where: { id: estudioId, propietarioId: null }, data: { propietarioId: cuentas[0]!.id } });
+    });
+    console.log("Seed completado sin borrar ni reemplazar registros. Accesos privados en docs-local/accesos-seed/cuentas.json.");
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}

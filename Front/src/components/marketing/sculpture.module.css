@@ -1,0 +1,132 @@
+.sculpture {
+  min-width: 0;
+}
+.stage {
+  height: 490px;
+  position: relative;
+  perspective: 1100px;
+  isolation: isolate;
+}
+.deck {
+  position: absolute;
+  inset: 30px 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.22s ease-out;
+}
+.work {
+  position: absolute;
+  width: 65%;
+  max-width: 290px;
+  height: 370px;
+  left: 17%;
+  top: 25px;
+  border: 1px solid var(--m-border);
+  padding: 7px;
+  background: var(--m-surface);
+  color: var(--m-ink);
+  border-radius: 5px;
+  text-align: left;
+  box-shadow: 0 30px 45px -25px #0008;
+  transition: transform 0.75s cubic-bezier(0.22, 0.8, 0.25, 1);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+.work img {
+  width: 100%;
+  height: calc(100% - 55px);
+  object-fit: cover;
+  pointer-events: none;
+  border-radius: 2px;
+}
+.work > span {
+  padding: 11px 8px 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.work small {
+  font-size: 10px;
+  color: var(--m-muted);
+}
+.work strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.work[data-position='0'] {
+  transform: translate3d(0, -5px, 100px) rotate(-7deg);
+  z-index: 3;
+}
+.work[data-position='1'] {
+  transform: translate3d(85px, 12px, -20px) rotateY(-20deg) rotate(12deg);
+  z-index: 2;
+}
+.work[data-position='2'] {
+  transform: translate3d(-65px, 8px, -100px) rotateY(24deg) rotate(-20deg);
+  z-index: 1;
+}
+.orbit {
+  position: absolute;
+  width: 92%;
+  height: 54%;
+  left: 3%;
+  bottom: 20px;
+  border: 1px solid var(--m-border);
+  border-radius: 50%;
+  transform: rotateX(65deg) rotateZ(-20deg);
+}
+.caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+  color: var(--m-muted);
+  font-size: 11px;
+}
+.caption button {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--m-ink);
+  padding: 8px 0;
+  font-size: 12px;
+}
+.caption button:hover {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .stage {
+    height: 430px;
+  }
+  .work {
+    height: 330px;
+    max-width: 250px;
+  }
+  .work[data-position='1'] {
+    transform: translate3d(55px, 12px, -20px) rotateY(-20deg) rotate(12deg);
+  }
+  .work[data-position='2'] {
+    transform: translate3d(-35px, 8px, -100px) rotateY(24deg) rotate(-20deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck {
+    transform: none;
+    transition: none;
+  }
+  .work {
+    transition: none;
+  }
+}

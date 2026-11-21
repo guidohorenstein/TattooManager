@@ -62,7 +62,7 @@
 }
 
 .link {
-  color: var(--color-text-muted, #9e9e9e);
+  color: var(--color-text-muted, var(--theme-muted));
   font-size: 0.875rem;
   text-decoration: none;
   text-underline-offset: 0.35em;

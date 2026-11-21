@@ -35,9 +35,8 @@ export function Pricing() {
   const [anual, setAnual] = useState(false);
   const { datos, error, recargar } = usePanelData<{ plans: PrecioPlan[] }>('/pagos/planes');
   return (
-    <section id="planes" className={styles.section}>
+    <section id="planes" className={`${styles.section} ${styles.pricing}`}>
       <header className={styles.sectionHead}>
-        <p className={styles.eyebrow}>Planes</p>
         <h2>El espacio que tu trabajo necesita.</h2>
         <p>
           Elegí según tu forma de trabajar. Los artistas de un estudio acceden con el plan de su

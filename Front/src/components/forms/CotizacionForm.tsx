@@ -3,6 +3,8 @@
 import { useRef, useState } from 'react';
 import { Form, Formik } from 'formik';
 import type { CotizacionValues, PasoCotizacionProps } from '@/types/cotizacion';
+import { StepResumen } from '@/app/cotizacion/components/steps/StepResumen';
+import { erroresContacto, normalizarTelefono } from '@/lib/contacto-presupuesto';
 import { descripcionValida } from '@/lib/descripcion-tatuaje';
 import styles from '@/app/cotizacion/components/cotizacion.module.css';
 
@@ -30,9 +32,6 @@ const initialValues: CotizacionValues = {
   descripcion: '',
   imagenReferencia: null,
   tieneTatuajesPrevios: null,
-  latitud: null,
-  longitud: null,
-  nombreUbicacion: '',
 };
 
 const pasosBase: {
@@ -92,8 +91,14 @@ const pasosBase: {
   {
     titulo: 'Tus datos de contacto',
     Componente: StepContacto,
-    validar: (v) => v.nombre.trim().length >= 2,
-    mensaje: 'Ingresá tu nombre completo.',
+    validar: (v) => Object.keys(erroresContacto(v)).length === 0,
+    mensaje: 'Revisá tus datos de contacto.',
+  },
+  {
+    titulo: 'Revisá tu consulta',
+    Componente: StepResumen,
+    validar: (v) => Object.keys(erroresContacto(v)).length === 0,
+    mensaje: 'Revisá tus datos de contacto.',
   },
 ];
 
@@ -121,12 +126,25 @@ export function CotizacionForm({
   return (
     <Formik<CotizacionValues>
       initialValues={initialValues}
-      onSubmit={async (values) => {
+      onSubmit={async (values, helpers) => {
         if (!actual.validar(values)) {
           setErrorPaso(actual.mensaje);
+          if (paso === 8) {
+            void helpers.setTouched({ nombre: true, email: true, telefono: true }, false);
+          }
+          if (paso === 8)
+            requestAnimationFrame(() => {
+              const campo = Object.keys(erroresContacto(values))[0];
+              if (campo) document.getElementById(campo)?.focus();
+            });
         } else if (esUltimo) {
           setErrorPaso('');
-          await onSubmit(values);
+          await onSubmit({
+            ...values,
+            nombre: values.nombre.trim(),
+            email: values.email.trim(),
+            telefono: normalizarTelefono(values.telefono),
+          });
         } else {
           irA(paso + 1);
         }
@@ -135,7 +153,7 @@ export function CotizacionForm({
       {({ values, setFieldValue, isSubmitting }) => {
         const errorVisible = errorPaso && !actual.validar(values) ? errorPaso : esUltimo && error;
         return (
-          <Form>
+          <Form noValidate>
             <fieldset disabled={isSubmitting} aria-labelledby="titulo-paso">
               <div className={styles.progreso}>
                 <span>

@@ -1,7 +1,10 @@
 import Image from 'next/image';
+import { MarketingShell } from '@/components/marketing/MarketingShell';
+import { ContactSection } from '@/components/marketing/ContactSection';
+import { PortfolioSculpture } from '@/components/marketing/PortfolioSculpture';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Brand } from '@/components/brand/Brand';
+import { ProductFooter } from '@/components/marketing/ProductFooter';
 import { ProductHeader } from '@/components/marketing/ProductHeader';
 import { StartButton } from '@/components/marketing/StartButton';
 import { ProductTour } from '@/components/marketing/ProductTour';
@@ -58,7 +61,7 @@ const preguntas = [
 ];
 export default function Home() {
   return (
-    <div className={styles.page}>
+    <MarketingShell>
       <a className={styles.skip} href="#contenido">
         Saltar al contenido
       </a>
@@ -73,16 +76,15 @@ export default function Home() {
               bajo control.
             </h1>
             <p className={styles.heroIntro}>
-              Consultas, presupuestos, artistas y turnos. Todo el trabajo que rodea al tatuaje, en
-              un solo lugar.
+              Consultas, presupuestos y turnos. El espacio de trabajo para artistas independientes y
+              estudios de tatuajes.
             </p>
             <div className={styles.heroActions}>
               <StartButton />
               <a href="#producto" className={styles.quietLink}>
-                Conocer la plataforma <span aria-hidden="true">↓</span>
+                Probar el espacio de trabajo <span aria-hidden="true">↓</span>
               </a>
             </div>
-            <p className={styles.heroNote}>Para artistas independientes y estudios con equipo.</p>
           </div>
           <div className={styles.heroPhoto}>
             <Image
@@ -106,14 +108,18 @@ export default function Home() {
             </h2>
             <p>
               Dejá de reconstruir cada consulta entre conversaciones, notas y calendarios. Cada
-              proyecto conserva su contexto.
+              proyecto conserva su contexto. Explorá una consulta, prepará una propuesta y reservá
+              un turno en la demo.
             </p>
           </header>
           <ProductTour />
         </section>
-        <section className={styles.capabilities} aria-label="Herramientas de TattooManager">
+        <section
+          data-reveal
+          className={styles.capabilities}
+          aria-label="Herramientas de TattooManager"
+        >
           <div>
-            <p className={styles.eyebrow}>La información, donde hace falta</p>
             <h2>
               Menos pendientes.
               <br />
@@ -165,9 +171,8 @@ export default function Home() {
             </article>
           </div>
         </section>
-        <section id="recorrido" className={styles.section}>
+        <section data-reveal id="recorrido" className={styles.section}>
           <header className={styles.sectionHead}>
-            <p className={styles.eyebrow}>Cómo funciona</p>
             <h2>
               De la primera idea
               <br />a la próxima sesión.
@@ -182,7 +187,7 @@ export default function Home() {
             ))}
           </ol>
         </section>
-        <section id="tu-pagina" className={styles.publicPage}>
+        <section data-reveal id="tu-pagina" className={styles.publicPage}>
           <div>
             <p className={styles.eyebrow}>Tu presencia, con tu identidad</p>
             <h2>
@@ -204,19 +209,9 @@ export default function Home() {
               Explorar una página de ejemplo <span aria-hidden="true">↗</span>
             </Link>
           </div>
-          <div className={styles.publicComposition}>
-            <Image
-              src="https://res.cloudinary.com/kvudcxty/image/upload/c_fill,w_900,h_1100,f_auto,q_auto/tattoomanager/formulario/cotizacion/estilos/negro-y-gris/ornamental"
-              alt="Tatuaje ornamental del portafolio de ejemplo"
-              width={900}
-              height={1100}
-              sizes="(max-width: 760px) 95vw, 40vw"
-            />
-            <p>Tu trabajo, tu equipo y una consulta directa.</p>
-          </div>
+          <PortfolioSculpture />
         </section>
-        <section className={styles.assistant}>
-          <p className={styles.eyebrow}>Un asistente que conoce tu forma de trabajar</p>
+        <section id="asistente" data-reveal className={styles.assistant}>
           <h2>
             La conversación sigue.
             <br />
@@ -236,7 +231,6 @@ export default function Home() {
         <Pricing />
         <section id="preguntas" className={styles.faq}>
           <header>
-            <p className={styles.eyebrow}>Preguntas frecuentes</p>
             <h2>Antes de empezar.</h2>
           </header>
           <div>
@@ -251,27 +245,17 @@ export default function Home() {
             ))}
           </div>
         </section>
-        <section className={styles.final}>
-          <p className={styles.eyebrow}>Hacé lugar para tu próximo proyecto</p>
+        <ContactSection />
+        <section className={styles.final} data-reveal>
           <h2>
             Más tiempo tatuando.
             <br />
             Menos tiempo organizando.
           </h2>
-          <StartButton>Empezar con TattooManager</StartButton>
+          <StartButton>Crear cuenta</StartButton>
         </section>
       </main>
-      <footer className={styles.footer}>
-        <Link href="/" className={styles.brand}>
-          <Brand />
-        </Link>
-        <p>El espacio de trabajo de tu estudio.</p>
-        <nav aria-label="Enlaces del sitio">
-          <Link href="/contacto">Contacto</Link>
-          <Link href="/terminos-y-condiciones">Términos y condiciones</Link>
-        </nav>
-        <small>© {new Date().getFullYear()} TattooManager</small>
-      </footer>
-    </div>
+      <ProductFooter />
+    </MarketingShell>
   );
 }

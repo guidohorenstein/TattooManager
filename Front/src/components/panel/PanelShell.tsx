@@ -1,5 +1,6 @@
 'use client';
 
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavigationGuardLink as Link } from 'nextjs-nav-guard';
 import NextLink from 'next/link';
@@ -159,7 +160,7 @@ export function PanelShell({ children, secciones, nombre, subtitulo, perfil, art
     }
   }
   return (
-    <div className={`${styles.panel} ${compact ? styles.compact : ''}`} data-bs-theme="light">
+    <div className={`${styles.panel} ${compact ? styles.compact : ''}`}>
       <a href="#panel-content" className={styles.skipLink}>
         Ir al contenido
       </a>
@@ -189,6 +190,7 @@ export function PanelShell({ children, secciones, nombre, subtitulo, perfil, art
             <span className={styles.divider}>/</span>
             <strong>{secciones.find((s) => s.ruta === path)?.nombre || 'Consultas'}</strong>
           </div>
+          <ThemeToggle />
           <Dropdown key={path} align="end">
             <Dropdown.Toggle
               as="button"

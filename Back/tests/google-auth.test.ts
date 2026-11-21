@@ -21,6 +21,7 @@ process.env.MAIL_TRANSPORT = "resend";
 process.env.RESEND_API_KEY = "";
 
 const { app } = await import("../src/app.js");
+const { limitarRegistro } = await import("../src/middlewares/limitar-registro.js");
 const { prisma } = await import("../src/config/prisma.js");
 const {
   prepararAccesoGoogle,
@@ -59,7 +60,8 @@ function reemplazar(
     record[key] = anterior;
   });
 }
-beforeEach((t) => {
+beforeEach(async (t) => {
+  await limitarRegistro.resetKey("127.0.0.1");
   usuarios.clear();
   estudios.clear();
   sesiones.clear();

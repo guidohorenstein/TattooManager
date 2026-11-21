@@ -25,8 +25,9 @@ const perfilPublico = {
 
 export function buscarPaginaEstudio(slug: string) {
   return prisma.estudio.findFirst({
-    where: { slug, propietario: { ...titularConPlan(), estudio: { slug } } },
+    where: { slug, propietario: { ...titularConPlan(), paginaPublicada: true, estudio: { slug } } },
     select: {
+      propietario: { select: { publicarDireccion: true } },
       nombre: true,
       biografia: true,
       ciudad: true,
@@ -65,11 +66,13 @@ export function buscarPaginaArtista(id: string) {
       id,
       rol: "ARTISTA",
       estudioId: null,
+      paginaPublicada: true,
       suspendidoAt: null,
       suscripciones: { some: planIndividualVigente() },
     },
     select: {
       ...perfilPublico,
+      publicarDireccion: true,
       ciudad: true,
       ciudadId: true,
       direccion: true,
@@ -82,4 +85,22 @@ export function buscarPaginaArtista(id: string) {
       },
     },
   });
+}
+
+export function buscarConfiguracionPagina(usuarioId: string) {
+  return prisma.usuario.findUnique({ where: { id: usuarioId }, select: {
+    id: true, rol: true, estudioId: true, paginaPublicada: true, publicarDireccion: true,
+    nombreArtistico: true, biografia: true, ciudadId: true, fotoPerfil: true, estilosPrincipales: true,
+    _count: { select: { galeria: { where: trabajoPublicado } } },
+    estudio: { select: { id: true, slug: true, propietarioId: true, nombre: true, biografia: true, ciudadId: true,
+      propietario: { select: { paginaPublicada: true, publicarDireccion: true } },
+      usuarios: { where: { rol: "ARTISTA", suspendidoAt: null, estadoEnEstudio: "ACTIVO" },
+        select: { _count: { select: { galeria: { where: trabajoPublicado } } } } },
+    } },
+  } });
+}
+export function guardarConfiguracionPagina(usuarioId: string, estudioId: string | null, data: { paginaPublicada: boolean; publicarDireccion: boolean }) {
+  return prisma.usuario.updateMany({ where: { id: usuarioId, estudioId, suspendidoAt: null,
+    ...(estudioId ? { rol: "ESTUDIO_ADMIN", estudio: { propietarioId: usuarioId } } : { rol: "ARTISTA" }),
+  }, data });
 }

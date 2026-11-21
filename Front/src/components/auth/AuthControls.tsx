@@ -14,10 +14,12 @@ import type { ContextoRegistro } from '@/types/forms';
 import styles from './auth.module.css';
 export function AuthControls({
   light = false,
+  variant = 'header',
   onOpen,
   contextoRegistro = 'profesional',
 }: {
   light?: boolean;
+  variant?: 'header' | 'footer';
   onOpen?: () => void;
   contextoRegistro?: ContextoRegistro;
 }) {
@@ -43,7 +45,9 @@ export function AuthControls({
   const ruta =
     usuario?.rol === 'SUPERADMIN' ? '/admin' : usuario?.rol === 'ARTISTA' ? '/artista' : '/estudio';
   return (
-    <div className={`${styles.controls} ${light ? styles.light : ''}`}>
+    <div
+      className={`${styles.controls} ${light ? styles.light : ''} ${variant === 'footer' ? styles.footer : ''}`}
+    >
       {cargando ? (
         <span role="status">Consultando sesión…</span>
       ) : error ? (

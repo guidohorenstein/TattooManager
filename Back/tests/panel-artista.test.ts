@@ -47,6 +47,7 @@ function coincide(row: Row, where: Row): boolean {
       );
     if (campo === "OR")
       return valor.some((condicion: Row) => coincide(row, condicion));
+    if (campo === "estudio") return row.estudio ? coincide(row.estudio, valor) : false;
     if (campo === "galeria")
       return [...fotos.values()].some(
         (foto) => foto.usuarioId === row.id && coincide(foto, valor.some),
@@ -226,6 +227,8 @@ function cuenta(rol = "ARTISTA", completo = false, conPlan = true) {
     dniPasaporte: "documento-privado",
     nombreArtistico: "Ana Ink",
     estudioId: null,
+    paginaPublicada: completo,
+    estudio: null,
     suspendidoAt: null,
     biografia: completo ? "Biografía artística" : null,
     ciudad: completo ? "Rosario" : null,

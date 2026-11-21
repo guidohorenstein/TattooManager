@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Brand } from '@/components/brand/Brand';
 import Link from 'next/link';
 import { AuthControls } from './AuthControls';
@@ -15,6 +16,7 @@ export function SiteHeader({
       <Link href="/" className={styles.brand} aria-label="TattooManager, inicio">
         <Brand />
       </Link>
+      <ThemeToggle />
       <AuthControls light={overlay} contextoRegistro={contextoRegistro} />
     </header>
   );

@@ -1,5 +1,6 @@
 'use client';
 
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavigationGuardLink as Link } from 'nextjs-nav-guard';
 import NextLink from 'next/link';
@@ -275,7 +276,7 @@ function ArtistPanel({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <div className={`${styles.panel} ${compacto ? styles.compact : ''}`} data-bs-theme="light">
+    <div className={`${styles.panel} ${compacto ? styles.compact : ''}`}>
       <a className={styles.skipLink} href="#artist-content">
         Ir al contenido
       </a>
@@ -302,6 +303,7 @@ function ArtistPanel({ children }: { children: ReactNode }) {
             <strong>{titulo}</strong>
           </div>
           <div className={styles.topbarActions}>
+            <ThemeToggle />
             <Link
               className={styles.notificationButton}
               href="/artista/notificaciones"

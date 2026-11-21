@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit } from "../middlewares/limitar-solicitudes.js";
 import { recibirMensaje } from "./contacto.controller.js";
 export const contactoRouter = Router();
 contactoRouter.post(

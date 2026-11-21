@@ -133,3 +133,23 @@ test("contacto comercial: valida tamaño y email antes de enviar", () => {
   ])
     assert.throws(() => validarMensaje(entrada), { status: 400 });
 });
+
+test("publicación: borrador inicial, perfil completo y dirección optativa",async(t)=>{
+ const {configuracionPagina,cambiarConfiguracionPagina}=await import("../src/paginas-publicas/paginas-publicas.service.js");
+ const cuenta={...artista,rol:"ARTISTA",estudioId:null,paginaPublicada:false,publicarDireccion:false,ciudadId:1384,fotoPerfil:"https://example.test/perfil.webp",_count:{galeria:1},estudio:null};
+ sustituir(t,prisma.usuario,"findUnique",async()=>cuenta);
+ const update=sustituir(t,prisma.usuario,"updateMany",async(args:unknown)=>{Object.assign(cuenta,(args as {data:object}).data);return {count:1};});
+ assert.equal((await configuracionPagina(cuenta.id)).publicada,false);assert.deepEqual((await configuracionPagina(cuenta.id)).pendientes,[]);
+ assert.equal((await cambiarConfiguracionPagina(cuenta.id,{publicada:true,mostrarDireccion:false})).publicada,true);assert.equal(update.mock.callCount(),1);assert.equal(cuenta.publicarDireccion,false);
+ cuenta.biografia="";await assert.rejects(cambiarConfiguracionPagina(cuenta.id,{publicada:true,mostrarDireccion:true}),{status:400});
+ assert.equal((await cambiarConfiguracionPagina(cuenta.id,{publicada:false,mostrarDireccion:false})).publicada,false);
+});
+test("publicación: el integrante no puede cambiar la página del estudio",async(t)=>{
+ const {cambiarConfiguracionPagina}=await import("../src/paginas-publicas/paginas-publicas.service.js");
+ sustituir(t,prisma.usuario,"findUnique",async()=>({...artista,rol:"ARTISTA",estudioId:"estudio-ajeno",_count:{galeria:1},estudio:{id:"estudio-ajeno",slug:"norte",propietarioId:"otro",nombre:"Norte",biografia:"Tatuajes",ciudadId:1384,propietario:{paginaPublicada:true,publicarDireccion:false},usuarios:[{_count:{galeria:1}}]}}));
+ const update=sustituir(t,prisma.usuario,"updateMany",async()=>{throw Error("No debería escribir");});await assert.rejects(cambiarConfiguracionPagina(artista.id,{publicada:true,mostrarDireccion:true}),{status:403});assert.equal(update.mock.callCount(),0);
+});
+test("página pública: la dirección solo aparece si fue autorizada",async(t)=>{
+ sustituir(t,prisma.usuario,"findFirst",async()=>({...artista,direccion:"Dirección ficticia",publicarDireccion:false}));assert.equal((await obtenerPaginaArtista(artista.id)).direccion,null);
+ sustituir(t,prisma.usuario,"findFirst",async()=>({...artista,direccion:"Dirección ficticia",publicarDireccion:true}));assert.equal((await obtenerPaginaArtista(artista.id)).direccion,"Dirección ficticia");
+});

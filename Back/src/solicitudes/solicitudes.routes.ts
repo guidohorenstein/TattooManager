@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit } from "../middlewares/limitar-solicitudes.js";
 import { requerirSesion } from "../middlewares/autenticacion.js";
 import { requerirRoles } from "../middlewares/roles.js";
 import { requerirPlanVigente } from "../middlewares/plan-vigente.js";
@@ -11,7 +11,6 @@ import {
   mostrarEstudio,
   mostrarArtista,
   mostrarEnlaceArtista,
-  crearParaCercanos,
 } from "./solicitudes.controller.js";
 import { guardar } from "../cotizaciones/cotizaciones.controller.js";
 import { upload, uploadSolicitud } from "../middlewares/multer.js";
@@ -32,12 +31,10 @@ const limitarEnvios = rateLimit({
 
 solicitudesRouter.get("/publicas/:slug", mostrarEstudio);
 solicitudesRouter.get("/publicas/artista/:id", mostrarArtista);
-solicitudesRouter.post(
-  "/publicas/cercanas",
-  limitarEnvios,
-  cargarImagenesSolicitud,
-  crearParaCercanos,
-);
+// Reservado para que el enlace retirado no coincida con /publicas/:slug.
+solicitudesRouter.all("/publicas/cercanas", (_req, res) => {
+  res.status(410).json({ error: "Este enlace ya no está disponible. Usá el formulario del estudio o artista." });
+});
 
 solicitudesRouter.post(
   "/publicas/:slug",

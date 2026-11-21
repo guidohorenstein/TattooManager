@@ -1,4 +1,6 @@
 'use server';
+import { headers } from 'next/headers';
+import { firmarIP } from '@/lib/proxy-firma';
 import { apiFetch } from '@/lib/api-client';
 type ContactResult = { success: boolean; message: string };
 export async function sendContactMessage(
@@ -9,7 +11,14 @@ export async function sendContactMessage(
   try {
     const res = await apiFetch('/contacto', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: firmarIP(
+        new Headers({
+          'x-vercel-forwarded-for': (await headers()).get('x-vercel-forwarded-for') ?? '',
+          'Content-Type': 'application/json',
+        }),
+        'POST',
+        '/api/contacto',
+      ),
       body: JSON.stringify({ nombre: name, email, mensaje: message }),
     });
     const datos: { message: string } = await res.json();

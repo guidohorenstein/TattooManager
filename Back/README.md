@@ -123,10 +123,20 @@ npm run db:generate
 | `npm run db:security`  | Aplica las reglas RLS del script de seguridad.     |
 | `npm run seed:reviews` | Carga los perfiles, retratos y reseñas de ejemplo. |
 
-`prisma/seed.ts` reemplaza datos de tablas; `seed:reviews` es independiente y conserva los usuarios existentes.
+`prisma/seed.ts` agrega cuentas de desarrollo sin borrar ni reemplazar registros y exige habilitación por entorno y destino; `seed:reviews` es independiente y conserva los usuarios existentes.
 
 `npm run seed:catalogo` agrega 8 artistas ficticios, 2 estudios y 16 trabajos publicados para probar estilos, ubicación y artistas independientes o de estudio. Usa ciudades del catálogo y sube a Cloudinary las imágenes que ya están en el repositorio. Las fotos se reutilizan como material de prueba y no representan trabajos reales de esos perfiles. Los correos `catalogo-demo-*@example.test` están reservados para estos datos; no tienen contraseña ni acceso con Google.
 
 La carga es repetible y conserva las cuentas existentes. `npm run seed:catalogo -- --remove` elimina exclusivamente estos perfiles, los estudios de prueba que hayan quedado vacíos y sus imágenes de Cloudinary. No usa el seed general que vacía tablas.
 
 La configuración de autenticación en producción está en [Despliegue](../docs/despliegue.md).
+
+## Proxy, límites y páginas públicas
+
+Next firma la IP del visitante que identifica el borde de Vercel. `API_PROXY_SECRET` debe contener la misma clave privada aleatoria de al menos 32 caracteres en ambos servidores; nunca usar un prefijo `NEXT_PUBLIC_`. El backend valida firma, vigencia, método y ruta antes de usar esa IP para los límites. Next elimina las cabeceras privadas recibidas. Las llamadas directas usan la IP de su conexión. `TRUSTED_PROXY_CIDRS` es opcional y solo admite redes concretas de proxies propios verificados. No confiar en todos los visitantes. Con varias réplicas, conectar los límites a un almacenamiento compartido.
+
+Las páginas se publican desde Configuración. El titular elige si muestra la dirección y puede volver a borrador. Los integrantes solo comparten la página de su estudio. Aplicar `prisma/changes/20261120_publicacion_pagina.sql`: las cuentas existentes comienzan con la página en borrador. Sus formularios directos siguen funcionando según sus permisos y plan. El envío de consultas siempre tiene destinatario concreto; el antiguo enlace de distribución por cercanía responde 410.
+
+## Seed de desarrollo
+
+El seed predeterminado no elimina ni reemplaza registros, no envía correos y no habilita cobros. Está bloqueado salvo `NODE_ENV=development` o `test`, `SEED_ENABLED=1` y una huella exacta del destino en `SEED_DATABASE_FINGERPRINT`. Desde Back, `npx tsx prisma/seed.ts --describe` informa host, base y huella sin conectarse ni mostrar la contraseña. Solo en una base de desarrollo dedicada, configurar esos valores y ejecutar `npx prisma db seed`. Las claves aleatorias quedan en `docs-local/accesos-seed/cuentas.json`, ignorado por Git; los reintentos no cambian claves ni perfiles. Deshabilitar `SEED_ENABLED` al terminar. No usar los scripts históricos para reconstruir una base comercial.

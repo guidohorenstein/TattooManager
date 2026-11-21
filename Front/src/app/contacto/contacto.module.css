@@ -2,14 +2,14 @@
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
-  background: #f6f6f6;
+  background: var(--theme-background);
 }
 
 .page {
   flex: 1;
   padding: clamp(56px, 9vw, 112px) 24px;
-  background: #f6f6f6;
-  color: var(--theme-ink, #252525);
+  background: var(--theme-background);
+  color: var(--theme-ink, var(--theme-ink));
 }
 
 .container {
@@ -45,7 +45,7 @@
 
 .eyebrow {
   margin: 0 0 14px;
-  color: var(--theme-muted, #696969);
+  color: var(--theme-muted, var(--theme-muted));
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -59,15 +59,15 @@
 
 .intro > p:last-child {
   margin: 0;
-  color: var(--theme-muted, #696969);
+  color: var(--theme-muted, var(--theme-muted));
   font-size: 16px;
   line-height: 1.65;
 }
 
 .form {
   padding: clamp(22px, 4vw, 36px);
-  border: 1px solid #dddddd;
-  background: #fff;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
 }
 
 .fields {
@@ -97,9 +97,9 @@
   width: 100%;
   min-height: 48px;
   padding: 12px;
-  border: 1px solid #cdcdcd;
+  border: 1px solid var(--theme-border);
   border-radius: 3px;
-  background: #fff;
+  background: var(--theme-surface);
   color: inherit;
   font: inherit;
   font-size: 15px;
@@ -112,7 +112,7 @@
 
 .field input:focus,
 .field textarea:focus {
-  border-color: #252525;
+  border-color: var(--theme-border);
   outline: 2px solid rgb(37 37 31 / 15%);
   outline-offset: 1px;
 }
@@ -139,28 +139,28 @@
 
 .success {
   margin-top: 16px;
-  color: #3e3e3e;
+  color: var(--theme-ink);
 }
 
 .submit {
   justify-self: start;
   min-height: 48px;
   padding: 12px 22px;
-  border: 1px solid #252525;
+  border: 1px solid var(--theme-border);
   border-radius: 3px;
-  background: #252525;
-  color: #fff;
+  background: var(--theme-accent);
+  color: var(--theme-on-accent);
   font: inherit;
   font-size: 14px;
   cursor: pointer;
 }
 
 .submit:hover:not(:disabled) {
-  background: #3a3a3a;
+  background: var(--theme-accent);
 }
 
 .submit:focus-visible {
-  outline: 2px solid #252525;
+  outline: 2px solid var(--theme-border);
   outline-offset: 4px;
 }
 

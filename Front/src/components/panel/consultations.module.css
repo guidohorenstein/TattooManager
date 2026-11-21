@@ -11,15 +11,15 @@
 }
 .filters select {
   min-height: 44px;
-  border: 1px solid #dfdfdf;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
   padding: 8px 12px;
-  background: white;
-  color: #353535;
+  background: var(--theme-surface);
+  color: var(--theme-ink);
 }
 .proposal {
   padding: 20px 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--theme-border);
 }
 .proposal h3 {
   font-size: 16px;
@@ -32,7 +32,7 @@
 }
 .proposal p {
   font-size: 14px;
-  color: #686868;
+  color: var(--theme-ink);
   line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -44,8 +44,8 @@
 }
 .references button {
   padding: 0;
-  border: 1px solid #e5e5e5;
-  background: #f9f9f9;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-background);
   border-radius: 5px;
   overflow: hidden;
 }

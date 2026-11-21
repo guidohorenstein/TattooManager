@@ -1,5 +1,5 @@
 .ayuda {
-  color: #5c5c5c;
+  color: var(--theme-ink);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -128,7 +128,7 @@
 
 .total {
   display: block;
-  color: #5c5c5c;
+  color: var(--theme-ink);
   margin-top: 1.1rem;
 }
 

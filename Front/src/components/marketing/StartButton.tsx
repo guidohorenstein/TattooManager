@@ -12,7 +12,7 @@ const LoginModal = dynamic(() => import('@/app/(auth)/Login/Login').then((m) => 
 import { useAuth } from '@/store/AuthProvider';
 import styles from './marketing.module.css';
 export function StartButton({
-  children = 'Crear mi cuenta',
+  children = 'Crear cuenta',
   secondary = false,
 }: {
   children?: React.ReactNode;

@@ -17,6 +17,7 @@ process.env.NODE_ENV = "test";
 process.env.MAIL_TRANSPORT = "resend";
 process.env.RESEND_API_KEY = "";
 const { app } = await import("../src/app.js");
+const { limitarRegistro } = await import("../src/middlewares/limitar-registro.js");
 const { prisma } = await import("../src/config/prisma.js");
 const { default: cloudinary } = await import("../src/config/cloudinary.js");
 const { limitarLogin } = await import("../src/middlewares/limitar-login.js");
@@ -329,6 +330,7 @@ beforeEach(async () => {
   sessions.clear();
   uploads = 0;
   await limitarLogin.resetKey("127.0.0.1");
+  await limitarRegistro.resetKey("127.0.0.1");
 });
 after(async () => {
   server.closeAllConnections();

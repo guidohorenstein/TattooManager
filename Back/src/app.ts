@@ -1,6 +1,8 @@
 import { contactoRouter } from "./contacto/contacto.routes.js";
 import { paginasPublicasRouter } from "./paginas-publicas/paginas-publicas.routes.js";
 import express from "express";
+import { identificarCliente } from "./middlewares/limitar-solicitudes.js";
+import { configurarProxy } from "./config/proxy.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./auth/auth.routes.js";
@@ -32,9 +34,11 @@ import { operacionRouter } from "./operacion/operacion.routes.js";
 import { asistenteRouter } from "./asistente/asistente.routes.js";
 
 export const app = express();
+configurarProxy(app);
 
 app.use(cors({ origin: origenesPermitidos, credentials: true }));
 app.use(validarOrigen);
+app.use(identificarCliente);
 app.use("/api/webhooks/whatsapp", webhookWhatsApp);
 app.use("/api/webhooks/instagram", webhookInstagram);
 app.use(express.json());
