@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { createContext, useContext, useState } from 'react';
 import Image from 'next/image';
@@ -251,8 +252,7 @@ function QueryDetail({ consulta: c }: { consulta: ConsultaGuardada }) {
     [editando, setEditando] = useState(false),
     [imagen, setImagen] = useState<{ url: string; titulo: string } | null>(null),
     [guardando, setGuardando] = useState(false),
-    [error, setError] = useState(''),
-    [aviso, setAviso] = useState('');
+    [error, setError] = useState('');
   const confirm = useDiscardChanges();
   const ctx = datos.contexto;
   const cliente = datos.clientes.find((x) => x.id === c.clienteId);
@@ -338,11 +338,6 @@ function QueryDetail({ consulta: c }: { consulta: ConsultaGuardada }) {
           )}
         </div>
       )}
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
-        </p>
-      )}
       {(c.imagenZonaMarcada || c.referencias.length > 0) && (
         <div className={ui.references}>
           {c.imagenZonaMarcada && (
@@ -419,7 +414,7 @@ function QueryDetail({ consulta: c }: { consulta: ConsultaGuardada }) {
                 version: c.version,
                 cierre: v.cierre ? new Date(v.cierre).toISOString() : null,
               });
-              setAviso('Cierre actualizado.');
+              notificar.exito('Cierre actualizado.');
             }}
           >
             <PanelField
@@ -461,7 +456,7 @@ function QueryDetail({ consulta: c }: { consulta: ConsultaGuardada }) {
                 version: c.version,
                 artistaId: v.artistaId,
               });
-              setAviso('Artista asignado.');
+              notificar.exito('Artista asignado.');
             }}
           >
             <PanelField name="artistaId" label="Artista" as="select" required>
@@ -525,7 +520,9 @@ function QueryDetail({ consulta: c }: { consulta: ConsultaGuardada }) {
                 try {
                   await cambiar(c.id, { accion, version: c.version });
                   setAccion(null);
-                  setAviso(accion === 'CERRAR' ? 'Recepción cerrada.' : 'Consulta archivada.');
+                  notificar.exito(
+                    accion === 'CERRAR' ? 'Recepción cerrada.' : 'Consulta archivada.',
+                  );
                 } catch (e) {
                   setError(e instanceof Error ? e.message : 'No pudimos guardar los cambios.');
                 } finally {
@@ -550,7 +547,7 @@ function QueryDetail({ consulta: c }: { consulta: ConsultaGuardada }) {
               consulta={c}
               onSaved={() => {
                 setEditando(false);
-                setAviso('Propuesta guardada.');
+                notificar.exito('Propuesta guardada.');
               }}
             />
           )}
@@ -587,13 +584,15 @@ function QuoteEditor({ consulta, onSaved }: { consulta: ConsultaGuardada; onSave
   return (
     <PanelForm<PresupuestoPanel>
       initialValues={
-        propia ? { ...propia, duracionMinutos: propia.duracionMinutos ?? 0 } : {
-          importe: 0,
-          sena: 0,
-          detalle: '',
-          duracionMinutos: 0,
-          validez: moverFecha(fechaLocal(new Date()), 14),
-        }
+        propia
+          ? { ...propia, duracionMinutos: propia.duracionMinutos ?? 0 }
+          : {
+              importe: 0,
+              sena: 0,
+              detalle: '',
+              duracionMinutos: 0,
+              validez: moverFecha(fechaLocal(new Date()), 14),
+            }
       }
       validate={(v) => ({
         ...erroresPresupuesto(v),
@@ -633,7 +632,15 @@ function QuoteEditor({ consulta, onSaved }: { consulta: ConsultaGuardada; onSave
         maxLength={1200}
       />
       <div className={styles.formGrid}>
-        <PanelField name="duracionMinutos" label="Duración estimada (minutos)" type="number" min={30} max={480} step={1} required />
+        <PanelField
+          name="duracionMinutos"
+          label="Duración estimada (minutos)"
+          type="number"
+          min={30}
+          max={480}
+          step={1}
+          required
+        />
         <PanelField name="validez" label="Válido hasta" type="date" required />
       </div>
       <PhotoField

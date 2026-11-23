@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { mutarPanel, usePanelData } from './usePanelData';
 import { crearRecordatorios } from '@/mocks/recordatorios';
 import type { ConversacionPanel, NotificacionPanel } from '@/types/panel-artista';
@@ -29,11 +29,26 @@ const sinActivar = {
 };
 
 export function useOperacion() {
-  const { datos, error, cargando, recargar } = usePanelData<Operacion>('/operacion', 30000);
+  const { datos, error, cargando, recargar, actualizar } = usePanelData<Operacion>(
+    '/operacion',
+    30000,
+  );
   const [errorAccion, setErrorAccion] = useState('');
+  const [preferenciasPendientes, setPreferenciasPendientes] = useState<RecordatoriosPanel | null>(
+    null,
+  );
+  const colaGuardado = useRef(Promise.resolve());
+  const revisionGuardado = useRef(0);
+  const panelAbierto = useRef(true);
+  useEffect(() => {
+    panelAbierto.current = true;
+    return () => {
+      panelAbierto.current = false;
+    };
+  }, []);
   const propios = datos?.recordatorios || sinActivar;
   const negocio = datos?.recordatoriosClientes || sinActivar;
-  const recordatorios = {
+  const recordatorios = preferenciasPendientes ?? {
     ...propios,
     clientesHabilitados: negocio.clientesHabilitados,
     reglas: {
@@ -45,6 +60,7 @@ export function useOperacion() {
   };
   const leerNotificacion = useCallback(
     async (id?: string) => {
+      if (!panelAbierto.current) return;
       try {
         await mutarPanel('/operacion/notificaciones', 'PATCH', id ? { id } : {});
         setErrorAccion('');
@@ -55,14 +71,29 @@ export function useOperacion() {
     },
     [recargar],
   );
-  async function guardarRecordatorios(config: RecordatoriosPanel) {
-    try {
-      await mutarPanel('/operacion/recordatorios', 'PUT', config);
-      await recargar();
-      return '';
-    } catch (e) {
-      return e instanceof Error ? e.message : 'No pudimos guardar los recordatorios.';
-    }
+  function guardarRecordatorios(config: RecordatoriosPanel): Promise<string> {
+    const revision = ++revisionGuardado.current;
+    setPreferenciasPendientes(config);
+    // Conservamos el orden de los cambios aunque la conexión sea lenta.
+    const guardado = colaGuardado.current.then(async () => {
+      if (!panelAbierto.current) return 'Se cerró el panel antes de guardar el cambio.';
+      try {
+        await mutarPanel('/operacion/recordatorios', 'PUT', config);
+        actualizar((actual) => ({
+          ...actual,
+          recordatorios: config,
+          recordatoriosClientes: actual.puedeEditarClientes ? config : actual.recordatoriosClientes,
+        }));
+        return '';
+      } catch (error) {
+        return error instanceof Error ? error.message : 'No pudimos guardar los recordatorios.';
+      }
+    });
+    colaGuardado.current = guardado.then(() => undefined);
+    return guardado.then((error) => {
+      if (revisionGuardado.current === revision) setPreferenciasPendientes(null);
+      return error;
+    });
   }
   return {
     operacion: datos,

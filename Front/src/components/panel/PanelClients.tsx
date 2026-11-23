@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { createContext, useContext, useState } from 'react';
 import Link from 'next/link';
@@ -49,7 +50,6 @@ function Clients() {
   const busqueda = params.get('q') || '';
   const setBusqueda = (value: string) => update({ q: value || null }, true);
   const [formulario, setFormulario] = useState<{ cliente?: ClientePanel } | null>(null);
-  const [aviso, setAviso] = useState('');
   const seleccionada = datos.clientes.find((cliente) => cliente.id === params.get('cliente'));
   const clientes = datos.clientes
     .filter((cliente) =>
@@ -83,11 +83,6 @@ function Clients() {
           Agregar cliente
         </button>
       </PageHeader>
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
-        </p>
-      )}
       <div className={styles.toolbar}>
         <span className={styles.muted}>{cantidad(datos.clientes.length, 'cliente')}</span>
         <SearchField
@@ -213,7 +208,7 @@ function Clients() {
                 onCancel={() => update({ editar: null }, true)}
                 onSaved={() => {
                   update({ editar: null }, true);
-                  setAviso('Cliente guardado.');
+                  notificar.exito('Cliente guardado.');
                 }}
               />
             ) : (
@@ -246,7 +241,7 @@ function Clients() {
               onCancel={() => confirmClose(() => setFormulario(null))}
               onSaved={() => {
                 setFormulario(null);
-                setAviso('Cliente guardado.');
+                notificar.exito('Cliente guardado.');
               }}
             />
           )}
@@ -263,7 +258,6 @@ function ClientDetail({ cliente, onEdit }: { cliente: ClientePanel; onEdit: () =
   const [notas, setNotas] = useState(cliente.notas);
   const clearPendingNotes = useUnsavedChanges(notas.trim() !== cliente.notas);
   const confirmClose = useDiscardChanges();
-  const [aviso, setAviso] = useState('');
   const citas = datos.citas
     .filter((item) => item.clienteId === cliente.id)
     .sort((a, b) => `${b.fecha}${b.hora}`.localeCompare(`${a.fecha}${a.hora}`));
@@ -358,7 +352,8 @@ function ClientDetail({ cliente, onEdit }: { cliente: ClientePanel; onEdit: () =
         onSubmit={(event) => {
           event.preventDefault();
           const error = guardarCliente({ ...cliente, notas }, cliente.id);
-          setAviso(error || 'Notas guardadas.');
+          if (error) notificar.error(error);
+          else notificar.exito('Notas guardadas.');
           if (!error) setNotas(notas.trim());
         }}
       >
@@ -377,11 +372,6 @@ function ClientDetail({ cliente, onEdit }: { cliente: ClientePanel; onEdit: () =
           Guardar notas
         </button>
       </form>
-      {aviso && (
-        <p className={`${styles.notice} mt-3`} role="status">
-          {aviso}
-        </p>
-      )}
       <PanelReminderOverrides
         datos={datos}
         baseRuta={baseRuta}

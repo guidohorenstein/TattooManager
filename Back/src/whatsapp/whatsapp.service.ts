@@ -1,3 +1,4 @@
+import { programarResumen } from "../gestion-conversaciones/gestion-conversaciones.repository.js";
 import { randomUUID } from "node:crypto";
 import type { EstadoMensajeWhatsApp } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
@@ -91,7 +92,10 @@ async function destinoWhatsApp(numeroId: string, wabaId: string | undefined) {
   const cuenta = estudioId
     ? await prisma.estudio
         .findFirst({
-          where: { id: estudioId, propietario: { ...titularConPlan(), estudioId } },
+          where: {
+            id: estudioId,
+            propietario: { ...titularConPlan(), estudioId },
+          },
           select: { propietarioId: true },
         })
         .then((e) => e?.propietarioId)
@@ -247,7 +251,18 @@ export async function responderWhatsApp(
       throw new HttpError(409, "El envío ya fue utilizado.");
     return Boolean(anterior);
   };
-  if (await comprobarEnvio()) return;
+  const resultado = () =>
+    prisma.mensajeWhatsApp.findFirst({
+      where: { claveEnvio, conversacionId: hilo.id },
+      select: {
+        id: true,
+        texto: true,
+        propio: true,
+        fecha: true,
+        estado: true,
+      },
+    });
+  if (await comprobarEnvio()) return resultado();
   const config = await configEnvio(hilo.estudioId, hilo.artistaId);
   if (!config || config.numeroId !== hilo.numeroId)
     throw new HttpError(503, "WhatsApp no está conectado para este negocio.");
@@ -275,7 +290,7 @@ export async function responderWhatsApp(
   });
   if (!count) {
     await comprobarEnvio();
-    return;
+    return resultado();
   }
   let proveedorId: string | undefined;
   let estado: EstadoMensajeWhatsApp;
@@ -322,6 +337,7 @@ export async function responderWhatsApp(
         data: { ultimaActividad: fecha },
       });
 
+      await programarResumen("WHATSAPP", hilo, tx);
       if (revocada && hilo.estudioId && config.tokenCifrado) {
         await tx.conexionWhatsApp.updateMany({
           where: {
@@ -334,6 +350,7 @@ export async function responderWhatsApp(
     },
     { timeout: 20000 },
   );
+  return resultado();
 }
 
 export async function marcarConversacion(

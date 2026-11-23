@@ -1,4 +1,5 @@
 'use client';
+import { SetupChecklist } from '@/components/panel/SetupChecklist';
 import { useConsultas } from '@/hooks/useConsultas';
 import { relojEnZona } from '@/lib/agenda';
 import Link from 'next/link';
@@ -30,6 +31,32 @@ export function StudioOverview() {
           Agendar turno
         </Link>
       </PageHeader>
+      <SetupChecklist
+        items={[
+          {
+            titulo: 'Datos del estudio',
+            listo: Boolean(
+              datos.perfil.nombre &&
+              datos.perfil.biografia &&
+              datos.perfil.ciudad &&
+              datos.perfil.direccion,
+            ),
+            href: '/estudio/perfil',
+          },
+          {
+            titulo: 'Artistas del equipo',
+            listo: datos.equipo.some((a) => a.estado === 'ACTIVO'),
+            href: '/estudio/equipo',
+          },
+          {
+            titulo: 'Horarios de los artistas',
+            listo:
+              Boolean(fuente?.equipo.some((a) => a.estado === 'ACTIVO')) &&
+              !fuente?.equipo.some((a) => a.estado === 'ACTIVO' && a.estadoAgenda !== 'LISTA'),
+            href: '/estudio/disponibilidad',
+          },
+        ]}
+      />
       <div className={styles.stats}>
         {[
           ['Turnos de hoy', turnos.length, '/estudio/agenda'],

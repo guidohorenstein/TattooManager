@@ -332,7 +332,7 @@ export function ConexionWhatsApp() {
         </h3>
 
         {estado === 'CONECTADA' && meta && (
-          <strong>Conectado</strong>
+          <span className={`${styles.status} ${styles.statusGood}`}>Conectado</span>
         )}
       </div>
 

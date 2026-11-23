@@ -1,7 +1,7 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 import { EnlacePaginaPublica } from '@/components/panel/EnlacePaginaPublica';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useFormikContext } from 'formik';
 import { CuentasAsociadas } from '@/components/panel/CuentasAsociadas';
@@ -20,7 +20,6 @@ import studio from './studio.module.css';
 export function StudioProfile() {
   const { operacion, errorOperacion, recargarOperacion } = useStudio();
   const { recargar } = useConsultas();
-  const [aviso, setAviso] = useState('');
   const perfil = operacion?.estudio;
   if (!perfil)
     return (
@@ -33,11 +32,6 @@ export function StudioProfile() {
   return (
     <>
       <PageHeader titulo="Perfil del estudio" />
-      {aviso && (
-        <p role="status" className={styles.notice}>
-          {aviso}
-        </p>
-      )}
       <PanelForm<PerfilEstudio & { ciudadId: number | null }>
         initialValues={perfil}
         className={studio.profile}
@@ -59,7 +53,7 @@ export function StudioProfile() {
           await mutarPanel('/operacion/estudio', 'PATCH', valores);
           void Promise.all([recargarOperacion(), recargar()]);
         }}
-        onSaved={() => setAviso('Perfil guardado.')}
+        onSaved={() => notificar.exito('Perfil guardado.')}
       >
         <section className={styles.settingsSection}>
           <div>
@@ -169,7 +163,6 @@ function EstadoEstudio({
 }
 export function StudioSettings() {
   const { operacion, errorOperacion, recargarOperacion } = useStudio();
-  const [aviso, setAviso] = useState('');
   const perfil = operacion?.estudio;
   if (!perfil)
     return (
@@ -197,11 +190,6 @@ export function StudioSettings() {
           Administrar disponibilidad
         </Link>
       </section>
-      {aviso && (
-        <p role="status" className={styles.notice}>
-          {aviso}
-        </p>
-      )}
       <PanelForm
         initialValues={{ horas: perfil.plazoPropuestasHoras }}
         validate={(v) =>
@@ -213,7 +201,7 @@ export function StudioSettings() {
           await mutarPanel('/operacion/estudio', 'PATCH', v);
           void recargarOperacion();
         }}
-        onSaved={() => setAviso('Configuración guardada.')}
+        onSaved={() => notificar.exito('Configuración guardada.')}
       >
         <section className={styles.settingsSection}>
           <div>

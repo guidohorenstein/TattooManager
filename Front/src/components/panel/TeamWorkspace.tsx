@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 import { Suspense, useState, useRef } from 'react';
 import Link from 'next/link';
 import Modal from 'react-bootstrap/Modal';
@@ -7,7 +8,7 @@ import { useAuth } from '@/store/AuthProvider';
 import { useConsultas } from '@/hooks/useConsultas';
 import { usePanelFilters } from '@/hooks/usePanelFilters';
 import { useDiscardChanges } from '@/components/forms/UnsavedChanges';
-import { PageHeader, EmptyState, Avatar, SearchField } from './PanelUI';
+import { PageHeader, EmptyState, Avatar, SearchField, StatusBadge } from './PanelUI';
 import { PanelForm, PanelField } from './PanelForm';
 import { InvitationList, type AccionInvitacion } from './InvitationList';
 import {
@@ -37,7 +38,6 @@ function Team() {
     { params, update } = usePanelFilters(),
     descartar = useDiscardChanges();
   const [invitar, setInvitar] = useState(false),
-    [aviso, setAviso] = useState(''),
     [confirmacion, setConfirmacion] = useState<Confirmacion | null>(null);
   const resultado = useRef('');
   const titular = usuario?.rol === 'ESTUDIO_ADMIN',
@@ -100,11 +100,6 @@ function Team() {
           {error}
         </p>
       )}
-      {aviso && (
-        <p role="status" className={styles.notice}>
-          {aviso}
-        </p>
-      )}
       {datos && !datos.contexto.emailVerificado && (
         <div className={styles.notice}>
           <p>Verificá tu email para {titular ? 'enviar' : 'ver y responder'} invitaciones.</p>
@@ -112,9 +107,9 @@ function Team() {
             className={styles.textButton}
             onClick={() => {
               void solicitarCorreoCuenta(usuario!.email, true)
-                .then(setAviso)
+                .then(notificar.exito)
                 .catch((e) =>
-                  setAviso(e instanceof Error ? e.message : 'No pudimos enviar el correo.'),
+                  notificar.error(e instanceof Error ? e.message : 'No pudimos enviar el correo.'),
                 );
             }}
           >
@@ -157,11 +152,11 @@ function Team() {
                     Ver todo el equipo
                   </button>
                 )}
-                <section className={styles.surface} aria-label="Integrantes del estudio">
+                <section className={styles.teamGrid} aria-label="Integrantes del estudio">
                   {equipo.length ? (
                     equipo.map((a) => (
-                      <article className={styles.mobileItem} key={a.id}>
-                        <div className={styles.mobileItemHeader}>
+                      <article className={styles.teamMember} key={a.id}>
+                        <div className={`${styles.mobileItemHeader} ${styles.teamHeader}`}>
                           <div className={styles.identity}>
                             <Avatar nombre={a.nombre} />
                             <div>
@@ -172,12 +167,23 @@ function Team() {
                               <small>{a.estilos}</small>
                             </div>
                           </div>
-                          <span className={styles.status}>
-                            {a.estado === 'ACTIVO' ? 'Activo' : 'Suspendido'}
-                          </span>
+                          <StatusBadge estado={a.estado} />
                         </div>
-                        {a.email && <p>{a.email}</p>}
-                        <div className={styles.headerActions}>
+                        {a.email && <p className={styles.teamEmail}>{a.email}</p>}
+                        {titular &&
+                          a.estado === 'ACTIVO' &&
+                          (a.estadoAgenda === 'SIN_CONFIGURAR' || a.estadoAgenda === 'CERRADA') && (
+                            <Link
+                              className={styles.teamSetup}
+                              href={'/estudio/disponibilidad?artista=' + a.id}
+                            >
+                              {a.estadoAgenda === 'CERRADA'
+                                ? 'Agenda sin días de atención'
+                                : 'Faltan configurar los horarios'}{' '}
+                              <span aria-hidden="true">→</span>
+                            </Link>
+                          )}
+                        <div className={styles.teamActions}>
                           <Link
                             className={styles.textButton}
                             href={`${base}/consultas?artista=${a.id}`}
@@ -212,6 +218,11 @@ function Team() {
                               </Dropdown.Toggle>
                               <Dropdown.Menu align="end">
                                 <Dropdown.Item
+                                  className={
+                                    a.estado === 'ACTIVO'
+                                      ? styles.actionWarning
+                                      : styles.actionEnable
+                                  }
                                   onClick={() =>
                                     setConfirmacion({
                                       tipo: 'INTEGRANTE',
@@ -224,7 +235,7 @@ function Team() {
                                 </Dropdown.Item>
                                 <Dropdown.Divider />
                                 <Dropdown.Item
-                                  className="text-danger"
+                                  className={styles.actionDanger}
                                   onClick={() =>
                                     setConfirmacion({
                                       tipo: 'INTEGRANTE',
@@ -291,7 +302,7 @@ function Team() {
               }}
               onSaved={() => {
                 setInvitar(false);
-                setAviso(resultado.current);
+                notificar.exito(resultado.current);
               }}
             >
               <PanelField
@@ -343,7 +354,7 @@ function Team() {
                 const acepta =
                   confirmacion.tipo === 'INVITACION' && confirmacion.accion === 'ACEPTAR';
                 setConfirmacion(null);
-                setAviso(resultado.current);
+                notificar.exito(resultado.current);
                 if (acepta) reintentar();
               }}
             >

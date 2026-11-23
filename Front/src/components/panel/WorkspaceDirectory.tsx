@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 import { useState } from 'react';
 import Link from 'next/link';
 import Modal from 'react-bootstrap/Modal';
@@ -18,16 +19,10 @@ function ClientsDirectory() {
   const { datos, error, cargando, recargar } = useConsultas();
   const { usuario } = useAuth();
   const [editando, setEditando] = useState<ClientePanel | null>(null);
-  const [aviso, setAviso] = useState('');
   const base = usuario?.rol === 'ESTUDIO_ADMIN' ? '/estudio' : '/artista';
   return (
     <>
       <PageHeader titulo="Clientes" />
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
-        </p>
-      )}
       {error && (
         <p className={styles.notice} role="alert">
           {error}
@@ -119,7 +114,7 @@ function ClientsDirectory() {
               }}
               onSaved={() => {
                 setEditando(null);
-                setAviso('Contacto guardado.');
+                notificar.exito('Contacto guardado.');
               }}
             >
               <PanelField name="nombre" label="Nombre" maxLength={80} required />
