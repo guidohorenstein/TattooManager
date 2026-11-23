@@ -66,7 +66,11 @@ webhookWhatsApp.post(
 );
 
 export const mensajesRouter = Router();
-mensajesRouter.use(requerirSesion, requerirRoles("ARTISTA", "ESTUDIO_ADMIN"), requerirPlanVigente);
+mensajesRouter.use(
+  requerirSesion,
+  requerirRoles("ARTISTA", "ESTUDIO_ADMIN"),
+  requerirPlanVigente,
+);
 
 const conexion = Router();
 conexion.use(requerirRoles("ESTUDIO_ADMIN"));
@@ -111,8 +115,7 @@ mensajesRouter.get("/", async (req, res) => {
   res.json(await bandejaWhatsApp(req.usuario!.id));
 });
 mensajesRouter.post("/:id", async (req, res) => {
-  await responderWhatsApp(req.usuario!.id, req.params.id, req.body);
-  res.sendStatus(204);
+  res.json(await responderWhatsApp(req.usuario!.id, req.params.id, req.body));
 });
 mensajesRouter.patch("/:id/lectura", async (req, res) => {
   await marcarConversacion(req.usuario!.id, req.params.id, req.body);

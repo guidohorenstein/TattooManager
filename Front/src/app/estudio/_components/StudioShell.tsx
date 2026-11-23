@@ -76,17 +76,24 @@ export function StudioShell({ children }: { children: ReactNode }) {
     <AccesoPanel
       key={usuario.id}
       ruta="/estudio"
-      mostrarPanel={(contenido, habilitado) => habilitado ? (
-        <ConsultasProvider>
-          <StudioProvider>
-            <Workspace>{contenido}</Workspace>
-          </StudioProvider>
-        </ConsultasProvider>
-      ) : (
-        <PanelShell secciones={sections} nombre={usuario.nombre || usuario.email} subtitulo="Cuenta del estudio" perfil="/estudio/perfil">
-          {contenido}
-        </PanelShell>
-      )}
+      mostrarPanel={(contenido, habilitado) =>
+        habilitado ? (
+          <ConsultasProvider>
+            <StudioProvider>
+              <Workspace>{contenido}</Workspace>
+            </StudioProvider>
+          </ConsultasProvider>
+        ) : (
+          <PanelShell
+            secciones={sections}
+            nombre={usuario.nombre || usuario.email}
+            subtitulo="Cuenta del estudio"
+            perfil="/estudio/perfil"
+          >
+            {contenido}
+          </PanelShell>
+        )
+      }
     >
       {children}
     </AccesoPanel>
@@ -95,7 +102,20 @@ export function StudioShell({ children }: { children: ReactNode }) {
 function Workspace({ children }: { children: ReactNode }) {
   const { datos, operacion } = useStudio();
   const consultas = useConsultas();
+  const agendasPendientes =
+    consultas.datos?.equipo.filter(
+      (a) =>
+        a.estado === 'ACTIVO' &&
+        (a.estadoAgenda === 'SIN_CONFIGURAR' || a.estadoAgenda === 'CERRADA'),
+    ).length || 0;
   const nav = sections.map((s) => ({
+    advertencia:
+      agendasPendientes && (s.ruta === '/estudio/disponibilidad' || s.ruta === '/estudio/equipo')
+        ? agendasPendientes +
+          (agendasPendientes === 1
+            ? ' artista con horarios pendientes'
+            : ' artistas con horarios pendientes')
+        : undefined,
     ...s,
     cantidad:
       s.icono === 'consultas'

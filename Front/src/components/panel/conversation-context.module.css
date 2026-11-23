@@ -1,0 +1,264 @@
+.indicadores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+.indicadores > span,
+.positivo,
+.pendiente,
+.neutro,
+.urgente {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+.positivo {
+  color: var(--state-success);
+  background: var(--state-success-bg);
+}
+.pendiente {
+  color: var(--state-warning);
+  background: var(--state-warning-bg);
+}
+.urgente {
+  color: var(--state-danger);
+  background: var(--state-danger-bg);
+}
+.neutro {
+  color: var(--theme-muted);
+  background: var(--theme-background);
+}
+.contexto {
+  --bs-offcanvas-width: min(420px, 100vw);
+  color: var(--theme-ink);
+  background: var(--theme-surface) !important;
+}
+.cuerpo {
+  display: block !important;
+  padding: 20px !important;
+  overflow-y: auto !important;
+  min-width: 0;
+}
+.titulo {
+  font-size: 16px;
+  margin: 0 0 18px;
+  font-weight: 650;
+}
+.seccion {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--theme-border);
+}
+.seccion h3 {
+  font-size: 13px;
+  font-weight: 650;
+  margin: 0 0 12px;
+}
+.seccion p {
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 8px 0;
+}
+.seccion strong {
+  font-size: 13px;
+}
+.seccion a {
+  font-size: 13px;
+  color: var(--theme-ink);
+  text-underline-offset: 3px;
+}
+.formulario {
+  display: grid;
+  gap: 12px;
+}
+.formulario label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+}
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.muted {
+  display: block;
+  color: var(--theme-muted);
+  font-size: 11px;
+}
+.resolver {
+  padding-top: 12px;
+  border-top: 1px solid var(--theme-border);
+}
+.ficha {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  font-size: 12px;
+  margin: 12px 0;
+}
+.ficha dt {
+  color: var(--theme-muted);
+  font-weight: 400;
+}
+.ficha dd {
+  margin: 0;
+}
+.imagenes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.imagenes img {
+  width: 76px;
+  height: 86px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.propuesta {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--theme-border);
+}
+.propuesta:last-child {
+  border-bottom: 0;
+}
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.boceto {
+  display: block;
+  width: 100%;
+  max-height: 230px;
+  object-fit: contain;
+  margin: 12px 0;
+  background: var(--theme-background);
+  border-radius: 6px;
+}
+.eventos {
+  padding-left: 16px;
+}
+.eventos li {
+  padding: 8px 0;
+}
+.eventos small {
+  color: var(--theme-muted);
+  font-size: 11px;
+}
+@media (min-width: 1400px) {
+  .contexto {
+    border-left: 1px solid var(--theme-border);
+    min-width: 0;
+    overflow: hidden;
+  }
+  .cuerpo {
+    height: 100%;
+    padding: 18px !important;
+  }
+  .contexto :global(.offcanvas-header) {
+    display: none;
+  }
+}
+@media (max-width: 1399px) {
+  .titulo {
+    display: none;
+  }
+}
+
+.preparacion {
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  padding: 15px 18px;
+  margin: 0 0 24px;
+}
+.preparacion summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.preparacion summary span {
+  margin-left: auto;
+  color: var(--theme-muted);
+  font-size: 12px;
+}
+.preparacion ul {
+  list-style: none;
+  padding: 12px 0 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.preparacion li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+.preparacion a {
+  color: var(--theme-ink);
+  text-underline-offset: 3px;
+}
+@media (max-width: 650px) {
+  .preparacion summary {
+    flex-wrap: wrap;
+  }
+  .preparacion summary span {
+    width: 100%;
+    margin-left: 27px;
+  }
+}
+
+.grupoResumen {
+  margin-top: 18px;
+}
+.grupoResumen h4,
+.estadoResumen h4 {
+  font-size: 12px;
+  font-weight: 650;
+  margin: 0 0 8px;
+}
+.grupoResumen ul {
+  padding-left: 17px;
+  margin: 0;
+}
+.grupoResumen li {
+  margin-bottom: 12px;
+}
+.evidencias summary {
+  font-size: 11px;
+  color: var(--theme-muted);
+  cursor: pointer;
+  width: fit-content;
+}
+.evidencias summary:focus-visible {
+  outline: 2px solid var(--theme-ink);
+  outline-offset: 3px;
+}
+.evidencias blockquote {
+  padding: 6px 10px;
+  margin: 10px 0;
+  border-left: 2px solid var(--theme-border);
+}
+.evidencias blockquote p {
+  font-size: 12px;
+}
+.evidencias small {
+  font-size: 10px;
+  color: var(--theme-muted);
+}
+.estadoResumen {
+  border-top: 1px solid var(--theme-border);
+  margin-top: 18px;
+  padding-top: 16px;
+}

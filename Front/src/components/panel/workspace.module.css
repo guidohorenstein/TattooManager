@@ -111,25 +111,33 @@
   white-space: nowrap;
   line-height: 1.5;
 }
+.status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
 .statusNew {
-  background: var(--theme-background);
-  color: var(--theme-ink);
+  background: var(--state-info-bg);
+  color: var(--state-info);
 }
 .statusPending {
-  background: var(--theme-background);
-  color: #785c26;
+  background: var(--state-warning-bg);
+  color: var(--state-warning);
 }
 .statusGood {
-  background: var(--theme-background);
-  color: #42664e;
+  background: var(--state-success-bg);
+  color: var(--state-success);
 }
 .statusMuted {
-  background: var(--theme-background);
-  color: var(--theme-ink);
+  background: var(--theme-soft);
+  color: var(--theme-muted);
 }
 .statusError {
-  background: var(--theme-background);
-  color: #943c30;
+  background: var(--state-danger-bg);
+  color: var(--state-danger);
 }
 .search {
   display: flex;
@@ -663,10 +671,16 @@
   font-size: 14px;
   margin-bottom: 22px;
 }
+.notice[role='status'] {
+  background: var(--state-success-bg);
+  border-color: var(--state-success-border);
+  color: var(--state-success);
+}
+.notice[role='alert'],
 .error {
-  background: var(--theme-background);
-  border-color: var(--theme-border);
-  color: #a25943;
+  background: var(--state-danger-bg);
+  border-color: var(--state-danger-border);
+  color: var(--state-danger);
 }
 .noteLabel {
   font-size: 14px;
@@ -781,8 +795,8 @@
   color: var(--theme-ink);
 }
 .switchRow :global(.form-check-input:checked) {
-  background-color: var(--theme-soft);
-  border-color: var(--theme-border);
+  background-color: var(--state-success-solid);
+  border-color: var(--state-success-solid);
 }
 .days {
   display: flex;
@@ -1108,10 +1122,185 @@
   }
 }
 
-.settingsActions, .settingsControls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
-.settingsActions > p { flex-basis: 100%; }
-.settingsControls { margin-top: 16px; }
-.settingsChecklist { margin-top: .75rem; font-size: .875rem; color: var(--theme-muted); }
-.settingsChecklist summary { cursor: pointer; }
-.settingsChecklist ul { margin: .75rem 0 0; padding-left: 1rem; display: grid; gap: .4rem; }
-.settingsChecklist a { color: var(--theme-ink); }
+.settingsActions,
+.settingsControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+.settingsActions > p {
+  flex-basis: 100%;
+}
+.settingsControls {
+  margin-top: 16px;
+}
+.settingsChecklist {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--theme-muted);
+}
+.settingsChecklist summary {
+  cursor: pointer;
+}
+.settingsChecklist ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+.settingsChecklist a {
+  color: var(--theme-ink);
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  gap: 22px;
+  margin: 24px 0 32px;
+}
+.teamMember {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-surface);
+}
+.teamHeader {
+  flex-wrap: wrap;
+  row-gap: 14px;
+}
+.teamHeader .identity {
+  min-width: 0;
+  flex: 1 1 180px;
+  align-items: flex-start;
+}
+.teamHeader .identity > div {
+  min-width: 0;
+}
+.teamHeader small {
+  display: block;
+  margin-top: 5px;
+  color: var(--theme-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.teamEmail {
+  margin: 0;
+  font-size: 13px;
+  color: var(--theme-muted);
+  overflow-wrap: anywhere;
+}
+.teamActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--theme-border);
+}
+.teamActions .textButton {
+  min-height: 40px;
+  padding-block: 7px;
+}
+.teamActions > :global(.dropdown) {
+  margin-left: auto;
+}
+.teamActions :global(.dropdown-toggle) {
+  min-height: 40px;
+  color: var(--theme-ink);
+  border-color: var(--theme-border);
+}
+.teamGrid > .emptyState {
+  grid-column: 1 / -1;
+}
+.actionEnable {
+  color: var(--state-success);
+}
+.actionWarning {
+  color: var(--state-warning);
+}
+.actionDanger {
+  color: var(--state-danger);
+}
+.invitationList {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+.invitationItem {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--theme-border);
+  border-radius: 6px;
+  background: var(--theme-background);
+}
+.invitationItem p {
+  margin: 12px 0;
+  color: var(--theme-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.invitationItem .headerActions {
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 16px;
+}
+.botToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.botToggle::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.botToggle[aria-pressed='true'] {
+  color: var(--state-success);
+  border-color: var(--state-success-border);
+  background: var(--state-success-bg);
+}
+@media (max-width: 600px) {
+  .teamGrid {
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .teamMember {
+    padding: 20px;
+    gap: 16px;
+  }
+  .teamActions > :global(.dropdown) {
+    margin-left: 0;
+  }
+  .invitationList {
+    padding: 16px;
+  }
+  .invitationItem {
+    padding: 16px;
+  }
+}
+
+.teamSetup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--state-warning);
+  background: var(--state-warning-bg);
+  border: 1px solid var(--state-warning-border);
+  padding: 10px 12px;
+  border-radius: 5px;
+  font-size: 13px;
+  text-decoration: none;
+}
+.teamSetup:hover {
+  text-decoration: underline;
+}

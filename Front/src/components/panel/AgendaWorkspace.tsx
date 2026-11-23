@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -153,8 +154,7 @@ function Agenda({
       ));
   }
   const mostrarForm = Boolean(seleccionada) || params.has('nueva');
-  const [aviso, setAviso] = useState(''),
-    [zona, setZona] = useState(false);
+  const [zona, setZona] = useState(false);
   const puedeCrear = datos.contexto.administra || datos.contexto.puedeProponer;
   const cerrar = () => update({ cita: null, nueva: null, solicitud: null }, true);
   const nombreCliente = (id: string) =>
@@ -231,11 +231,6 @@ function Agenda({
       {error && (
         <p className="alert alert-danger" role="alert">
           {error}
-        </p>
-      )}
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
         </p>
       )}
       <div className={styles.toolbar}>
@@ -428,7 +423,7 @@ function Agenda({
                 onCancel={() => confirm(cerrar)}
                 onSave={(v) => guardarCita(v, seleccionada?.id)}
                 onSaved={(cita) => {
-                  setAviso(seleccionada ? 'Turno actualizado.' : 'Turno agendado.');
+                  notificar.exito(seleccionada ? 'Turno actualizado.' : 'Turno agendado.');
                   update({ cita: null, nueva: null, solicitud: null, fecha: cita.fecha }, true);
                 }}
               />
@@ -452,7 +447,7 @@ function Agenda({
               }}
               onSaved={() => {
                 setZona(false);
-                setAviso('Zona horaria actualizada.');
+                notificar.exito('Zona horaria actualizada.');
               }}
             >
               <PanelField name="zonaHoraria" label="Zona horaria" as="select">

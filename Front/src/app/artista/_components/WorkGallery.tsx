@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -33,7 +34,6 @@ export function WorkGallery() {
   const [formulario, setFormulario] = useState<{ trabajo: TrabajoArtista | null } | null>(null);
   const [borrando, setBorrando] = useState<TrabajoArtista | null>(null);
   const [ocupado, setOcupado] = useState<string | null>(null);
-  const [mensaje, setMensaje] = useState('');
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([obtenerMisTrabajos(controller.signal), obtenerEstilos(controller.signal)])
@@ -58,7 +58,7 @@ export function WorkGallery() {
         : [trabajo, ...actuales],
     );
     setFormulario(null);
-    setMensaje(trabajo.estado === 'PUBLICADO' ? 'Trabajo publicado.' : 'Borrador guardado.');
+    notificar.exito(trabajo.estado === 'PUBLICADO' ? 'Trabajo publicado.' : 'Borrador guardado.');
   }
   async function cambiarEstado(trabajo: TrabajoArtista) {
     setOcupado(trabajo.id);
@@ -79,7 +79,7 @@ export function WorkGallery() {
       await eliminarTrabajo(borrando.id);
       setTrabajos((actuales) => actuales.filter((item) => item.id !== borrando.id));
       setBorrando(null);
-      setMensaje('Trabajo eliminado.');
+      notificar.exito('Trabajo eliminado.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos eliminar el trabajo.');
     } finally {
@@ -93,7 +93,6 @@ export function WorkGallery() {
         <button
           className={common.button}
           onClick={() => {
-            setMensaje('');
             setFormulario({ trabajo: null });
           }}
           disabled={cargando || !estilos.length}
@@ -123,11 +122,6 @@ export function WorkGallery() {
             Reintentar
           </button>
         </div>
-      )}
-      {mensaje && (
-        <p role="status" className={styles.feedback}>
-          {mensaje}
-        </p>
       )}
       <div className={styles.toolbar}>
         <div className={common.tabs} role="group" aria-label="Estado de los trabajos">

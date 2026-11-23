@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -73,7 +74,6 @@ export function PanelSubscription({
   const [accion, setAccion] = useState<'CICLO' | 'CANCELAR' | null>(null);
   const [ciclo, setCiclo] = useState<CicloPlan>(suscripcion.cicloProximo || suscripcion.ciclo);
   const [detalle, setDetalle] = useState<CobroPanel | null>(null);
-  const [aviso, setAviso] = useState('');
   const [suscripcionReal, setSuscripcionReal] = useState<SuscripcionMercadoPago | null>(null);
   const [consultaReal, setConsultaReal] = useState(true);
   const [errorReal, setErrorReal] = useState('');
@@ -118,7 +118,7 @@ export function PanelSubscription({
       });
       setSuscripcionReal(null);
       setConfirmarCancelacionReal(false);
-      setAviso('Suscripción cancelada. El acceso al plan quedó desactivado.');
+      notificar.exito('Suscripción cancelada. El acceso al plan quedó desactivado.');
     } catch (cause) {
       setErrorReal(cause instanceof Error ? cause.message : 'No pudimos cancelar la suscripción.');
     } finally {
@@ -130,11 +130,6 @@ export function PanelSubscription({
   return (
     <>
       <PageHeader titulo="Suscripción" descripcion="Tu plan, próximos vencimientos y pagos." />
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
-        </p>
-      )}
       <section className={`${styles.surface} mb-4`} aria-labelledby="mercadopago-subscription">
         <div className={styles.surfaceHeading}>
           <h2 id="mercadopago-subscription">Suscripción de Mercado Pago</h2>
@@ -319,7 +314,7 @@ export function PanelSubscription({
                       className={styles.button}
                       onClick={() => {
                         reactivarRenovacion();
-                        setAviso('Renovación automática reactivada.');
+                        notificar.exito('Renovación automática reactivada.');
                       }}
                     >
                       Reactivar renovación
@@ -465,7 +460,7 @@ export function PanelSubscription({
                       onClick={() => {
                         cambiarCiclo(ciclo);
                         setAccion(null);
-                        setAviso(
+                        notificar.exito(
                           ciclo === suscripcion.ciclo
                             ? 'Se conserva la facturación actual.'
                             : 'Cambio de facturación programado.',
@@ -496,7 +491,7 @@ export function PanelSubscription({
                       onClick={() => {
                         cancelarRenovacion();
                         setAccion(null);
-                        setAviso('Renovación automática cancelada al finalizar el período.');
+                        notificar.exito('Renovación automática cancelada al finalizar el período.');
                       }}
                     >
                       Confirmar cancelación

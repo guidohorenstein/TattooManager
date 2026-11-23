@@ -1,5 +1,6 @@
 import type { IntegranteEstudio } from './panel-estudio';
 export interface IntegranteGuardado extends IntegranteEstudio {
+  estadoAgenda?: 'SIN_CONFIGURAR' | 'CERRADA' | 'LISTA';
   version: number;
   turnosPendientes: number;
   consultasAsignadas: number;

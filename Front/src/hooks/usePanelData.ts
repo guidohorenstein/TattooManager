@@ -42,8 +42,25 @@ export function usePanelData<T>(ruta: string, intervalo = 0) {
       peticion.current?.abort();
     };
   }, [recargar, intervalo]);
+  const actualizar = useCallback(
+    (cambio: (datos: T) => T) => {
+      peticion.current?.abort();
+      setEstado((anterior) =>
+        anterior?.ruta === ruta && anterior.datos !== null
+          ? { ...anterior, datos: cambio(anterior.datos), error: '' }
+          : anterior,
+      );
+    },
+    [ruta],
+  );
   const actual = estado?.ruta === ruta ? estado : null;
-  return { datos: actual?.datos ?? null, error: actual?.error ?? '', cargando: !actual, recargar };
+  return {
+    datos: actual?.datos ?? null,
+    error: actual?.error ?? '',
+    cargando: !actual,
+    recargar,
+    actualizar,
+  };
 }
 
 export function mutarPanel(ruta: string, method: 'POST' | 'PATCH' | 'PUT', datos: unknown) {

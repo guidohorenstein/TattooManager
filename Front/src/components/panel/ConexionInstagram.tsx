@@ -55,7 +55,9 @@ export function ConexionInstagram() {
         <h3 id="conexion-instagram" className="m-0 d-flex align-items-center gap-2 fs-6">
           <PanelIcon nombre="instagram" size={19} /> Instagram
         </h3>
-        {conectada && datos.disponible && <strong>Conectado</strong>}
+        {conectada && datos.disponible && (
+          <span className={`${styles.status} ${styles.statusGood}`}>Conectado</span>
+        )}
       </div>
       <div className={styles.surfaceBody}>
         {cargando && <p role="status">Consultando conexión…</p>}

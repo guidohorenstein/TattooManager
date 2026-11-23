@@ -87,7 +87,11 @@ async function comprobarHorario(
     );
 }
 
-export async function crearTurno(usuarioId: string, entrada: unknown, origen?: "instagram") {
+export async function crearTurno(
+  usuarioId: string,
+  entrada: unknown,
+  origen?: "instagram",
+) {
   const a = await resolverAmbito(usuarioId);
   asegurarEditor(a);
   const d = validarCita(entrada, a.zonaHoraria),
@@ -145,17 +149,36 @@ export async function crearTurno(usuarioId: string, entrada: unknown, origen?: "
       const cotizacion = s.cotizaciones.find(
         (p) => p.artistaId === s.artistaAsignadoId,
       );
-      if (origen === "instagram" && (!a.administra || s.canal !== "INSTAGRAM" ||
-          !cotizacion?.duracionMinutos || d.inicioAt <= new Date() ||
-          (cotizacion.validaHasta && cotizacion.validaHasta < new Date())))
-        throw new HttpError(409, "La propuesta o el horario ya no está disponible.");
-      const conversaciones = origen === "instagram" ? [] : await tx.conversacionCanal.findMany({
-        where: { canal: "INSTAGRAM", solicitudId: s.id, estudioId: a.estudioId,
-          artistaId: a.estudioId ? null : a.usuarioId },
-        select: { id: true, flujoInstagram: { select: { solicitudId: true } } },
-      });
-      const conversacion = conversaciones.find(c => c.flujoInstagram?.solicitudId === s.id)
-        ?? (conversaciones.length === 1 ? conversaciones[0] : undefined);
+      if (
+        origen === "instagram" &&
+        (!a.administra ||
+          s.canal !== "INSTAGRAM" ||
+          !cotizacion?.duracionMinutos ||
+          d.inicioAt <= new Date() ||
+          (cotizacion.validaHasta && cotizacion.validaHasta < new Date()))
+      )
+        throw new HttpError(
+          409,
+          "La propuesta o el horario ya no está disponible.",
+        );
+      const conversaciones =
+        origen === "instagram"
+          ? []
+          : await tx.conversacionCanal.findMany({
+              where: {
+                canal: "INSTAGRAM",
+                solicitudId: s.id,
+                estudioId: a.estudioId,
+                artistaId: a.estudioId ? null : a.usuarioId,
+              },
+              select: {
+                id: true,
+                flujoInstagram: { select: { solicitudId: true } },
+              },
+            });
+      const conversacion =
+        conversaciones.find((c) => c.flujoInstagram?.solicitudId === s.id) ??
+        (conversaciones.length === 1 ? conversaciones[0] : undefined);
       const cita = await tx.cita.create({
         data: {
           ...d,
@@ -169,8 +192,13 @@ export async function crearTurno(usuarioId: string, entrada: unknown, origen?: "
         include: detalleCita,
       });
       if (cita.artistaId !== usuarioId)
-        await registrarAviso(tx, { usuarioId: cita.artistaId, clave: "turno:" + cita.id,
-          titulo: "Nuevo turno en tu agenda", detalle: cita.titulo, destino: "/artista/agenda?cita=" + cita.id });
+        await registrarAviso(tx, {
+          usuarioId: cita.artistaId,
+          clave: "turno:" + cita.id,
+          titulo: "Nuevo turno en tu agenda",
+          detalle: cita.titulo,
+          destino: "/artista/agenda?cita=" + cita.id,
+        });
       return { cita, creada: true };
     });
     return { cita: presentarCita(resultado.cita, a), creada: resultado.creada };
@@ -241,20 +269,50 @@ export async function actualizarTurno(
             "La asignación de la consulta cambió. Cancelá este turno y agendá uno nuevo.",
           );
         await comprobarHorario(tx, d, actual.artistaId, id);
+        const avisoAlCliente =
+          (reprograma || d.estado !== actual.estado) &&
+          ["PENDIENTE", "CONFIRMADA", "CANCELADA"].includes(d.estado);
+        const hilos = avisoAlCliente
+          ? await tx.conversacionCanal.findMany({
+              where: {
+                canal: "INSTAGRAM",
+                solicitudId: s.id,
+                estudioId: a.estudioId,
+                artistaId: a.estudioId ? null : a.usuarioId,
+              },
+              select: {
+                id: true,
+                flujoInstagram: { select: { solicitudId: true } },
+              },
+            })
+          : [];
+        const hiloAviso =
+          hilos.find((h) => h.flujoInstagram?.solicitudId === s.id) ??
+          (hilos.length === 1 ? hilos[0] : undefined);
         const actualizada = await tx.cita.update({
           where: { id },
           data: {
             ...d,
+            ...(avisoAlCliente
+              ? { avisoInstagramConversacionId: hiloAviso?.id ?? null }
+              : {}),
             version: { increment: 1 },
             ...(d.estado === "COMPLETADA" ? { completadaAt: new Date() } : {}),
             ...(d.estado === "CANCELADA" ? { canceladaAt: new Date() } : {}),
           },
           include: detalleCita,
         });
-        if (actualizada.artistaId !== usuarioId && (reprograma || actualizada.estado !== actual.estado))
-          await registrarAviso(tx, { usuarioId: actualizada.artistaId,
-            clave: "turno:" + id + ":" + actualizada.version, titulo: "Turno actualizado",
-            detalle: actualizada.titulo, destino: "/artista/agenda?cita=" + id });
+        if (
+          actualizada.artistaId !== usuarioId &&
+          (reprograma || actualizada.estado !== actual.estado)
+        )
+          await registrarAviso(tx, {
+            usuarioId: actualizada.artistaId,
+            clave: "turno:" + id + ":" + actualizada.version,
+            titulo: "Turno actualizado",
+            detalle: actualizada.titulo,
+            destino: "/artista/agenda?cita=" + id,
+          });
         return actualizada;
       },
     );

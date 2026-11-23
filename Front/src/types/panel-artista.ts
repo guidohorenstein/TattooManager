@@ -60,6 +60,10 @@ export interface MensajePanel {
   estado?: 'RECIBIDO' | 'ENVIANDO' | 'ENVIADO' | 'ENTREGADO' | 'LEIDO' | 'ERROR' | 'INCIERTO';
 }
 export interface ConversacionPanel {
+  gestion?: import('./gestion-conversaciones').GestionChat;
+  etapa?: import('./gestion-conversaciones').EtapaChat;
+  resumenRevision?: string|null;
+  dudaPendiente?: boolean;
   puedeResponder?: boolean;
   botActivo?: boolean;
   id: string;

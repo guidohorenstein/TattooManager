@@ -30,6 +30,11 @@ const sections = [
     text: 'TattooManager utiliza proveedores de alojamiento y base de datos, Cloudinary para las imágenes y un servicio de correo para las comunicaciones. Google interviene cuando elegís acceder con esa cuenta. Si el negocio conecta una red social, un proveedor de pagos o el asistente, la información necesaria para esa función se procesa a través de esa integración.',
   },
   {
+    id: 'asistente',
+    title: 'Atención automatizada',
+    text: 'Cuando el negocio habilita el asistente virtual, Groq procesa fragmentos necesarios de esa conversación para responder consultas sobre tatuajes, propuestas y turnos, y actualizar el resumen de preferencias, dudas y acuerdos que utiliza el equipo. No se envía la ficha completa del cliente ni se adjuntan imágenes al modelo. La aplicación filtra datos de contacto conocidos e identificadores y deriva al equipo los mensajes detectados con información delicada. Los filtros automáticos pueden no identificar todos los datos personales incluidos en un texto libre; evitá compartir documentos, contraseñas, datos de pago, información de salud o imágenes íntimas con el asistente. Podés pedir hablar con el equipo en cualquier momento.',
+  },
+  {
     id: 'cookies',
     title: 'Cookies y almacenamiento del navegador',
     text: 'La cookie de sesión permite mantener el acceso autenticado. Durante el inicio de sesión con Google se utiliza otra cookie temporal para validar el recorrido. La cookie tattoomanager_theme conserva el modo claro u oscuro durante un año. El país seleccionado y el estado del menú lateral pueden guardarse en el almacenamiento local. Podés borrar estas preferencias desde la configuración de tu navegador; al borrar las de sesión tendrás que volver a ingresar.',

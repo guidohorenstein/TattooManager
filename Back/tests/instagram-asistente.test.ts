@@ -8,7 +8,12 @@ const { configuracionInicial } =
 const { procesarMensajeBot } =
   await import("../src/instagram/instagram-bot.service.js");
 
-function reemplazar(t: TestContext, objeto: object, metodo: string, valor: unknown) {
+function reemplazar(
+  t: TestContext,
+  objeto: object,
+  metodo: string,
+  valor: unknown,
+) {
   const delegado = objeto as Record<string, unknown>;
   const anterior = delegado[metodo];
   delegado[metodo] = valor;
@@ -32,6 +37,7 @@ test("cada estudio usa su configuración, comparte su formulario y pausa al deri
 
   const hilo = {
     id: "hilo",
+    mensajes: [{ id: "saludo-anterior" }],
     estudioId: "estudio",
     estudio: { slug: "estudio-qa", propietarioId: "titular" },
     canal: "INSTAGRAM",
@@ -54,7 +60,12 @@ test("cada estudio usa su configuración, comparte su formulario y pausa al deri
     "findUnique",
     async (params: { where: { estudioId: string } }) => {
       assert.deepEqual(params.where, { estudioId: hilo.estudioId });
-      return { datos: params.where.estudioId === "estudio" ? configuracion : otraConfiguracion };
+      return {
+        datos:
+          params.where.estudioId === "estudio"
+            ? configuracion
+            : otraConfiguracion,
+      };
     },
   );
   const avisos: string[] = [];
@@ -66,7 +77,13 @@ test("cada estudio usa su configuración, comparte su formulario y pausa al deri
     async (operacion: (tx: object) => Promise<unknown>) =>
       operacion({
         $queryRaw: async () => [],
-        conversacionCanal: { findUniqueOrThrow: async () => hilo },
+        gestionConversacion: { upsert: async () => ({ id: "gestion" }) },
+        eventoConversacion: { create: async () => ({}) },
+        conversacionCanal: {
+          findUniqueOrThrow: async () => hilo,
+          update: async () => ({}),
+        },
+        mensajeCanal: { updateMany: async () => ({ count: 1 }) },
         flujoInstagram: {
           findUnique: async () => hilo.flujoInstagram,
           upsert: async ({
@@ -177,7 +194,13 @@ test("cada estudio usa su configuración, comparte su formulario y pausa al deri
   accion = "FORMULARIO";
   await procesarMensajeBot("hilo", "titular", "m6", "¿Cuánto cuesta?", enviar);
   assert.equal(modelo.mock.callCount(), 4);
-  await procesarMensajeBot("hilo", "otro-titular", "m7", "¿Cuánto cuesta?", enviar);
+  await procesarMensajeBot(
+    "hilo",
+    "otro-titular",
+    "m7",
+    "¿Cuánto cuesta?",
+    enviar,
+  );
   assert.equal(modelo.mock.callCount(), 5);
   assert.ok(salidas[4]?.includes("/cotizacion/otro-estudio?ig=" + token));
 });
@@ -191,9 +214,18 @@ test("el modelo consulta fechas y duraciones solo de la solicitud vinculada al c
   });
 
   const hilo = {
-    id: "hilo", estudioId: "estudio", solicitudId: "consulta-ig" as string | null,
-    estudio: { slug: "estudio-qa", propietarioId: "titular", zonaHoraria: "America/Argentina/Buenos_Aires" },
-    canal: "INSTAGRAM", flujoInstagram: null, ultimaEntradaAt: new Date(),
+    id: "hilo",
+    mensajes: [{ id: "saludo-anterior" }],
+    estudioId: "estudio",
+    solicitudId: "consulta-ig" as string | null,
+    estudio: {
+      slug: "estudio-qa",
+      propietarioId: "titular",
+      zonaHoraria: "America/Argentina/Buenos_Aires",
+    },
+    canal: "INSTAGRAM",
+    flujoInstagram: null,
+    ultimaEntradaAt: new Date(),
   };
   let vinculoVigente = true;
   let consultasTurnos = 0;
@@ -203,65 +235,135 @@ test("el modelo consulta fechas y duraciones solo de la solicitud vinculada al c
     assert.equal(where.solicitudId, hilo.solicitudId);
     return vinculoVigente ? hilo : null;
   });
-  reemplazar(t, prisma.configuracionAsistente, "findUnique", async () => ({ datos: configuracionInicial }));
+  reemplazar(t, prisma.configuracionAsistente, "findUnique", async () => ({
+    datos: configuracionInicial,
+  }));
   reemplazar(t, prisma.usuario, "findMany", async () => []);
   reemplazar(t, prisma.solicitud, "findFirst", async ({ where }) => {
     assert.equal(where.id, "consulta-ig");
     assert.equal(where.estudioId, "estudio");
     assert.deepEqual(where.conversacionesCanal, { some: { id: "hilo" } });
     return {
-      id: "consulta-ig", estudioId: "estudio", estado: "ASIGNADA", artistaAsignadoId: "artista",
-      cotizaciones: [{ artistaId: "artista", duracionMinutos: 120, validaHasta: null }],
-      contacto: { email: "privado@example.test", telefono: "111222333" }, notas: "Nota interna",
+      id: "consulta-ig",
+      estudioId: "estudio",
+      estado: "ASIGNADA",
+      artistaAsignadoId: "artista",
+      cotizaciones: [
+        { artistaId: "artista", duracionMinutos: 120, validaHasta: null },
+      ],
+      contacto: { email: "privado@example.test", telefono: "111222333" },
+      notas: "Nota interna",
     };
   });
   const cita = {
-    inicioAt: new Date("2035-02-03T01:30:00Z"), finAt: new Date("2035-02-03T03:00:00Z"),
-    estado: "CONFIRMADA", artista: { nombre: "Ana", nombreArtistico: "Ana Tinta" },
+    inicioAt: new Date("2035-02-03T01:30:00Z"),
+    finAt: new Date("2035-02-03T03:00:00Z"),
+    estado: "CONFIRMADA",
+    artista: { nombre: "Ana", nombreArtistico: "Ana Tinta" },
   };
   reemplazar(t, prisma.cita, "findMany", async ({ where, select }) => {
     consultasTurnos++;
     assert.equal(where.solicitudId, "consulta-ig");
     assert.deepEqual(where.solicitud, { estudioId: "estudio" });
-    assert.deepEqual(Object.keys(select).sort(), ["artista", "estado", "finAt", "inicioAt"]);
+    assert.deepEqual(Object.keys(select).sort(), [
+      "artista",
+      "estado",
+      "finAt",
+      "inicioAt",
+    ]);
     return [cita];
   });
   reemplazar(t, prisma.cita, "findFirst", async ({ where }) => {
     assert.equal(where.solicitudId, "consulta-ig");
     assert.deepEqual(where.estado, { not: "CANCELADA" });
-    return { ...cita, inicioAt: new Date("2025-02-03T01:30:00Z"), finAt: new Date("2025-02-03T02:00:00Z"), estado: "COMPLETADA" };
+    return {
+      ...cita,
+      inicioAt: new Date("2025-02-03T01:30:00Z"),
+      finAt: new Date("2025-02-03T02:00:00Z"),
+      estado: "COMPLETADA",
+    };
   });
-  const modelo = t.mock.method(globalThis, "fetch", async (_url: string, opciones: RequestInit) => {
-    const { messages } = JSON.parse(String(opciones.body));
-    const { turnosDeEsteChat: turnos, mensaje } = JSON.parse(messages[1].content);
-    assert.doesNotMatch(messages[1].content, /privado@example|Nota interna|consulta-ig/);
-    let texto = "No encuentro un turno vinculado a este chat.";
-    if (hilo.solicitudId) {
-      const [turno] = turnos.proximos;
-      assert.deepEqual(turno, { fecha: "2035-02-02", dia: "viernes", horaInicio: "22:30",
-        fechaFin: "2035-02-03", horaFin: "00:00", duracionMinutos: 90, artista: "Ana Tinta", estado: "CONFIRMADA" });
-      assert.equal(turnos.ultimoPasado.estado, "COMPLETADA");
-      assert.equal(turnos.duracionEstimadaMinutos, 120);
-      texto = mensaje.includes("cuándo")
-        ? "Tu turno es el viernes a las " + turno.horaInicio + "."
-        : "Reservá " + turno.duracionMinutos + " minutos para la sesión.";
-    } else {
-      assert.equal(turnos, undefined);
-    }
-    return Response.json({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ accion: "RESPONDER", texto }) } }] });
-  });
+  const modelo = t.mock.method(
+    globalThis,
+    "fetch",
+    async (_url: string, opciones: RequestInit) => {
+      const { messages } = JSON.parse(String(opciones.body));
+      const { turnosDeEsteChat: turnos, mensaje } = JSON.parse(
+        messages[1].content,
+      );
+      assert.doesNotMatch(
+        messages[1].content,
+        /privado@example|Nota interna|consulta-ig/,
+      );
+      let texto = "No encuentro un turno vinculado a este chat.";
+      if (hilo.solicitudId) {
+        const [turno] = turnos.proximos;
+        assert.deepEqual(turno, {
+          fecha: "2035-02-02",
+          dia: "viernes",
+          horaInicio: "22:30",
+          fechaFin: "2035-02-03",
+          horaFin: "00:00",
+          duracionMinutos: 90,
+          artista: "Ana Tinta",
+          estado: "CONFIRMADA",
+        });
+        assert.equal(turnos.ultimoPasado.estado, "COMPLETADA");
+        assert.equal(turnos.duracionEstimadaMinutos, 120);
+        texto = mensaje.includes("cuándo")
+          ? "Tu turno es el viernes a las " + turno.horaInicio + "."
+          : "Reservá " + turno.duracionMinutos + " minutos para la sesión.";
+      } else {
+        assert.equal(turnos, undefined);
+      }
+      return Response.json({
+        choices: [
+          {
+            finish_reason: "stop",
+            message: {
+              content: JSON.stringify({ accion: "RESPONDER", texto }),
+            },
+          },
+        ],
+      });
+    },
+  );
   const salidas: string[] = [];
   const enviar = async (_hilo: unknown, _clave: string, texto: string) => {
     salidas.push(texto);
     return "ENVIADO" as const;
   };
-  await procesarMensajeBot("hilo", "titular", "fecha", "Che, ¿cuándo era mi turno?", enviar);
-  await procesarMensajeBot("hilo", "titular", "duracion", "¿Cuánto tiempo me guardo para la sesión?", enviar);
+  await procesarMensajeBot(
+    "hilo",
+    "titular",
+    "fecha",
+    "Che, ¿cuándo era mi turno?",
+    enviar,
+  );
+  await procesarMensajeBot(
+    "hilo",
+    "titular",
+    "duracion",
+    "¿Cuánto tiempo me guardo para la sesión?",
+    enviar,
+  );
   vinculoVigente = false;
-  await procesarMensajeBot("hilo", "titular", "cambio", "¿Cuánto dura mi sesión?", enviar);
+  await procesarMensajeBot(
+    "hilo",
+    "titular",
+    "cambio",
+    "¿Cuánto dura mi sesión?",
+    enviar,
+  );
   vinculoVigente = true;
   hilo.solicitudId = null;
-  await procesarMensajeBot("hilo", "titular", "sin-vinculo", "¿Cuánto dura mi sesión?", enviar);
+  await procesarMensajeBot(
+    "hilo",
+    "titular",
+    "sin-vinculo",
+    "¿Cuánto dura mi sesión?",
+    enviar,
+  );
   assert.equal(consultasTurnos, 3);
   assert.equal(modelo.mock.callCount(), 4);
   assert.deepEqual(salidas, [

@@ -66,6 +66,7 @@ export function listarEquipo(a: AmbitoConsultas) {
       estilosPrincipales: true,
       estadoEnEstudio: true,
       versionEquipo: true,
+      disponibilidades: { where: { ambito: a.estudioId || "INDEPENDIENTE" }, select: { semana: true } },
       _count: {
         select: {
           citas: {

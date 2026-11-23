@@ -23,3 +23,20 @@
   border-radius: 50%;
   background: linear-gradient(90deg, currentColor 50%, transparent 50%);
 }
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 44px;
+}
+.menuLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.currentTheme {
+  color: var(--theme-muted);
+  font-size: 12px;
+}

@@ -1,8 +1,15 @@
+import { programarResumen } from "../gestion-conversaciones/gestion-conversaciones.repository.js";
 import type { CanalMensajes, Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { registrarAviso } from "../operacion/avisos.repository.js";
 import type { AmbitoConsultas } from "../solicitudes/solicitudes.entity.js";
-import { anterioresA, camposMensaje, ordenMensajes, presentarMensajes, tamanoPaginaMensajes } from "./historial-mensajes.js";
+import {
+  anterioresA,
+  camposMensaje,
+  ordenMensajes,
+  presentarMensajes,
+  tamanoPaginaMensajes,
+} from "./historial-mensajes.js";
 
 export const ventanaRespuesta = 24 * 60 * 60 * 1000;
 
@@ -52,9 +59,10 @@ export async function listarCanales(
     nombre: c.nombre,
     asunto: "Mensaje directo",
     solicitudId: c.solicitudId,
-    ...(a.administra && a.estudioId && c.canal === "INSTAGRAM" && {
-      botActivo: !c.flujoInstagram?.pausadoAt,
-    }),
+    ...(a.estudioId &&
+      c.canal === "INSTAGRAM" && {
+        botActivo: !c.flujoInstagram?.pausadoAt,
+      }),
     ventanaHasta: new Date(
       c.ultimaEntradaAt.getTime() + ventanaRespuesta,
     ).toISOString(),
@@ -63,8 +71,15 @@ export async function listarCanales(
   }));
 }
 
-export async function historialInstagram(a: AmbitoConsultas, conversacionId: string, antes: string) {
-  const ambito = { conversacionId, conversacion: { canal: "INSTAGRAM" as const, ...filtroCanal(a) } };
+export async function historialInstagram(
+  a: AmbitoConsultas,
+  conversacionId: string,
+  antes: string,
+) {
+  const ambito = {
+    conversacionId,
+    conversacion: { canal: "INSTAGRAM" as const, ...filtroCanal(a) },
+  };
   const cursor = await prisma.mensajeCanal.findFirst({
     where: { ...ambito, id: antes },
     select: { id: true, fecha: true },
@@ -85,17 +100,22 @@ export async function bloquearConversacionCanal(
   await tx.$queryRaw`SELECT "id" FROM "ConversacionCanal" WHERE "id" = ${id} FOR NO KEY UPDATE`;
 }
 
-export async function guardarMensajeCanal(d: {
-  canal: CanalMensajes;
-  cuentaId: string;
-  estudioId: string | null;
-  artistaId: string | null;
-  remitente: string;
-  nombre: string;
-  proveedorId: string;
-  texto: string;
-  fecha: Date;
-} & ({ propio: true } | { propio: false; destinatario: string; bot?: { accion?: string } })) {
+export async function guardarMensajeCanal(
+  d: {
+    canal: CanalMensajes;
+    cuentaId: string;
+    estudioId: string | null;
+    artistaId: string | null;
+    remitente: string;
+    nombre: string;
+    proveedorId: string;
+    texto: string;
+    fecha: Date;
+  } & (
+    | { propio: true }
+    | { propio: false; destinatario: string; bot?: { accion?: string } }
+  ),
+) {
   return prisma.$transaction(
     async (tx) => {
       const ambito = { estudioId: d.estudioId, artistaId: d.artistaId };
@@ -123,10 +143,12 @@ export async function guardarMensajeCanal(d: {
         return;
       const entrante = d.propio ? undefined : d.bot;
       if (d.propio || entrante) await bloquearConversacionCanal(tx, hilo.id);
-      const flujo = entrante && await tx.flujoInstagram.findUnique({
-        where: { conversacionId: hilo.id },
-        select: { pausadoAt: true },
-      });
+      const flujo =
+        entrante &&
+        (await tx.flujoInstagram.findUnique({
+          where: { conversacionId: hilo.id },
+          select: { pausadoAt: true },
+        }));
       const bot = flujo && flujo.pausadoAt ? undefined : entrante;
       const { count } = await tx.mensajeCanal.createMany({
         data: [
@@ -143,6 +165,7 @@ export async function guardarMensajeCanal(d: {
         skipDuplicates: true,
       });
       if (!count) return;
+      await programarResumen(d.canal, hilo, tx);
       await tx.conversacionCanal.updateMany({
         where: { id: hilo.id, ultimaActividad: { lt: d.fecha } },
         data: { ultimaActividad: d.fecha },

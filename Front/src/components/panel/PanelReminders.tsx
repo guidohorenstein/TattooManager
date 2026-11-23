@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { createContext, useContext, useState } from 'react';
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -59,18 +60,12 @@ function Reminders() {
     recargarOperacion,
   } = useReminderPanel();
   const [editando, setEditando] = useState<TipoRecordatorio | null>(null);
-  const [aviso, setAviso] = useState('');
-  const [error, setError] = useState('');
-  const [guardando, setGuardando] = useState(false);
   const config = datos.recordatorios;
   const confirmClose = useDiscardChanges();
   async function guardar(siguiente: RecordatoriosPanel) {
-    setGuardando(true);
-    setAviso('');
     const fallo = await guardarRecordatorios(siguiente);
-    setGuardando(false);
-    setError(fallo);
-    if (!fallo) setAviso('Configuración de recordatorios actualizada.');
+    if (fallo) notificar.error(fallo);
+    else notificar.exito('Configuración de recordatorios actualizada.');
     return fallo;
   }
   const titulo = [...recordatoriosCliente, ...recordatoriosArtista].find(
@@ -98,18 +93,7 @@ function Reminders() {
         titulo="Recordatorios"
         descripcion="Turnos, seguimiento y resúmenes de actividad."
       />
-      {error && (
-        <p className={`${styles.notice} ${styles.error}`} role="alert">
-          {error}
-        </p>
-      )}
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
-        </p>
-      )}
-      {guardando && <p role="status">Guardando preferencias…</p>}
-      <fieldset disabled={guardando}>
+      <fieldset>
         <div className={mail.timezone}>
           <PanelIcon nombre="reloj" size={18} />
           <label htmlFor="reminder-timezone">Zona horaria</label>
@@ -127,14 +111,14 @@ function Reminders() {
         </div>
         <div className={styles.stack}>
           <section className={styles.surface} aria-labelledby="client-reminders">
-            <div className={styles.surfaceHeading}>
+            <div className={`${styles.surfaceHeading} ${mail.groupHeader}`}>
               <div>
                 <h2 id="client-reminders">Correos para tus clientes</h2>
                 <p className={mail.groupDescription}>
                   Turnos, cuidados y seguimiento después de cada sesión.
                 </p>
               </div>
-              <label className={mail.groupSwitch}>
+              <label className={mail.groupSwitch} data-active={config.clientesHabilitados}>
                 <span>{config.clientesHabilitados ? 'Activados' : 'Desactivados'}</span>
                 <span className="form-check form-switch m-0">
                   <input
@@ -184,14 +168,14 @@ function Reminders() {
             </div>
           </section>
           <section className={styles.surface} aria-labelledby="artist-reminders">
-            <div className={styles.surfaceHeading}>
+            <div className={`${styles.surfaceHeading} ${mail.groupHeader}`}>
               <div>
                 <h2 id="artist-reminders">Correos para vos</h2>
                 <p className={mail.groupDescription}>
                   Tu agenda y un resumen de cómo viene tu trabajo.
                 </p>
               </div>
-              <label className={mail.groupSwitch}>
+              <label className={mail.groupSwitch} data-active={config.artistaHabilitado}>
                 <span>{config.artistaHabilitado ? 'Activados' : 'Desactivados'}</span>
                 <span className="form-check form-switch m-0">
                   <input
@@ -284,7 +268,10 @@ function ReminderRow({
   onEdit: () => void;
 }) {
   return (
-    <div className={`${mail.ruleRow} ${!habilitado || !regla.activo ? mail.ruleDisabled : ''}`}>
+    <div
+      className={`${mail.ruleRow} ${!habilitado || !regla.activo ? mail.ruleDisabled : ''}`}
+      data-active={habilitado && regla.activo}
+    >
       <div className={mail.ruleIcon}>
         <PanelIcon
           nombre={

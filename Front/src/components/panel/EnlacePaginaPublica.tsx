@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePanelData, mutarPanel } from '@/hooks/usePanelData';
@@ -19,18 +20,16 @@ export function EnlacePaginaPublica({
   editable?: boolean;
 }) {
   const { datos, error, recargar } = usePanelData<Configuracion>('/paginas/configuracion');
-  const [aviso, setAviso] = useState('');
   const [ocupado, setOcupado] = useState(false);
   async function guardar(publicada: boolean, mostrarDireccion: boolean) {
     if (ocupado) return;
     setOcupado(true);
-    setAviso('');
     try {
       await mutarPanel('/paginas/configuracion', 'PATCH', { publicada, mostrarDireccion });
       await recargar();
-      setAviso(publicada ? 'Página publicada.' : 'Página guardada en borrador.');
+      notificar.exito(publicada ? 'Página publicada.' : 'Página guardada en borrador.');
     } catch (e) {
-      setAviso(e instanceof Error ? e.message : 'No pudimos guardar los cambios.');
+      notificar.error(e instanceof Error ? e.message : 'No pudimos guardar los cambios.');
     } finally {
       setOcupado(false);
     }
@@ -40,9 +39,9 @@ export function EnlacePaginaPublica({
       await navigator.clipboard.writeText(
         new URL(datos?.enlace || enlace, window.location.origin).href,
       );
-      setAviso('Enlace copiado.');
+      notificar.exito('Enlace copiado.');
     } catch {
-      setAviso('Abrí la página y copiá la dirección desde el navegador.');
+      notificar.info('Abrí la página y copiá la dirección desde el navegador.');
     }
   }
   return (
@@ -122,9 +121,6 @@ export function EnlacePaginaPublica({
             </button>
           </div>
         )}
-        <p role="status" className={styles.description}>
-          {aviso}
-        </p>
       </div>
     </section>
   );

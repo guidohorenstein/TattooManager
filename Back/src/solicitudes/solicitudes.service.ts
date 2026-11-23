@@ -1,3 +1,4 @@
+import { estadoAgenda } from '../disponibilidad/estado-agenda.js';
 import { ambitoDeCuenta } from "./solicitudes.ambito.js";
 import { EstadoSolicitud, Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
@@ -131,6 +132,7 @@ export async function obtenerBandeja(usuarioId: string) {
       email: ambito.administra ? a.email : "",
       estilos: a.estilosPrincipales.join(" · "),
       estado: a.estadoEnEstudio,
+      estadoAgenda: estadoAgenda(a.disponibilidades?.[0]?.semana),
       version: a.versionEquipo,
       turnosPendientes: a._count.citas,
       consultasAsignadas: a._count.solicitudesAsignadas,

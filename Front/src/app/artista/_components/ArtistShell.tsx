@@ -1,6 +1,7 @@
 'use client';
 
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useConsultas } from '@/hooks/useConsultas';
+import { ThemeMenuItem } from '@/components/theme/ThemeToggle';
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavigationGuardLink as Link } from 'nextjs-nav-guard';
 import NextLink from 'next/link';
@@ -119,6 +120,10 @@ function ArtistNavigation({ cerrar }: { cerrar?: () => void }) {
   const pathname = usePathname();
   const { datos } = useArtistPanel();
   const { perfil } = useArtistProfile();
+  const { usuario } = useAuth();
+  const { datos: fuente } = useConsultas();
+  const agenda = fuente?.equipo.find((a) => a.id === usuario?.id)?.estadoAgenda;
+  const pendienteAgenda = agenda === 'SIN_CONFIGURAR' || agenda === 'CERRADA';
   const pendientes = perfil ? camposPendientes(perfil) : [];
   const nuevas = datos.consultas.filter((item) => item.estado === 'NUEVA').length;
   const mensajes = datos.conversaciones.reduce((total, item) => total + item.sinLeer, 0);
@@ -165,6 +170,14 @@ function ArtistNavigation({ cerrar }: { cerrar?: () => void }) {
                     <PanelIcon nombre={item.icono} size={19} />
                     <span className={styles.navLabel}>{item.nombre}</span>
                     {cantidad > 0 && <span className={styles.navCount}>{cantidad}</span>}
+                    {item.ruta === '/artista/disponibilidad' && pendienteAgenda && (
+                      <span
+                        className={styles.setupDot}
+                        role="img"
+                        title="Falta configurar tu agenda"
+                        aria-label="Falta configurar tu agenda"
+                      />
+                    )}
                     {item.icono === 'perfil' && pendientes.length > 0 && (
                       <OverlayTrigger
                         placement="right"
@@ -303,7 +316,6 @@ function ArtistPanel({ children }: { children: ReactNode }) {
             <strong>{titulo}</strong>
           </div>
           <div className={styles.topbarActions}>
-            <ThemeToggle />
             <Link
               className={styles.notificationButton}
               href="/artista/notificaciones"
@@ -332,6 +344,8 @@ function ArtistPanel({ children }: { children: ReactNode }) {
                 <Dropdown.Item as={Link} href="/artista/configuracion">
                   Configuración
                 </Dropdown.Item>
+                <Dropdown.Divider />
+                <ThemeMenuItem />
                 <Dropdown.Divider />
                 <Dropdown.Item
                   as="button"

@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import { useEffect, useRef, useState } from 'react';
 import { guardarMiPerfil, obtenerEstilos } from '@/services/artistas.service';
@@ -76,7 +77,7 @@ function ProfileForm({
   onSaved: (perfil: PerfilArtista) => void;
 }) {
   const result = useRef<PerfilArtista | null>(null);
-  const [guardado, setGuardado] = useState(false);
+
   const faltantes = camposPendientes(perfil);
   function validate(values: ProfileValues) {
     const errors: FormikErrors<ProfileValues> = {};
@@ -104,7 +105,6 @@ function ProfileForm({
       }}
       validate={validate}
       onSave={async (values) => {
-        setGuardado(false);
         const datos = new FormData();
         datos.set('nombreArtistico', values.nombreArtistico.trim());
         datos.set('biografia', values.biografia.trim());
@@ -116,7 +116,7 @@ function ProfileForm({
       onSaved={() => {
         if (result.current) {
           onSaved(result.current);
-          setGuardado(true);
+          notificar.exito('Perfil guardado.');
         }
       }}
     >
@@ -124,11 +124,6 @@ function ProfileForm({
         <p className={styles.pendingFields}>Pendiente: {faltantes.join(', ')}.</p>
       )}
       <ProfileFields perfil={perfil} estilos={estilos} />
-      {guardado && (
-        <p role="status" className={styles.feedback}>
-          Perfil guardado.
-        </p>
-      )}
     </PanelForm>
   );
 }

@@ -26,7 +26,7 @@ export function PanelForm<Values extends FormikValues>({
 }: {
   initialValues: Values;
   validate: (values: Values) => FormikErrors<Values>;
-  onSave: (values: Values) => string | void | Promise<string | void>;
+  onSave: (values: Values) => string | false | void | Promise<string | false | void>;
   onSaved?: () => void;
   children: ReactNode;
   className?: string;
@@ -44,6 +44,7 @@ export function PanelForm<Values extends FormikValues>({
         helpers.setStatus('');
         try {
           const error = await onSave(values);
+          if (error === false) return;
           if (error) {
             helpers.setStatus(error);
             return;

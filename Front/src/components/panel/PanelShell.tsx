@@ -1,6 +1,6 @@
 'use client';
 
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { ThemeMenuItem } from '@/components/theme/ThemeToggle';
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavigationGuardLink as Link } from 'nextjs-nav-guard';
 import NextLink from 'next/link';
@@ -18,6 +18,7 @@ export interface PanelSection {
   icono: IconoPanel;
   grupo: string;
   cantidad?: number;
+  advertencia?: string;
 }
 interface Props {
   children: ReactNode;
@@ -62,7 +63,7 @@ function Navigation({
                 <Link
                   key={s.ruta}
                   href={s.ruta}
-                  title={s.nombre}
+                  title={s.advertencia || s.nombre}
                   aria-label={s.nombre}
                   aria-current={path === s.ruta ? 'page' : undefined}
                   className={path === s.ruta ? styles.active : ''}
@@ -76,6 +77,9 @@ function Navigation({
                   <PanelIcon nombre={s.icono} size={19} />
                   <span className={styles.navLabel}>{s.nombre}</span>
                   {Boolean(s.cantidad) && <span className={styles.navCount}>{s.cantidad}</span>}
+                  {s.advertencia && (
+                    <span className={styles.setupDot} role="img" aria-label={s.advertencia} />
+                  )}
                 </Link>
               ))}
           </div>
@@ -190,7 +194,6 @@ export function PanelShell({ children, secciones, nombre, subtitulo, perfil, art
             <span className={styles.divider}>/</span>
             <strong>{secciones.find((s) => s.ruta === path)?.nombre || 'Consultas'}</strong>
           </div>
-          <ThemeToggle />
           <Dropdown key={path} align="end">
             <Dropdown.Toggle
               as="button"
@@ -208,6 +211,8 @@ export function PanelShell({ children, secciones, nombre, subtitulo, perfil, art
               <Dropdown.Item as={NextLink} href={perfil}>
                 {artista ? 'Mi perfil' : 'Perfil del estudio'}
               </Dropdown.Item>
+              <Dropdown.Divider />
+              <ThemeMenuItem />
               <Dropdown.Divider />
               <Dropdown.Item
                 as="button"

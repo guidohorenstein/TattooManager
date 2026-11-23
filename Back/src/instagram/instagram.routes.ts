@@ -140,8 +140,7 @@ instagramRouter.delete("/conexion", async (req, res) => {
   res.sendStatus(204);
 });
 instagramRouter.post("/:id", async (req, res) => {
-  await responderInstagram(req.usuario!.id, req.params.id, req.body);
-  res.sendStatus(204);
+  res.json(await responderInstagram(req.usuario!.id, req.params.id, req.body));
 });
 instagramRouter.patch("/:id/lectura", async (req, res) => {
   await leerInstagram(req.usuario!.id, req.params.id, req.body);

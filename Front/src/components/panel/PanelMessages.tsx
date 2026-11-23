@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { usePanelFilters } from '@/hooks/usePanelFilters';
 import type {
   ClientePanel,
@@ -14,6 +14,9 @@ import { mostrarFecha } from '@/lib/panel-artista';
 import { nombreCanal } from '@/lib/canales-consulta';
 import styles from '@/components/panel/workspace.module.css';
 import chat from './messages.module.css';
+import { ConversationContext } from './ConversationContext';
+import { IndicadoresChat } from './IndicadoresChat';
+import { coincideGestion, nombresEtapa } from '@/lib/gestion-conversaciones';
 
 export interface PanelMessagesProps {
   datos: { conversaciones: ConversacionPanel[]; borradoresMensajes?: Record<string, string> };
@@ -36,6 +39,9 @@ export interface PanelMessagesProps {
   conectado: boolean;
   errorConexion: string;
   configuracion?: string;
+  administra?: boolean;
+  base?: '/artista' | '/estudio';
+  actualizarBandeja?: () => Promise<void>;
 }
 const estadosMensaje = {
   RECIBIDO: '',
@@ -84,6 +90,12 @@ export function PanelMessages(props: PanelMessagesProps) {
   const soloSinLeer = params.get('sinLeer') === '1';
   const canal = params.get('canal') || '';
   const consulta = params.get('consulta');
+  const filtros = {
+    etapa: params.get('etapa') || '',
+    atencion: params.get('atencion') || '',
+    prioridad: params.get('prioridad') || '',
+  };
+  const [detalleAbierto, setDetalleAbierto] = useState(false);
   const canales = [...new Set(datos.conversaciones.map((hilo) => hilo.canal))];
   const borradores = datos.borradoresMensajes || {};
   const cercaDelFinal = useRef(true);
@@ -91,6 +103,15 @@ export function PanelMessages(props: PanelMessagesProps) {
   const fin = useRef<HTMLDivElement>(null);
   const posicionHistorial = useRef<{ id: string; altura: number; arriba: number } | null>(null);
   const [historiales, setHistoriales] = useState<Record<string, PaginaMensajes>>({});
+  const recibirPagina = useCallback((id: string, pagina: PaginaMensajes) => {
+    setHistoriales((previos) => ({
+      ...previos,
+      [id]: {
+        mensajes: reunirMensajes(previos[id]?.mensajes ?? [], pagina.mensajes),
+        anterior: previos[id] ? previos[id].anterior : pagina.anterior,
+      },
+    }));
+  }, []);
   const [cargandoHistorial, setCargandoHistorial] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
@@ -102,6 +123,7 @@ export function PanelMessages(props: PanelMessagesProps) {
   const conversaciones = datos.conversaciones
     .filter((item) => !consulta || item.solicitudId === consulta)
     .filter((item) => !canal || item.canal === canal)
+    .filter((item) => coincideGestion(item, filtros))
     .filter((item) => !soloSinLeer || item.sinLeer > 0)
     .filter((item) =>
       `${buscarCliente(item.clienteId).nombre} ${item.asunto}`
@@ -121,7 +143,7 @@ export function PanelMessages(props: PanelMessagesProps) {
     : (recientes ?? []);
   const anterior = historial ? historial.anterior : seleccionada?.anterior;
   const texto = seleccionada ? borradores[seleccionada.id] || '' : '';
-  const ultimoRecibido = seleccionada?.mensajes.findLast((m) => !m.propio)?.fecha;
+  const ultimoRecibido = mensajes.findLast((m) => !m.propio)?.fecha;
   const idSeleccionado = seleccionada?.id;
   const canalSeleccionado = seleccionada?.canal;
   const maximo = canalSeleccionado === 'INSTAGRAM' ? 1000 : 2000;
@@ -272,8 +294,57 @@ export function PanelMessages(props: PanelMessagesProps) {
           </select>
         )}
       </div>
+      <div className={chat.filters} role="group" aria-label="Filtros de atención">
+        <select
+          className="form-select form-select-sm"
+          aria-label="Etapa de la consulta"
+          value={filtros.etapa}
+          onChange={(e) => update({ etapa: e.target.value || null, conversacion: null })}
+        >
+          <option value="">Todas las etapas</option>
+          {Object.entries(nombresEtapa).map(([k, v]) => (
+            <option key={k} value={k}>
+              {v}
+            </option>
+          ))}
+        </select>
+        <select
+          className="form-select form-select-sm"
+          aria-label="Atención de la conversación"
+          value={filtros.atencion}
+          onChange={(e) => update({ atencion: e.target.value || null, conversacion: null })}
+        >
+          <option value="">Toda la atención</option>
+          <option value="BOT_ACTIVO">Bot activo</option>
+          <option value="BOT_PAUSADO">Bot pausado</option>
+          <option value="PENDIENTE">Necesita atención</option>
+          <option value="MANUAL">Atención manual</option>
+          <option value="RESUELTA">Resuelta</option>
+        </select>
+        <select
+          className="form-select form-select-sm"
+          aria-label="Prioridad de la conversación"
+          value={filtros.prioridad}
+          onChange={(e) => update({ prioridad: e.target.value || null, conversacion: null })}
+        >
+          <option value="">Todas las prioridades</option>
+          <option value="URGENTE">Urgente</option>
+          <option value="NORMAL">Normal</option>
+        </select>
+        {(filtros.etapa || filtros.atencion || filtros.prioridad) && (
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary"
+            onClick={() =>
+              update({ etapa: null, atencion: null, prioridad: null, conversacion: null })
+            }
+          >
+            Limpiar
+          </button>
+        )}
+      </div>
       <section
-        className={`${chat.messenger} ${params.has('conversacion') ? chat.mobileThread : ''}`}
+        className={`${chat.messenger} ${seleccionada && props.base ? chat.withContext : ''} ${params.has('conversacion') ? chat.mobileThread : ''}`}
         aria-label="Mensajes"
       >
         <aside className={chat.conversations}>
@@ -309,6 +380,7 @@ export function PanelMessages(props: PanelMessagesProps) {
                             ? `${ultimo.propio ? 'Vos: ' : ''}${ultimo.texto}`
                             : item.asunto}
                       </span>
+                      <IndicadoresChat hilo={item} />
                     </span>
                     <span className={chat.conversationMeta}>
                       {ultimo && <time>{mostrarFecha(ultimo.fecha)}</time>}
@@ -349,16 +421,30 @@ export function PanelMessages(props: PanelMessagesProps) {
                   <span className={chat.channelLabel}>{seleccionada.telefono}</span>
                 )}
               </div>
-              {typeof seleccionada.botActivo === 'boolean' && (
+              {props.administra &&
+                typeof seleccionada.botActivo === 'boolean' &&
+                seleccionada.gestion?.atencion !== 'PENDIENTE' && (
+                  <button
+                    className={`btn btn-sm ms-auto flex-shrink-0 ${styles.botToggle} btn-outline-secondary`}
+                    aria-pressed={seleccionada.botActivo}
+                    type="button"
+                    disabled={guardando}
+                    onClick={() =>
+                      void ejecutar(() => cambiarBot(seleccionada.id, !seleccionada.botActivo))
+                    }
+                  >
+                    {seleccionada.botActivo ? 'Pausar bot' : 'Activar bot'}
+                  </button>
+                )}
+              {props.base && (
                 <button
-                  className={`btn btn-sm ms-auto flex-shrink-0 ${seleccionada.botActivo ? 'btn-outline-secondary' : 'btn-outline-primary'}`}
                   type="button"
-                  disabled={guardando}
-                  onClick={() =>
-                    void ejecutar(() => cambiarBot(seleccionada.id, !seleccionada.botActivo))
-                  }
+                  className={'btn btn-sm btn-outline-secondary ' + chat.detailButton}
+                  onClick={() => setDetalleAbierto(true)}
+                  aria-label="Abrir detalles de la conversación"
                 >
-                  {seleccionada.botActivo ? 'Pausar bot' : 'Activar bot'}
+                  <PanelIcon nombre="consultas" size={17} />
+                  <span>Detalles</span>
                 </button>
               )}
             </header>
@@ -411,7 +497,7 @@ export function PanelMessages(props: PanelMessagesProps) {
                   const dia = mensaje.fecha.slice(0, 10);
                   const nuevoDia = indice === 0 || mensajes[indice - 1]?.fecha.slice(0, 10) !== dia;
                   return (
-                    <div key={mensaje.id}>
+                    <div key={mensaje.id} id={'mensaje-' + mensaje.id}>
                       {nuevoDia && (
                         <p className={chat.dateSeparator}>
                           {mostrarFecha(dia, { day: 'numeric', month: 'long' })}
@@ -482,6 +568,18 @@ export function PanelMessages(props: PanelMessagesProps) {
               detalle="Seleccioná un cliente para ver sus mensajes."
             />
           </div>
+        )}
+        {seleccionada && props.base && props.actualizarBandeja && seleccionada.canal !== 'WEB' && (
+          <ConversationContext
+            key={seleccionada.id}
+            hilo={seleccionada}
+            base={props.base}
+            abierto={detalleAbierto}
+            cerrar={() => setDetalleAbierto(false)}
+            onPagina={recibirPagina}
+            onCambio={props.actualizarBandeja}
+            onBorrador={guardarBorradorMensaje}
+          />
         )}
       </section>
     </>

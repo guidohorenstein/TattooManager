@@ -1,3 +1,4 @@
+import { anexarGestion } from '../gestion-conversaciones/gestion-conversaciones.service.js';
 import { prisma } from "../config/prisma.js";
 import {
   activaInstagram,
@@ -14,7 +15,6 @@ import {
 import { historialWhatsApp, listarConversaciones } from "../whatsapp/whatsapp.repository.js";
 import { historialInstagram, listarCanales } from "./mensajes.repository.js";
 import { tienePlanIndividual } from "../pagos/acceso-plan.js";
-import { tamanoPaginaMensajes } from "./historial-mensajes.js";
 import { HttpError } from "../errors/http-error.js";
 
 export async function puedeUsarMensajes(a: AmbitoConsultas) {
@@ -58,7 +58,7 @@ export async function bandejaMensajes(a: AmbitoConsultas, solicitudId?: string) 
   const piloto = configuracionWhatsApp();
   const tieneWhatsApp = Boolean(metaWhatsApp || piloto);
   const [hilos, instagram, whatsapp] = await Promise.all([
-    cargarHilos(a, tamanoPaginaMensajes, solicitudId),
+    cargarHilos(a, 4, solicitudId),
     configuracionInstagram()
       ? prisma.conexionCanal.findFirst({
           where: { canal: canalInstagram, ...ambitoInstagram(a) },
@@ -93,6 +93,6 @@ export async function bandejaMensajes(a: AmbitoConsultas, solicitudId?: string) 
     administra: a.administra,
     mostrarWhatsApp:
       a.administra && Boolean((a.estudioId && metaWhatsApp) || whatsapp),
-    conversaciones,
+    conversaciones: await anexarGestion(conversaciones),
   };
 }
