@@ -2,6 +2,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import Accordion from 'react-bootstrap/Accordion';
+import Modal from 'react-bootstrap/Modal';
 import { useFormikContext } from 'formik';
 import { PanelForm, PanelField, PanelSubmitButton } from './PanelForm';
 import { PanelReminderOverrides } from './PanelReminderOverrides';
@@ -44,54 +45,120 @@ export function BookingEditor({
   onSaved: (c: CitaGuardada) => void;
 }) {
   const guardada = useRef<CitaGuardada | null>(null);
+  const [revision, setRevision] = useState<FormularioCita | null>(null);
+  const confirmar = useRef<((si: boolean) => void) | null>(null);
+  function resolverRevision(si: boolean) {
+    confirmar.current?.(si);
+    confirmar.current = null;
+    setRevision(null);
+  }
   const [artistaId, setArtistaId] = useState(
     cita?.artistaId || datos.consultas.find((c) => c.id === solicitudId)?.artistaId || '',
   );
   const disponibilidad = useDisponibilidad(artistaId);
   return (
-    <PanelForm<FormularioCita>
-      initialValues={crearFormularioCita(datos, solicitudId, fecha, cita)}
-      validate={(v) => {
-        const errores = erroresFormularioCita(v, datos, cita?.id);
-        const cambiaHorario =
-          !cita || v.fecha !== cita.fecha || v.hora !== cita.hora || v.duracion !== cita.duracion;
-        if (
-          cambiaHorario &&
-          v.estado !== 'CANCELADA' &&
-          artistaId &&
-          !errores.fecha &&
-          !errores.hora &&
-          !errores.duracion
-        ) {
-          const problema = disponibilidad.datos
-            ? problemaReserva(disponibilidad.datos, v.fecha, v.hora, v.duracion)
-            : disponibilidad.error || 'Esperá a que cargue la disponibilidad del artista.';
-          if (problema) errores.hora = problema;
-        }
-        return errores;
-      }}
-      onSave={async (v) => {
-        guardada.current = await onSave(v);
-      }}
-      onSaved={() => {
-        if (guardada.current) onSaved(guardada.current);
-      }}
-    >
-      <BookingFields
-        datos={datos}
-        cita={cita}
-        base={base}
-        recordatorios={recordatorios}
-        disponibilidad={disponibilidad}
-        onArtistChange={setArtistaId}
-      />
-      <div className={styles.formActions}>
-        <button type="button" className={styles.secondaryButton} onClick={onCancel}>
-          Volver
-        </button>
-        <PanelSubmitButton>Guardar turno</PanelSubmitButton>
-      </div>
-    </PanelForm>
+    <>
+      <PanelForm<FormularioCita>
+        initialValues={crearFormularioCita(datos, solicitudId, fecha, cita)}
+        validate={(v) => {
+          const errores = erroresFormularioCita(v, datos, cita?.id);
+          const cambiaHorario =
+            !cita || v.fecha !== cita.fecha || v.hora !== cita.hora || v.duracion !== cita.duracion;
+          if (
+            cambiaHorario &&
+            v.estado !== 'CANCELADA' &&
+            artistaId &&
+            !errores.fecha &&
+            !errores.hora &&
+            !errores.duracion
+          ) {
+            const problema = disponibilidad.datos
+              ? problemaReserva(disponibilidad.datos, v.fecha, v.hora, v.duracion)
+              : disponibilidad.error || 'Esperá a que cargue la disponibilidad del artista.';
+            if (problema) errores.hora = problema;
+          }
+          return errores;
+        }}
+        onSave={async (v) => {
+          guardada.current = null;
+          const cambio =
+            cita &&
+            (v.estado !== cita.estado ||
+              v.fecha !== cita.fecha ||
+              v.hora !== cita.hora ||
+              v.duracion !== cita.duracion);
+          if (cambio) {
+            setRevision(v);
+            const aceptado = await new Promise<boolean>((resolve) => {
+              confirmar.current = resolve;
+            });
+            if (!aceptado) return false;
+          }
+          guardada.current = await onSave(v);
+        }}
+        onSaved={() => {
+          if (guardada.current) onSaved(guardada.current);
+        }}
+      >
+        <BookingFields
+          datos={datos}
+          cita={cita}
+          base={base}
+          recordatorios={recordatorios}
+          disponibilidad={disponibilidad}
+          onArtistChange={setArtistaId}
+        />
+        <div className={styles.formActions}>
+          <button type="button" className={styles.secondaryButton} onClick={onCancel}>
+            Volver
+          </button>
+          <PanelSubmitButton>Guardar turno</PanelSubmitButton>
+        </div>
+      </PanelForm>
+      <Modal
+        show={Boolean(revision)}
+        onHide={() => resolverRevision(false)}
+        centered
+        aria-labelledby="revisar-turno-titulo"
+      >
+        <Modal.Header closeButton closeLabel="Cerrar revisión">
+          <Modal.Title id="revisar-turno-titulo">
+            {revision?.estado === 'CANCELADA' ? 'Cancelar turno' : 'Confirmar cambios del turno'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {revision?.estado === 'CANCELADA' ? (
+            <p>El horario quedará libre y se desactivarán los recordatorios de este turno.</p>
+          ) : (
+            revision && (
+              <>
+                <p>
+                  {mostrarFecha(revision.fecha)} a las {revision.hora} · {revision.duracion} minutos
+                </p>
+                <p>Estado: {estados[revision.estado]}</p>
+              </>
+            )
+          )}
+          <p>Revisá los cambios antes de guardarlos.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => resolverRevision(false)}
+          >
+            Volver a editar
+          </button>
+          <button
+            type="button"
+            className={'btn ' + (revision?.estado === 'CANCELADA' ? 'btn-danger' : 'btn-dark')}
+            onClick={() => resolverRevision(true)}
+          >
+            {revision?.estado === 'CANCELADA' ? 'Cancelar turno' : 'Confirmar cambios'}
+          </button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }
 function BookingFields({

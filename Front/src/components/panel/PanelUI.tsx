@@ -2,6 +2,11 @@ import type { ReactNode } from 'react';
 import styles from './workspace.module.css';
 
 const iconos = {
+  bot: 'M8 4h8M12 2v2M5 7h14v13H5zM2 11v5M22 11v5M8 11h.01M16 11h.01M9 16h6',
+  atencion: 'm12 3 10 18H2L12 3zM12 9v5M12 17h.01',
+  pausa: 'M8 5v14M16 5v14',
+  bandera: 'M5 22V3h14l-3 5 3 5H5',
+  actualizar: 'M20 7v5h-5M4 17v-5h5M5.5 7a8 8 0 0 1 13-1l1.5 2M18.5 17a8 8 0 0 1-13 1L4 16',
   estadisticas: 'M3 3v18h18M7 16v-4M12 16V8M17 16V5',
   resumen: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   consultas: 'M5 3h14v18H5zM9 8h6M9 12h6M9 16h3',
@@ -81,20 +86,26 @@ export function Avatar({ nombre, grande = false }: { nombre: string; grande?: bo
   );
 }
 const estados: Record<string, { nombre: string; clase: string }> = {
+  ACTIVO: { nombre: 'Activo', clase: 'statusGood' },
+  SUSPENDIDO: { nombre: 'Suspendido', clase: 'statusPending' },
+  ACEPTADA: { nombre: 'Aceptada', clase: 'statusGood' },
+  RECHAZADA: { nombre: 'Rechazada', clase: 'statusError' },
+  VENCIDA: { nombre: 'Vencida', clase: 'statusMuted' },
+  CONECTADA: { nombre: 'Conectado', clase: 'statusGood' },
   NUEVA: { nombre: 'Nueva', clase: 'statusNew' },
   EN_REVISION: { nombre: 'En revisión', clase: 'statusPending' },
-  PRESUPUESTADA: { nombre: 'Presupuestada', clase: 'statusGood' },
+  PRESUPUESTADA: { nombre: 'Presupuestada', clase: 'statusNew' },
   ARCHIVADA: { nombre: 'Archivada', clase: 'statusMuted' },
   PENDIENTE: { nombre: 'Por confirmar', clase: 'statusPending' },
   CONFIRMADA: { nombre: 'Confirmada', clase: 'statusGood' },
-  COMPLETADA: { nombre: 'Completada', clase: 'statusMuted' },
+  COMPLETADA: { nombre: 'Completada', clase: 'statusGood' },
   CANCELADA: { nombre: 'Cancelada', clase: 'statusMuted' },
 };
-export function StatusBadge({ estado }: { estado: string }) {
+export function StatusBadge({ estado, nombre }: { estado: string; nombre?: string }) {
   const opcion = estados[estado];
   return (
     <span className={`${styles.status} ${opcion ? styles[opcion.clase] : ''}`}>
-      {opcion?.nombre || estado}
+      {nombre || opcion?.nombre || estado}
     </span>
   );
 }

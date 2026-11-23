@@ -1,3 +1,4 @@
+import { iniciarResumenes } from './gestion-conversaciones/resumen.worker.js';
 import "dotenv/config";
 import { app } from "./app.js";
 import { configuracionCorreo } from "./config/correos.js";
@@ -10,6 +11,7 @@ import { enviarEnHiloInstagram } from "./instagram/instagram.service.js";
 const PORT = process.env.PORT || 4002;
 
 app.listen(PORT, () => {
+  iniciarResumenes();
   iniciarBotInstagram(enviarEnHiloInstagram);
   iniciarColaInstagram(enviarEnHiloInstagram);
   if (process.env.RECORDATORIOS_AUTOMATICOS === "1") {

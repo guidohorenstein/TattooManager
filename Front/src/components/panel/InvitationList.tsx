@@ -1,5 +1,6 @@
 'use client';
 import Accordion from 'react-bootstrap/Accordion';
+import { StatusBadge } from './PanelUI';
 import type { InvitacionEquipo } from '@/types/equipo';
 import styles from './workspace.module.css';
 
@@ -28,10 +29,10 @@ export function InvitationList({
     historial = invitaciones.filter((i) => i.estado !== 'PENDIENTE');
   function fila(i: InvitacionEquipo) {
     return (
-      <article className={styles.mobileItem} key={i.id}>
+      <article className={styles.invitationItem} key={i.id}>
         <div className={styles.mobileItemHeader}>
           <strong>{titular ? i.email : i.estudioNombre}</strong>
-          <span className={styles.status}>{nombres[i.estado]}</span>
+          <StatusBadge estado={i.estado} nombre={nombres[i.estado]} />
         </div>
         <p>
           {i.estado === 'PENDIENTE'
@@ -91,7 +92,7 @@ export function InvitationList({
             <span>{pendientes.length}</span>
           </div>
           {pendientes.length ? (
-            pendientes.map(fila)
+            <div className={styles.invitationList}>{pendientes.map(fila)}</div>
           ) : (
             <p className={styles.surfaceBody}>No hay invitaciones pendientes.</p>
           )}
@@ -107,7 +108,9 @@ export function InvitationList({
         <Accordion>
           <Accordion.Item eventKey="historial">
             <Accordion.Header>Historial de invitaciones ({historial.length})</Accordion.Header>
-            <Accordion.Body>{historial.map(fila)}</Accordion.Body>
+            <Accordion.Body>
+              <div className={styles.invitationList}>{historial.map(fila)}</div>
+            </Accordion.Body>
           </Accordion.Item>
         </Accordion>
       )}

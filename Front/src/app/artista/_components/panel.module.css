@@ -57,13 +57,15 @@
   top: 12px;
   padding: 5px 9px;
   border-radius: 3px;
-  background: #ffffffed;
-  color: var(--theme-ink);
+  background: var(--state-warning-bg);
+  color: var(--state-warning);
+  border: 1px solid var(--state-warning-border);
   font-size: 12px;
 }
 .published {
-  background: #202320ed;
-  color: #fff;
+  background: var(--state-success-bg);
+  color: var(--state-success);
+  border-color: var(--state-success-border);
 }
 .workBody {
   padding: 17px;

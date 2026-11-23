@@ -1,3 +1,4 @@
+import { estadoAgenda } from '../disponibilidad/estado-agenda.js';
 import { randomUUID } from "node:crypto";
 import { DateTime } from "luxon";
 import type { PreferenciaAgenda, TurnosAsistente } from "../asistente/respuesta.js";
@@ -19,7 +20,7 @@ export type MenuAgenda = {
   preferencia?: PreferenciaAgenda;
   confirmacion?: string;
 };
-export type RespuestaBot = { texto: string; tarjetas?: TarjetaInstagram[]; opciones?: BotonInstagram[]; agenda?: MenuAgenda };
+export type RespuestaBot = { requiereAtencion?: boolean; texto: string; tarjetas?: TarjetaInstagram[]; opciones?: BotonInstagram[]; agenda?: MenuAgenda };
 const formatoHora = "HH:mm";
 const rangoDias = 21;
 const uuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
@@ -119,7 +120,7 @@ export async function agendarPorInstagram(
     await registrarAviso(prisma, { usuarioId: titularId, clave: "agenda-incompleta:" + s.id, urgente: true,
       titulo: "Consulta pendiente de agenda", detalle: "Revisá el artista, la vigencia y la duración de la propuesta.",
       destino: "/estudio/consultas?consulta=" + s.id });
-    return { texto: "Le avisé al estudio que tiene que revisar la propuesta antes de ofrecerte un turno." };
+    return { requiereAtencion: true, texto: "El equipo va a revisar tu propuesta y seguir por este chat para coordinar tu turno." };
   }
 
   const ahora = DateTime.now().setZone(zona);
@@ -171,11 +172,11 @@ export async function agendarPorInstagram(
         inicioAt: { lt: finBusqueda.toJSDate() } }, select: { inicioAt: true, finAt: true },
     }),
   ]);
-  if (!Array.isArray(agenda?.semana)) {
+  if (!agenda || estadoAgenda(agenda.semana) !== "LISTA") {
     await registrarAviso(prisma, { usuarioId: titularId, clave: "sin-horarios:" + s.id, urgente: true,
       titulo: "Artista sin horarios configurados", detalle: artista.nombreArtistico || artista.nombre || "Consulta de Instagram",
-      destino: "/estudio/consultas?consulta=" + s.id });
-    return { texto: "Le avisé al estudio que todavía tiene que cargar los horarios de este artista." };
+      destino: "/estudio/disponibilidad?artista=" + s.artistaAsignadoId });
+    return { requiereAtencion: true, texto: "El equipo va a revisar la disponibilidad y seguir por este chat para coordinar un horario con vos." };
   }
 
   const semana = agenda.semana as unknown as SemanaDisponible;

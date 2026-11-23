@@ -1,3 +1,4 @@
+import { gestionConversacionesRouter } from '../gestion-conversaciones/gestion-conversaciones.routes.js';
 import { Router } from "express";
 import { instagramRouter } from "../instagram/instagram.routes.js";
 import { requerirSesion } from "../middlewares/autenticacion.js";
@@ -24,6 +25,7 @@ mensajesUnificadosRouter.get(
     ));
   },
 );
+mensajesUnificadosRouter.use(gestionConversacionesRouter);
 mensajesUnificadosRouter.use("/instagram", instagramRouter);
 mensajesUnificadosRouter.use("/whatsapp", whatsappRouter);
 mensajesUnificadosRouter.get(

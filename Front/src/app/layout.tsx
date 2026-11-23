@@ -3,7 +3,9 @@ import { Suspense, type ReactNode } from 'react';
 import localFont from 'next/font/local';
 import Script from 'next/script';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-toastify/dist/ReactToastify.css';
 import './globals.css';
+import { ActionNotifications } from '@/components/feedback/ActionNotifications';
 import { AuthProvider } from '@/store/AuthProvider';
 import { GoogleAuthNotice } from '@/components/auth/GoogleAuthNotice';
 import { CuentaEliminadaNotice } from '@/components/auth/CuentaEliminadaNotice';
@@ -52,6 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <UnsavedChangesProvider>
           <AuthProvider>
             {children}
+            <ActionNotifications />
             <Suspense fallback={null}>
               <GoogleAuthNotice />
               <CuentaEliminadaNotice />

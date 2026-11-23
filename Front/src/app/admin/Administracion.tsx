@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 import Link from 'next/link';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import Modal from 'react-bootstrap/Modal';
@@ -252,7 +253,6 @@ function Listado({ tipo }: { tipo: 'cuentas' | 'suscripciones' }) {
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
   const [accion, setAccion] = useState<Accion | null>(null);
-  const [aviso, setAviso] = useState('');
   const query = new URLSearchParams({ q: busqueda, pagina: String(pagina) });
   const estado = usePanelData<{ filas: (Cuenta | Suscripcion)[]; siguiente: boolean }>(
     '/admin/' + tipo + '?' + query,
@@ -278,11 +278,6 @@ function Listado({ tipo }: { tipo: 'cuentas' | 'suscripciones' }) {
         </label>
         <button className={styles.secondaryButton}>Buscar</button>
       </form>
-      {aviso && (
-        <p className={styles.notice} role="status">
-          {aviso}
-        </p>
-      )}
       <EstadoCarga {...estado} />
       {estado.datos &&
         (filas.length ? (
@@ -447,7 +442,7 @@ function Listado({ tipo }: { tipo: 'cuentas' | 'suscripciones' }) {
                 await estado.recargar();
               }}
               onSaved={() => {
-                setAviso('Cambio aplicado.');
+                notificar.exito('Cambio aplicado.');
                 setAccion(null);
               }}
             >

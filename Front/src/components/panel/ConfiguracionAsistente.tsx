@@ -1,4 +1,5 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
 import Link from 'next/link';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
@@ -23,6 +24,7 @@ type VistaPrevia = {
   accion: keyof typeof acciones;
   texto: string;
   enlaceFormulario: string | null;
+  motivoDerivacion?: string;
 };
 
 function leerJson(contenido: string): unknown {
@@ -36,7 +38,6 @@ function leerJson(contenido: string): unknown {
 function AccionesArchivo() {
   const { values, setFieldValue } = useFormikContext<Archivo>();
   const [error, setError] = useState('');
-  const [aviso, setAviso] = useState('');
 
   async function importar(evento: ChangeEvent<HTMLInputElement>) {
     const input = evento.currentTarget;
@@ -44,12 +45,11 @@ function AccionesArchivo() {
     input.value = '';
     if (!archivo) return;
     setError('');
-    setAviso('');
     try {
       if (archivo.size > 96 * 1024) throw new Error('Elegí un archivo JSON de hasta 96 KB.');
       const datos = leerJson(await archivo.text());
       await setFieldValue('contenido', JSON.stringify(datos, null, 2));
-      setAviso('Archivo cargado. Guardá para aplicar los cambios a tu configuración.');
+      notificar.info('Archivo cargado. Guardá para aplicar los cambios a tu configuración.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos leer el archivo.');
     }
@@ -96,11 +96,6 @@ function AccionesArchivo() {
       {error && (
         <p role="alert" className="text-danger mt-2">
           {error}
-        </p>
-      )}
-      {aviso && (
-        <p role="status" className="mt-2">
-          {aviso}
         </p>
       )}
     </>
@@ -166,6 +161,12 @@ function PruebaAsistente({ disponible }: { disponible: boolean }) {
               <div className={`${styles.surface} p-3 mt-3`}>
                 <h3 className="h6">{acciones[respuesta.accion]}</h3>
                 <p className="mb-0">{respuesta.texto}</p>
+                {respuesta.motivoDerivacion && (
+                  <p className="small text-body-secondary mt-2 mb-0">
+                    Este caso requiere una revisión privada del equipo. No se ejecutan acciones
+                    automáticas.
+                  </p>
+                )}
                 {respuesta.enlaceFormulario && (
                   <Link href={respuesta.enlaceFormulario}>Ver formulario</Link>
                 )}
@@ -182,7 +183,7 @@ function PruebaAsistente({ disponible }: { disponible: boolean }) {
 
 export function ConfiguracionAsistente({ volver }: { volver: string }) {
   const { datos, error, cargando } = usePanelData<Respuesta>(ruta);
-  const [guardado, setGuardado] = useState(false);
+
   return (
     <>
       <PageHeader titulo="Configuración del asistente">
@@ -198,6 +199,11 @@ export function ConfiguracionAsistente({ volver }: { volver: string }) {
       )}
       {datos && (
         <>
+          <p className="small text-body-secondary">
+            El asistente utiliza solo el contexto necesario de cada chat. Las consultas con
+            información de salud, documentos, credenciales, datos de pago o contenido íntimo se
+            derivan al equipo cuando se detectan.
+          </p>
           <PanelForm<Archivo>
             initialValues={{ contenido: JSON.stringify(datos.configuracion, null, 2) }}
             validate={({ contenido }) => {
@@ -209,14 +215,13 @@ export function ConfiguracionAsistente({ volver }: { volver: string }) {
               }
             }}
             onSave={async ({ contenido }) => {
-              setGuardado(false);
               await apiFetch(ruta, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(leerJson(contenido)),
               });
             }}
-            onSaved={() => setGuardado(true)}
+            onSaved={() => notificar.exito('Configuración del asistente guardada.')}
           >
             <PanelField
               name="contenido"
@@ -231,11 +236,6 @@ export function ConfiguracionAsistente({ volver }: { volver: string }) {
               <PanelSubmitButton>Guardar configuración</PanelSubmitButton>
             </div>
           </PanelForm>
-          {guardado && (
-            <p role="status" className="mt-2">
-              Configuración del asistente guardada.
-            </p>
-          )}
           <PruebaAsistente disponible={datos.pruebaDisponible} />
         </>
       )}

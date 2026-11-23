@@ -1,8 +1,15 @@
+import { programarResumen } from "../gestion-conversaciones/gestion-conversaciones.repository.js";
 import { Prisma, type EstadoMensajeWhatsApp } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { registrarAviso } from "../operacion/avisos.repository.js";
 import type { AmbitoConsultas } from "../solicitudes/solicitudes.entity.js";
-import { anterioresA, camposMensaje, ordenMensajes, presentarMensajes, tamanoPaginaMensajes } from "../mensajes/historial-mensajes.js";
+import {
+  anterioresA,
+  camposMensaje,
+  ordenMensajes,
+  presentarMensajes,
+  tamanoPaginaMensajes,
+} from "../mensajes/historial-mensajes.js";
 
 export function filtroConversaciones(
   a: AmbitoConsultas,
@@ -58,7 +65,11 @@ export async function listarConversaciones(
   }));
 }
 
-export async function historialWhatsApp(a: AmbitoConsultas, conversacionId: string, antes: string) {
+export async function historialWhatsApp(
+  a: AmbitoConsultas,
+  conversacionId: string,
+  antes: string,
+) {
   const ambito = { conversacionId, conversacion: filtroConversaciones(a) };
   const cursor = await prisma.mensajeWhatsApp.findFirst({
     where: { ...ambito, id: antes },
@@ -147,6 +158,7 @@ export async function registrarEntrada(datos: {
       });
 
       if (!count) return;
+      await programarResumen("WHATSAPP", hilo, tx);
 
       if (!datos.propio)
         await tx.conversacionWhatsApp.updateMany({
@@ -198,17 +210,19 @@ export async function registrarEstado(
           })
         : null;
 
-      const mensaje = local ?? await tx.mensajeWhatsApp.findFirst({
-        where: {
-          proveedorId,
-          propio: true,
-          conversacion: { numeroId },
-        },
-        select: {
-          id: true,
-          conversacionId: true,
-        },
-      });
+      const mensaje =
+        local ??
+        (await tx.mensajeWhatsApp.findFirst({
+          where: {
+            proveedorId,
+            propio: true,
+            conversacion: { numeroId },
+          },
+          select: {
+            id: true,
+            conversacionId: true,
+          },
+        }));
 
       if (!mensaje) return;
 

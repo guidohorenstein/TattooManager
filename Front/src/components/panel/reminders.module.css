@@ -111,8 +111,8 @@
 }
 .ruleRow :global(.form-check-input:checked),
 .groupSwitch :global(.form-check-input:checked) {
-  background-color: var(--theme-soft);
-  border-color: var(--theme-border);
+  background-color: var(--state-success-solid);
+  border-color: var(--state-success-solid);
 }
 .variables {
   margin: -3px 0 24px;
@@ -203,13 +203,54 @@
     padding-left: 52px;
     justify-content: space-between;
   }
-  .groupSwitch > span:first-child {
-    display: none;
+  .groupHeader {
+    flex-wrap: wrap;
+    gap: 16px;
   }
   .schedule {
     line-height: 1.5;
   }
   .ruleContent p {
     font-size: 12px;
+  }
+}
+
+.groupSwitch {
+  border: 1px solid var(--theme-border);
+  border-radius: 5px;
+  padding: 8px 12px;
+  background: var(--theme-background);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+.groupSwitch[data-active='true'] {
+  color: var(--state-success);
+  border-color: var(--state-success-border);
+  background: var(--state-success-bg);
+}
+.groupSwitch :global(.form-check-input) {
+  margin: 0;
+  float: none;
+  cursor: pointer;
+}
+.ruleRow[data-active='true'] .ruleIcon {
+  color: var(--state-success);
+  border-color: var(--state-success-border);
+  background: var(--state-success-bg);
+}
+.groupSwitch :global(.form-switch) {
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+}
+.ruleActions .switchTarget :global(.form-check-input),
+.groupSwitch :global(.form-check-input) {
+  width: 2.5rem;
+  height: 1.4rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .groupSwitch {
+    transition: none;
   }
 }

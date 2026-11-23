@@ -435,3 +435,13 @@
     padding-inline: 18px;
   }
 }
+
+.setupDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d99525;
+  flex: none;
+  margin-left: auto;
+  box-shadow: 0 0 0 3px var(--state-warning-bg);
+}

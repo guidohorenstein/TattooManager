@@ -129,6 +129,8 @@ enum EstadoPagoSuscripcion {
 // --- MODELOS DE DATOS ---
 
 model Usuario {
+  gestionesPropias GestionConversacion[] @relation("GestionArtista")
+  gestionesAsignadas GestionConversacion[] @relation("GestionResponsable")
   configuracionAsistente ConfiguracionAsistente?
   suspendidoAt           DateTime?              @db.Timestamptz(3)
   preferenciasCorreo     PreferenciasCorreo?
@@ -254,6 +256,7 @@ enum EstadoPublicacion {
 }
 
 model Estudio {
+  gestionesConversacion GestionConversacion[]
   configuracionAsistente ConfiguracionAsistente?
   biografia              String?
   emailContacto          String?
@@ -758,4 +761,45 @@ model AccionAdministrativa {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+model GestionConversacion {
+ id String @id @default(uuid())
+ canal String
+ conversacionId String
+ estudioId String?
+ estudio Estudio? @relation(fields:[estudioId],references:[id],onDelete:Cascade)
+ artistaId String?
+ artista Usuario? @relation("GestionArtista",fields:[artistaId],references:[id],onDelete:Cascade)
+ atencion String @default("AUTOMATICA")
+ prioridad String @default("NORMAL")
+ motivo String @default("")
+ responsableId String?
+ responsable Usuario? @relation("GestionResponsable",fields:[responsableId],references:[id],onDelete:SetNull)
+ resueltaAt DateTime? @db.Timestamptz(3)
+ version Int @default(0)
+ resumen Json?
+ ultimoMensajeResumenId String?
+ resumenActualizadoAt DateTime? @db.Timestamptz(3)
+ resumenPendienteAt DateTime? @db.Timestamptz(3)
+ intentoResumenAt DateTime? @db.Timestamptz(3)
+ leaseResumenHasta DateTime? @db.Timestamptz(3)
+ errorResumen Boolean @default(false)
+ eventos EventoConversacion[]
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@unique([canal,conversacionId])
+ @@index([estudioId,atencion,prioridad])
+ @@index([artistaId,atencion])
+ @@index([resumenPendienteAt])
+}
+model EventoConversacion {
+ id String @id @default(uuid())
+ gestionId String
+ gestion GestionConversacion @relation(fields:[gestionId],references:[id],onDelete:Cascade)
+ actorId String?
+ accion String
+ detalle String
+ createdAt DateTime @default(now())
+ @@index([gestionId,createdAt])
 }

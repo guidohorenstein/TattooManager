@@ -1,3 +1,4 @@
+import { programarResumen } from "../gestion-conversaciones/gestion-conversaciones.repository.js";
 import { createHash, randomUUID } from "node:crypto";
 import type { EstadoMensajeCanal, Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
@@ -76,7 +77,12 @@ export async function recibirInstagram(datos: Webhook) {
               ...titularConPlan(),
               estudioId: c.estudioId,
             }
-          : { id: c.artistaId!, rol: "ARTISTA", estudioId: null, suscripciones: { some: planIndividualVigente() } }),
+          : {
+              id: c.artistaId!,
+              rol: "ARTISTA",
+              estudioId: null,
+              suscripciones: { some: planIndividualVigente() },
+            }),
       },
       select: { id: true },
     });
@@ -88,13 +94,24 @@ export async function recibirInstagram(datos: Webhook) {
       const remitente: string | undefined = propio ? receptor : emisor;
       const mensaje = evento?.message;
       const postback = !propio && c.estudioId ? evento?.postback : undefined;
-      const payload = postback?.payload ?? (!propio ? mensaje?.quick_reply?.payload : undefined);
-      const accion = typeof payload === "string" && payload.startsWith("ink:") && payload.length <= 300
-        ? payload : undefined;
+      const payload =
+        postback?.payload ??
+        (!propio ? mensaje?.quick_reply?.payload : undefined);
+      const accion =
+        typeof payload === "string" &&
+        payload.startsWith("ink:") &&
+        payload.length <= 300
+          ? payload
+          : undefined;
       const instante = evento?.timestamp;
-      const proveedorId = accion ? "postback:" + createHash("sha256")
-        .update(JSON.stringify([instante, remitente, accion])).digest("hex") :
-        typeof mensaje?.mid === "string" ? idMensajeInstagram(mensaje.mid) : undefined;
+      const proveedorId = accion
+        ? "postback:" +
+          createHash("sha256")
+            .update(JSON.stringify([instante, remitente, accion]))
+            .digest("hex")
+        : typeof mensaje?.mid === "string"
+          ? idMensajeInstagram(mensaje.mid)
+          : undefined;
       if (
         (!mensaje && !accion) ||
         mensaje?.is_self ||
@@ -129,7 +146,8 @@ export async function recibirInstagram(datos: Webhook) {
           remitente,
         )) ||
           "Contacto " + remitente.slice(-4));
-      const texto = typeof mensaje?.text === "string" ? mensaje.text.trim() : "";
+      const texto =
+        typeof mensaje?.text === "string" ? mensaje.text.trim() : "";
       await guardarMensajeCanal({
         canal: canalInstagram,
         cuentaId,
@@ -141,12 +159,23 @@ export async function recibirInstagram(datos: Webhook) {
         fecha: new Date(instante),
         ...(propio
           ? { propio: true }
-          : { propio: false, destinatario: destinatario.id,
-            ...(c.estudioId && (texto || accion) && Date.now() - instante < ventanaRespuesta
-              ? { bot: { accion } } : {}) }),
-        texto: texto?.slice(0, 4096) ||
-          (accion && typeof postback?.title === "string" && postback.title.slice(0, 100)) ||
-          (accion ? "El cliente seleccionó una opción." : "Este mensaje contiene contenido multimedia."),
+          : {
+              propio: false,
+              destinatario: destinatario.id,
+              ...(c.estudioId &&
+              (texto || accion) &&
+              Date.now() - instante < ventanaRespuesta
+                ? { bot: { accion } }
+                : {}),
+            }),
+        texto:
+          texto?.slice(0, 4096) ||
+          (accion &&
+            typeof postback?.title === "string" &&
+            postback.title.slice(0, 100)) ||
+          (accion
+            ? "El cliente seleccionó una opción."
+            : "Este mensaje contiene contenido multimedia."),
       });
     }
   }
@@ -169,16 +198,65 @@ async function hiloPermitido(usuarioId: string, identificador: unknown) {
   return { a, hilo };
 }
 
-export async function cambiarBotInstagram(usuarioId: string, id: unknown, entrada: unknown) {
+export async function cambiarBotInstagram(
+  usuarioId: string,
+  id: unknown,
+  entrada: unknown,
+) {
   const { activo } = objetoEntrada(entrada);
-  if (typeof activo !== "boolean") throw new HttpError(400, "Indicá si querés activar el bot.");
+  if (typeof activo !== "boolean")
+    throw new HttpError(400, "Indicá si querés activar el bot.");
   const { a, hilo } = await hiloPermitido(usuarioId, id);
   if (!a.estudioId || !a.administra)
-    throw new HttpError(403, "Solo el titular del estudio puede cambiar el estado del bot.");
+    throw new HttpError(
+      403,
+      "Solo el titular del estudio puede cambiar el estado del bot.",
+    );
 
-  await prisma.$transaction(async tx => {
+  await prisma.$transaction(async (tx) => {
     await bloquearConversacionCanal(tx, hilo.id);
     const where = { conversacionId: hilo.id };
+    const gestion = await tx.gestionConversacion.findUnique({
+      where: {
+        canal_conversacionId: { canal: "INSTAGRAM", conversacionId: hilo.id },
+      },
+    });
+    if (activo && gestion?.atencion === "PENDIENTE")
+      throw new HttpError(
+        409,
+        "Resolvé la atención pendiente desde los detalles antes de reactivar el bot.",
+      );
+    const g = await tx.gestionConversacion.upsert({
+      where: {
+        canal_conversacionId: { canal: "INSTAGRAM", conversacionId: hilo.id },
+      },
+      create: {
+        canal: "INSTAGRAM",
+        conversacionId: hilo.id,
+        estudioId: hilo.estudioId,
+        atencion: activo ? "AUTOMATICA" : "MANUAL",
+      },
+      update: {
+        atencion:
+          gestion?.atencion === "PENDIENTE"
+            ? "PENDIENTE"
+            : activo
+              ? "AUTOMATICA"
+              : "MANUAL",
+        version: { increment: 1 },
+        resumenPendienteAt: new Date(Date.now() + 10000),
+      },
+    });
+    await tx.eventoConversacion.create({
+      data: {
+        gestionId: g.id,
+        actorId: usuarioId,
+        accion: activo ? "ACTIVAR_BOT" : "PAUSAR_BOT",
+        detalle: activo
+          ? "Bot activado por el titular"
+          : "Bot pausado por el titular",
+      },
+    });
     if (activo) {
       await tx.flujoInstagram.updateMany({ where, data: { pausadoAt: null } });
       return;
@@ -186,12 +264,21 @@ export async function cambiarBotInstagram(usuarioId: string, id: unknown, entrad
     const ahora = new Date();
     await tx.flujoInstagram.upsert({
       where,
-      create: { ...where, token: randomUUID(), enlaceHasta: ahora, pausadoAt: ahora },
+      create: {
+        ...where,
+        token: randomUUID(),
+        enlaceHasta: ahora,
+        pausadoAt: ahora,
+      },
       update: { pausadoAt: ahora },
     });
-    await tx.conversacionCanal.update({ where: { id: hilo.id }, data: { botResponderAt: null } });
+    await tx.conversacionCanal.update({
+      where: { id: hilo.id },
+      data: { botResponderAt: null },
+    });
     await tx.mensajeCanal.updateMany({
-      where: { conversacionId: hilo.id, botPendiente: true }, data: { botPendiente: false },
+      where: { conversacionId: hilo.id, botPendiente: true },
+      data: { botPendiente: false },
     });
   });
 }
@@ -208,15 +295,28 @@ export async function responderInstagram(
     throw new HttpError(400, "Escribí un mensaje de hasta 1000 caracteres.");
   const { hilo } = await hiloPermitido(usuarioId, id);
   await enviarEnHiloInstagram(hilo, claveEnvio, texto);
+  return prisma.mensajeCanal.findFirst({
+    where: { claveEnvio, conversacionId: hilo.id },
+    select: { id: true, texto: true, propio: true, fecha: true, estado: true },
+  });
 }
 
-export const enviarEnHiloInstagram: EnviarBot = async (hilo, claveEnvio, texto, formato = {}) => {
+export const enviarEnHiloInstagram: EnviarBot = async (
+  hilo,
+  claveEnvio,
+  texto,
+  formato = {},
+) => {
   const { tarjetas, opciones, agenda } = formato;
   async function comprobarEnvio() {
     const previo = await prisma.mensajeCanal.findUnique({
       where: { claveEnvio },
     });
-    if (previo && (previo.conversacionId !== hilo.id || (!claveEnvio.startsWith("bot:") && previo.texto !== texto)))
+    if (
+      previo &&
+      (previo.conversacionId !== hilo.id ||
+        (!claveEnvio.startsWith("bot:") && previo.texto !== texto))
+    )
       throw new HttpError(409, "El envío ya fue utilizado.");
     return previo?.estado;
   }
@@ -247,31 +347,35 @@ export const enviarEnHiloInstagram: EnviarBot = async (hilo, claveEnvio, texto, 
 
   const mensajeId = randomUUID();
   const fecha = new Date();
-  const reservar = (db: Prisma.TransactionClient) => db.mensajeCanal.createMany({
-    data: [
-      {
-        id: mensajeId,
-        claveEnvio,
-        conversacionId: hilo.id,
-        texto,
-        propio: true,
-        estado: "ENVIANDO",
-        fecha,
-        accionBot: agenda,
-      },
-    ],
-    skipDuplicates: true,
-  });
-  const reserva = claveEnvio.startsWith("bot:") && !claveEnvio.startsWith("bot:derivacion:")
-    ? await prisma.$transaction(async tx => {
-        await bloquearConversacionCanal(tx, hilo.id);
-        const flujo = await tx.flujoInstagram.findUnique({
-          where: { conversacionId: hilo.id }, select: { pausadoAt: true },
-        });
-        return flujo?.pausadoAt ? null : reservar(tx);
-      })
-    : await reservar(prisma);
-  if (!reserva) throw new HttpError(409, "El bot está pausado en esta conversación.");
+  const reservar = (db: Prisma.TransactionClient) =>
+    db.mensajeCanal.createMany({
+      data: [
+        {
+          id: mensajeId,
+          claveEnvio,
+          conversacionId: hilo.id,
+          texto,
+          propio: true,
+          estado: "ENVIANDO",
+          fecha,
+          accionBot: agenda,
+        },
+      ],
+      skipDuplicates: true,
+    });
+  const reserva =
+    claveEnvio.startsWith("bot:") && !claveEnvio.startsWith("bot:derivacion:")
+      ? await prisma.$transaction(async (tx) => {
+          await bloquearConversacionCanal(tx, hilo.id);
+          const flujo = await tx.flujoInstagram.findUnique({
+            where: { conversacionId: hilo.id },
+            select: { pausadoAt: true },
+          });
+          return flujo?.pausadoAt ? null : reservar(tx);
+        })
+      : await reservar(prisma);
+  if (!reserva)
+    throw new HttpError(409, "El bot está pausado en esta conversación.");
   const { count } = reserva;
   if (!count) {
     return (await comprobarEnvio()) ?? "ENVIANDO";
@@ -281,10 +385,27 @@ export const enviarEnHiloInstagram: EnviarBot = async (hilo, claveEnvio, texto, 
   let revocada = false;
   try {
     try {
-      proveedorId = await enviarInstagram(config, credencial, hilo.remitente, texto, tarjetas, opciones);
+      proveedorId = await enviarInstagram(
+        config,
+        credencial,
+        hilo.remitente,
+        texto,
+        tarjetas,
+        opciones,
+      );
     } catch (error) {
-      if (!opciones?.length || !(error instanceof HttpError) || error.status !== 422) throw error;
-      proveedorId = await enviarInstagram(config, credencial, hilo.remitente, texto);
+      if (
+        !opciones?.length ||
+        !(error instanceof HttpError) ||
+        error.status !== 422
+      )
+        throw error;
+      proveedorId = await enviarInstagram(
+        config,
+        credencial,
+        hilo.remitente,
+        texto,
+      );
     }
     proveedorId = idMensajeInstagram(proveedorId);
     estado = "ENVIADO";
@@ -314,6 +435,7 @@ export const enviarEnHiloInstagram: EnviarBot = async (hilo, claveEnvio, texto, 
       where: { id: hilo.id, ultimaActividad: { lt: fecha } },
       data: { ultimaActividad: fecha },
     });
+    await programarResumen("INSTAGRAM", hilo, tx);
     if (revocada)
       await tx.conexionCanal.updateMany({
         where: { id: conexion.id, tokenCifrado: conexion.tokenCifrado },

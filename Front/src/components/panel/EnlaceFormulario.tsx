@@ -1,18 +1,16 @@
 'use client';
+import { notificar } from '@/lib/notificar';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import styles from './workspace.module.css';
 
 export function EnlaceFormulario({ enlace, estudio }: { enlace: string; estudio?: boolean }) {
-  const [aviso, setAviso] = useState('');
-
   async function copiar() {
     try {
       await navigator.clipboard.writeText(new URL(enlace, window.location.origin).href);
-      setAviso('Enlace copiado.');
+      notificar.exito('Enlace copiado.');
     } catch {
-      setAviso('Abrí el formulario y copiá el enlace desde la barra de direcciones.');
+      notificar.info('Abrí el formulario y copiá el enlace desde la barra de direcciones.');
     }
   }
 
@@ -33,9 +31,6 @@ export function EnlaceFormulario({ enlace, estudio }: { enlace: string; estudio?
         <button type="button" className={styles.textButton} onClick={copiar}>
           Copiar enlace
         </button>
-        <p role="status" className={styles.description}>
-          {aviso}
-        </p>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 'use client';
+import { SetupChecklist } from '@/components/panel/SetupChecklist';
 import { useConsultas } from '@/hooks/useConsultas';
 import { relojEnZona } from '@/lib/agenda';
 
@@ -46,6 +47,23 @@ export function ArtistOverview() {
           Agendar sesión
         </Link>
       </PageHeader>
+      <SetupChecklist
+        items={[
+          {
+            titulo: 'Perfil profesional',
+            listo: Boolean(perfil) && faltantes.length === 0,
+            href: '/artista/perfil',
+          },
+          {
+            titulo: 'Horarios de atención',
+            listo: Boolean(
+              fuente?.equipo.find((a) => a.id === fuente.contexto.usuarioId)?.estadoAgenda ===
+              'LISTA',
+            ),
+            href: '/artista/disponibilidad',
+          },
+        ]}
+      />
       {Boolean(fuente?.invitaciones?.length) && (
         <div className={styles.notice}>
           <span>
