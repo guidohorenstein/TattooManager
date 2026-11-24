@@ -2,6 +2,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { sendContactMessage } from '@/app/contacto/actions';
+import { Turnstile, turnstileHabilitado } from '@/components/forms/Turnstile';
 import styles from './marketing.module.css';
 type Errors = Partial<Record<'name' | 'email' | 'message', string>>;
 export function ContactSection() {
@@ -9,6 +10,8 @@ export function ContactSection() {
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState<{ success: boolean; message: string }>();
+  const [token, setToken] = useState<string | null>(null);
+  const [intento, setIntento] = useState(0);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (sending) return;
@@ -34,9 +37,16 @@ export function ContactSection() {
         ?.focus();
       return;
     }
+    if (turnstileHabilitado && !token) {
+      setFeedback({
+        success: false,
+        message: 'Esperá a que termine la verificación de seguridad y volvé a enviar.',
+      });
+      return;
+    }
     setSending(true);
     try {
-      const result = await sendContactMessage(name, email, message);
+      const result = await sendContactMessage(name, email, message, token);
       setFeedback(result);
       if (result.success) {
         form.current?.reset();
@@ -49,6 +59,8 @@ export function ContactSection() {
       });
     } finally {
       setSending(false);
+      // Cada token sirve para un solo envío.
+      setIntento((valor) => valor + 1);
     }
   }
   return (
@@ -109,6 +121,7 @@ export function ContactSection() {
               </p>
             )}
           </div>
+          <Turnstile key={intento} onToken={setToken} />
           <div className={styles.contactBottom}>
             <p>
               Usaremos tus datos para responder esta consulta.{' '}

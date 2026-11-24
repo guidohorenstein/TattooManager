@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Form, Formik } from 'formik';
 import type { CotizacionValues, PasoCotizacionProps } from '@/types/cotizacion';
 import { StepResumen } from '@/app/cotizacion/components/steps/StepResumen';
@@ -105,9 +105,12 @@ const pasosBase: {
 export function CotizacionForm({
   onSubmit,
   error,
+  verificacion,
 }: {
   onSubmit: (values: CotizacionValues) => Promise<void>;
   error?: string;
+  /** Se muestra en el último paso, antes de enviar (por ejemplo, Turnstile). */
+  verificacion?: ReactNode;
 }) {
   const pasos = pasosBase;
 
@@ -169,6 +172,7 @@ export function CotizacionForm({
                 {actual.titulo}
               </h2>
               <actual.Componente values={values} setFieldValue={setFieldValue} />
+              {esUltimo && verificacion}
               {errorVisible && (
                 <p className={styles.error} role="alert">
                   {errorVisible}
