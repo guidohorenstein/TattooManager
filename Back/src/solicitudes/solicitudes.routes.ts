@@ -14,6 +14,7 @@ import {
 } from "./solicitudes.controller.js";
 import { guardar } from "../cotizaciones/cotizaciones.controller.js";
 import { upload, uploadSolicitud } from "../middlewares/multer.js";
+import { requerirHumano } from "../middlewares/turnstile.js";
 
 export const solicitudesRouter = Router();
 
@@ -39,6 +40,7 @@ solicitudesRouter.all("/publicas/cercanas", (_req, res) => {
 solicitudesRouter.post(
   "/publicas/:slug",
   limitarEnvios,
+  requerirHumano(),
   cargarImagenesSolicitud,
   crear,
 );
@@ -46,6 +48,7 @@ solicitudesRouter.post(
 solicitudesRouter.post(
   "/publicas/artista/:id",
   limitarEnvios,
+  requerirHumano(),
   cargarImagenesSolicitud,
   crearParaArtista,
 );

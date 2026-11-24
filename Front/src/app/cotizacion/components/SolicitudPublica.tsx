@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { CotizacionForm } from '@/components/forms/CotizacionForm';
+import { Turnstile, turnstileHabilitado } from '@/components/forms/Turnstile';
 import styles from './cotizacion.module.css';
 import { crearSolicitud } from '@/services/cotizacion.service';
 import type { CotizacionValues } from '@/types/cotizacion';
@@ -16,15 +17,23 @@ export function SolicitudPublica({
   const claveEnvio = useRef<string>(null);
   const [enviada, setEnviada] = useState(false);
   const [error, setError] = useState('');
+  const [token, setToken] = useState<string | null>(null);
+  const [intento, setIntento] = useState(0);
 
   async function enviar(values: CotizacionValues) {
     setError('');
+    if (turnstileHabilitado && !token) {
+      setError('Esperá a que termine la verificación de seguridad y volvé a enviar.');
+      return;
+    }
     try {
       claveEnvio.current ??= crypto.randomUUID();
-      await crearSolicitud(values, destino, claveEnvio.current, enlaceInstagram);
+      await crearSolicitud(values, destino, claveEnvio.current, enlaceInstagram, token);
       setEnviada(true);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos enviar la consulta.');
+      // Cada token sirve para un solo envío: se pide uno nuevo para reintentar.
+      setIntento((valor) => valor + 1);
     }
   }
 
@@ -38,6 +47,10 @@ export function SolicitudPublica({
       </p>
     </div>
   ) : (
-    <CotizacionForm onSubmit={enviar} error={error} />
+    <CotizacionForm
+      onSubmit={enviar}
+      error={error}
+      verificacion={<Turnstile key={intento} onToken={setToken} />}
+    />
   );
 }

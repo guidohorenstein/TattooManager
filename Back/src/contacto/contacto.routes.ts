@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { rateLimit } from "../middlewares/limitar-solicitudes.js";
 import { recibirMensaje } from "./contacto.controller.js";
+import { requerirHumano } from "../middlewares/turnstile.js";
 export const contactoRouter = Router();
 contactoRouter.post(
   "/",
@@ -13,5 +14,6 @@ contactoRouter.post(
       error: "Recibimos varios mensajes. Volvé a intentar más tarde.",
     },
   }),
+  requerirHumano(),
   recibirMensaje,
 );
