@@ -2,11 +2,19 @@ import jwt from "jsonwebtoken";
 import { jwtSecret, duracionSesionSegundos } from "../config/auth.js";
 import { HttpError } from "../errors/http-error.js";
 
-export function crearToken(usuarioId: string, sesionId: string): string {
-  return jwt.sign({}, jwtSecret, {
+// El token vence junto con la sesión; sin fecha, usa la duración estándar.
+export function crearToken(
+  usuarioId: string,
+  sesionId: string,
+  expiraAt?: Date,
+): string {
+  const iat = Math.floor(Date.now() / 1000);
+  const exp = expiraAt
+    ? Math.max(iat + 1, Math.floor(expiraAt.getTime() / 1000))
+    : iat + duracionSesionSegundos;
+  return jwt.sign({ iat, exp }, jwtSecret, {
     subject: usuarioId,
     jwtid: sesionId,
-    expiresIn: duracionSesionSegundos,
     algorithm: "HS256",
     issuer: "tattoomanager-api",
     audience: "tattoomanager-web",

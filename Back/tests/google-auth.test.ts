@@ -514,7 +514,7 @@ for (const perfil of perfiles) {
     )!;
     assert.match(cookieSesion, /HttpOnly/);
     assert.match(cookieSesion, /SameSite=Lax/);
-    assert.match(cookieSesion, /Max-Age=3600/);
+    assert.match(cookieSesion, /Max-Age=604800/);
     assert.match(cookieSesion, /Path=\//);
     const cookie = cookieSesion.split(";")[0];
     const payload = jwt.verify(cookie.split("=")[1], process.env.JWT_SECRET!, {

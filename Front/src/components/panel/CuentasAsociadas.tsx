@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { ConexionInstagram } from './ConexionInstagram';
 import { ConexionWhatsApp } from './ConexionWhatsApp';
+import { whatsappHabilitado } from '@/lib/canales-habilitados';
 import styles from './workspace.module.css';
 
 export function CuentasAsociadas({ estudio = false }: { estudio?: boolean }) {
@@ -18,7 +19,7 @@ export function CuentasAsociadas({ estudio = false }: { estudio?: boolean }) {
         <Suspense fallback={<p role="status">Consultando Instagram…</p>}>
           <ConexionInstagram />
         </Suspense>
-        {estudio && <ConexionWhatsApp />}
+        {estudio && whatsappHabilitado && <ConexionWhatsApp />}
       </div>
     </section>
   );

@@ -226,7 +226,7 @@ export async function iniciarSesionGoogle(
 
   const sesion = await abrirSesion(usuario.id);
 
-  const token = crearToken(usuario.id, sesion.id);
+  const token = crearToken(usuario.id, sesion.id, sesion.expiraAt);
 
   return { usuario, token };
 }

@@ -19,6 +19,17 @@ export function buscarSesionPorId(id: string): Promise<Sesion | null> {
   });
 }
 
+export function extenderSesion(
+  id: string,
+  usuarioId: string,
+  expiraAt: Date,
+): Promise<{ count: number }> {
+  return prisma.sesion.updateMany({
+    where: { id, usuarioId, revocadaAt: null },
+    data: { expiraAt },
+  });
+}
+
 export function revocarSesion(
   id: string,
   usuarioId: string,
