@@ -7,18 +7,18 @@ export async function sendContactMessage(
   name: unknown,
   email: unknown,
   message: unknown,
+  tokenVerificacion?: unknown,
 ): Promise<ContactResult> {
   try {
+    const encabezados = new Headers({
+      'x-vercel-forwarded-for': (await headers()).get('x-vercel-forwarded-for') ?? '',
+      'Content-Type': 'application/json',
+    });
+    if (typeof tokenVerificacion === 'string' && tokenVerificacion.length > 0)
+      encabezados.set('X-Turnstile-Token', tokenVerificacion);
     const res = await apiFetch('/contacto', {
       method: 'POST',
-      headers: firmarIP(
-        new Headers({
-          'x-vercel-forwarded-for': (await headers()).get('x-vercel-forwarded-for') ?? '',
-          'Content-Type': 'application/json',
-        }),
-        'POST',
-        '/api/contacto',
-      ),
+      headers: firmarIP(encabezados, 'POST', '/api/contacto'),
       body: JSON.stringify({ nombre: name, email, mensaje: message }),
     });
     const datos: { message: string } = await res.json();

@@ -37,6 +37,7 @@ export async function crearSolicitud(
   destino: { estudio: string } | { artista: string },
   claveEnvio: string,
   enlaceInstagram?: string,
+  tokenVerificacion?: string | null,
 ) {
   const body = await construirFormData(values);
   body.set('claveEnvio', claveEnvio);
@@ -52,6 +53,7 @@ export async function crearSolicitud(
   await apiFetch(`/consultas/publicas/${ruta}`, {
     method: 'POST',
     body,
+    headers: tokenVerificacion ? { 'X-Turnstile-Token': tokenVerificacion } : undefined,
     signal: AbortSignal.timeout(60000),
   });
 }
