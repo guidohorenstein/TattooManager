@@ -8,13 +8,13 @@ export function crearToken(
   sesionId: string,
   expiraAt?: Date,
 ): string {
-  const segundos = expiraAt
-    ? Math.max(1, Math.floor((expiraAt.getTime() - Date.now()) / 1000))
-    : duracionSesionSegundos;
-  return jwt.sign({}, jwtSecret, {
+  const iat = Math.floor(Date.now() / 1000);
+  const exp = expiraAt
+    ? Math.max(iat + 1, Math.floor(expiraAt.getTime() / 1000))
+    : iat + duracionSesionSegundos;
+  return jwt.sign({ iat, exp }, jwtSecret, {
     subject: usuarioId,
     jwtid: sesionId,
-    expiresIn: segundos,
     algorithm: "HS256",
     issuer: "tattoomanager-api",
     audience: "tattoomanager-web",

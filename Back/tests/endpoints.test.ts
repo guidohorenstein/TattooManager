@@ -686,7 +686,9 @@ test("login, cookie segura, claims y /me sin datos sensibles", async () => {
     audience: "tattoomanager-web",
   }) as jwt.JwtPayload;
   assert.ok(claims.sub && claims.jti);
-  assert.equal(claims.exp! - claims.iat!, 7 * 24 * 3600);
+  const duracion = claims.exp! - claims.iat!;
+  // El token vence con la sesión; puede caer un segundo antes si se cruza un segundo al firmarlo.
+  assert.ok(duracion >= 7 * 24 * 3600 - 1 && duracion <= 7 * 24 * 3600, String(duracion));
   const me = await request("/auth/me", { headers: { Cookie: cookie } });
   assert.equal(me.status, 200);
   assert.deepEqual(Object.keys((await me.json()).user).sort(), [
