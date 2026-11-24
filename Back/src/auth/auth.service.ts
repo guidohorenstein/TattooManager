@@ -38,18 +38,22 @@ export async function validarCredenciales(entrada: unknown) {
 export async function iniciarSesion(entrada: unknown) {
   const usuario = await validarCredenciales(entrada);
   const sesion = await abrirSesion(usuario.id);
-  const token = crearToken(usuario.id, sesion.id);
+  const token = crearToken(usuario.id, sesion.id, sesion.expiraAt);
 
   return { usuario, token };
 }
 export async function obtenerUsuarioSesion(token: unknown) {
+  return (await obtenerSesionActiva(token)).usuario;
+}
+
+export async function obtenerSesionActiva(token: unknown) {
   if (typeof token !== "string" || token.length === 0) {
     throw new HttpError(401, "Debés iniciar sesión.");
   }
 
   const { usuarioId, sesionId } = verificarToken(token);
 
-  const [, usuario] = await Promise.all([
+  const [sesion, usuario] = await Promise.all([
     validarSesion(sesionId, usuarioId),
     buscarUsuarioPorId(usuarioId),
   ]);
@@ -58,7 +62,7 @@ export async function obtenerUsuarioSesion(token: unknown) {
     throw new HttpError(401, "Sesión inválida.");
   }
 
-  return usuario;
+  return { usuario, sesion };
 }
 
 export async function cerrarSesion(token: unknown): Promise<void> {

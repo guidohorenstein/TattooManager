@@ -50,7 +50,7 @@ Los archivos `*.entity.ts` no crean tablas. Los modelos, relaciones y enumeracio
 
 El registro admite `CLIENTE`, `ARTISTA` y `ESTUDIO_ADMIN`. El alta pública rechaza `SUPERADMIN`. Los artistas tienen nombre artístico; el alta de un estudio crea usuario, estudio y vínculo en una transacción.
 
-Las contraseñas se almacenan como hashes bcrypt. Un login válido crea una fila `Sesion` y un JWT con `sub` para el usuario y `jti` para la sesión. La cookie `tattoomanager_session` es HttpOnly, SameSite=Lax, dura una hora y usa Secure en producción. El JWT usa HS256, issuer `tattoomanager-api` y audience `tattoomanager-web`.
+Las contraseñas se almacenan como hashes bcrypt. Un login válido crea una fila `Sesion` y un JWT con `sub` para el usuario y `jti` para la sesión. La cookie `tattoomanager_session` es HttpOnly, SameSite=Lax y usa Secure en producción. La sesión vence tras 7 días sin uso; mientras la persona sigue activa se renueva como mucho una vez por día, hasta un máximo de 30 días desde el inicio. El JWT usa HS256, issuer `tattoomanager-api` y audience `tattoomanager-web`.
 
 `requerirSesion` valida el token, la vigencia y revocación de la sesión, y consulta el usuario actual. `requerirRoles` compara su rol con los admitidos por cada ruta. El logout revoca la sesión actual y elimina su cookie; las otras sesiones permanecen activas. Restablecer una contraseña revoca todas las sesiones del usuario.
 

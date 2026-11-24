@@ -28,6 +28,6 @@ Una cuenta nueva de Google no tiene contraseña local y puede crearla mediante e
 
 ## Sesión
 
-La cookie `tattoomanager_session` es HttpOnly, SameSite Lax y Secure en producción. La sesión dura una hora, se guarda en la base y puede revocarse. Los roles y la pertenencia se consultan al validar cada petición. Los paneles verifican además el plan vigente.
+La cookie `tattoomanager_session` es HttpOnly, SameSite Lax y Secure en producción. La sesión vence tras 7 días sin uso y se renueva con la actividad hasta un máximo de 30 días. Se guarda en la base y puede revocarse. Los roles y la pertenencia se consultan al validar cada petición. Los paneles verifican además el plan vigente.
 
 Las páginas públicas y los formularios no necesitan consultar una sesión del cliente. El panel conserva la autenticación y los permisos profesionales.

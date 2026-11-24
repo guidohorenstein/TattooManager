@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#111"/><text x="30" y="45" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="40" font-weight="bold" letter-spacing="-5">tm</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- TattooManager: monograma "tm" en trazo continuo, estilo fine line de tatuaje. -->
+  <rect width="1024" height="1024" fill="#111111"/>
+  <g transform="translate(-22 0)" fill="none" stroke="#F2EEE8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Marco fino tipo flash -->
+    <circle cx="534" cy="512" r="338" stroke-width="6" opacity="0.55"/>
+    <circle cx="534" cy="512" r="314" stroke-width="2" opacity="0.3"/>
+    <!-- t enlazada con la m -->
+    <path stroke-width="40" d="M340 352 V598 C340 646 366 668 404 668 C 446 668 476 640 480 598 V 530 C 480 488 506 462 545 462 C 586 462 610 490 610 530 V 664"/>
+    <path stroke-width="40" d="M296 462 H 404"/>
+    <!-- segunda pata de la m, con remate -->
+    <path stroke-width="40" d="M610 530 C 610 488 636 462 675 462 C 716 462 740 490 740 530 V 664"/>
+  </g>
+  <!-- Gota de tinta al final del trazo y destello -->
+  <circle cx="770" cy="652" r="14" fill="#C8553D"/>
+  <path d="M705 296 L712 322 L738 330 L712 338 L705 364 L698 338 L672 330 L698 322 Z" fill="#F2EEE8"/>
+</svg>
