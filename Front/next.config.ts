@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 // Encabezados de seguridad para todas las páginas. La CSP completa requiere nonces
 // para los scripts de Next y Mercado Pago; por ahora solo se impide embeber el sitio.
@@ -28,4 +29,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: 'guido-horenstein',
+  project: 'tattoomanager-frontend',
+  // Sube los source maps solo si SENTRY_AUTH_TOKEN está definido en el build (Vercel).
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  silent: !process.env.CI,
+});
