@@ -1,6 +1,7 @@
 import { contactoRouter } from "./contacto/contacto.routes.js";
 import { paginasPublicasRouter } from "./paginas-publicas/paginas-publicas.routes.js";
 import express from "express";
+import * as Sentry from "@sentry/node";
 import { identificarCliente } from "./middlewares/limitar-solicitudes.js";
 import { configurarProxy } from "./config/proxy.js";
 import cors from "cors";
@@ -85,4 +86,6 @@ app.use("/api/asistente", asistenteRouter);
 app.use((_req, res) => {
   res.status(404).json({ error: "La ruta solicitada no existe." });
 });
+// Reporta a Sentry los errores no controlados (5xx); los HttpError 4xx se ignoran.
+Sentry.setupExpressErrorHandler(app);
 app.use(manejarErrores);

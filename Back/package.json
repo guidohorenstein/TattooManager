@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec tsx src/index.ts",
+    "dev": "nodemon --exec \"tsx --import ./src/instrument.ts src/index.ts\"",
     "build": "tsc",
     "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
-    "start": "node dist/index.js",
+    "start": "node --enable-source-maps --import ./dist/instrument.js dist/index.js",
     "db:generate": "prisma generate",
     "db:pagos": "prisma db execute --file prisma/changes/20261031_suscripciones.sql --schema prisma/schema.prisma",
     "db:pagos:unificar": "prisma db execute --file prisma/changes/20261110_unificar_pagos.sql --schema prisma/schema.prisma",
@@ -41,6 +41,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "6.19.3",
+    "@sentry/node": "^11.17.0",
     "@supabase/supabase-js": "^2.118.0",
     "@tansuasici/country-state-city": "3.0.3",
     "bcryptjs": "3.0.3",
