@@ -34,7 +34,19 @@ import { operacionRouter } from "./operacion/operacion.routes.js";
 import { asistenteRouter } from "./asistente/asistente.routes.js";
 
 export const app = express();
+app.disable("x-powered-by");
 configurarProxy(app);
+
+// La API solo devuelve JSON: no debe interpretarse como otro tipo ni embeberse.
+app.use((_req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+    "Referrer-Policy": "no-referrer",
+  });
+  next();
+});
 
 app.use(cors({ origin: origenesPermitidos, credentials: true }));
 app.use(validarOrigen);

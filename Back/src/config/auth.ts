@@ -9,7 +9,11 @@ if (!secret || Buffer.byteLength(secret, "utf8") < 32) {
 }
 
 export const jwtSecret = secret;
-export const duracionSesionSegundos = 60 * 60;
+// La sesión vence tras 7 días sin uso y se renueva, como mucho una vez por día,
+// mientras la persona sigue activa. Nunca supera los 30 días desde el inicio.
+export const duracionSesionSegundos = 7 * 24 * 60 * 60;
+export const duracionMaximaSesionSegundos = 30 * 24 * 60 * 60;
+export const intervaloRenovacionSesionSegundos = 24 * 60 * 60;
 
 export const origenesPermitidos = process.env.FRONTEND_URL
   ? [new URL(process.env.FRONTEND_URL).origin]

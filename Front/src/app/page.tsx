@@ -10,6 +10,7 @@ import { StartButton } from '@/components/marketing/StartButton';
 import { ProductTour } from '@/components/marketing/ProductTour';
 import { Pricing } from '@/components/marketing/Pricing';
 import styles from '@/components/marketing/marketing.module.css';
+import { whatsappHabilitado } from '@/lib/canales-habilitados';
 export const metadata: Metadata = {
   title: 'TattooManager | Tu estudio, bajo control',
   description:
@@ -52,7 +53,9 @@ const preguntas = [
   ],
   [
     '¿Puedo conectar mis redes sociales?',
-    'Los canales disponibles se conectan desde la configuración del negocio. Instagram y WhatsApp requieren una cuenta compatible y los permisos de Meta. La página y el formulario funcionan sin esa conexión.',
+    whatsappHabilitado
+      ? 'Los canales disponibles se conectan desde la configuración del negocio. Instagram y WhatsApp requieren una cuenta compatible y los permisos de Meta. La página y el formulario funcionan sin esa conexión.'
+      : 'Podés conectar la cuenta profesional de Instagram de tu negocio desde la configuración. WhatsApp llega próximamente. La página y el formulario funcionan sin esa conexión.',
   ],
   [
     '¿Puedo compartir mi propia página?',

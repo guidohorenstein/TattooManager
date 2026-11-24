@@ -112,6 +112,7 @@ export function ProductFooter() {
         <nav aria-label="Información legal">
           <Link href="/terminos-y-condiciones">Términos y condiciones</Link>
           <Link href="/privacidad">Privacidad</Link>
+          <Link href="/eliminacion-de-datos">Eliminación de datos</Link>
         </nav>
         <div className={styles.utilities}>
           <ThemeToggle />

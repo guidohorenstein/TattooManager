@@ -686,7 +686,7 @@ test("login, cookie segura, claims y /me sin datos sensibles", async () => {
     audience: "tattoomanager-web",
   }) as jwt.JwtPayload;
   assert.ok(claims.sub && claims.jti);
-  assert.equal(claims.exp! - claims.iat!, 3600);
+  assert.equal(claims.exp! - claims.iat!, 7 * 24 * 3600);
   const me = await request("/auth/me", { headers: { Cookie: cookie } });
   assert.equal(me.status, 200);
   assert.deepEqual(Object.keys((await me.json()).user).sort(), [
